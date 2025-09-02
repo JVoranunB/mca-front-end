@@ -50,7 +50,7 @@ export const sampleWorkflows: Workflow[] = [
               collection: 'contacts',
               field: 'birthday',
               fieldType: 'date',
-              operator: 'date_is_today',
+              operator: 'equals',
               value: 'today'
             }
           ]
