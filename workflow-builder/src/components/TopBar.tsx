@@ -17,7 +17,9 @@ import {
   CheckCircleIcon,
   DeleteIcon,
   ChevronLeftIcon,
-  EditIcon
+  EditIcon,
+  SettingsFilledIcon,
+  CalendarIcon
 } from '@shopify/polaris-icons';
 import useWorkflowStore from '../store/workflowStore';
 
@@ -149,6 +151,7 @@ const TopBar: React.FC<TopBarProps> = ({ onBackToList }) => {
       handleNameCancel();
     }
   };
+
   
   const workflowOptions = workflows.map(w => ({
     label: `${w.name} (${new Date(w.createdAt).toLocaleDateString()})`,
@@ -223,14 +226,22 @@ const TopBar: React.FC<TopBarProps> = ({ onBackToList }) => {
                 )}
               </div>
             )}
-            {isDirty && (
-              <Badge tone="attention">
-                Unsaved changes
+            {currentWorkflow && (
+              <Badge 
+                tone={currentWorkflow.triggerType === 'event-based' ? 'attention' : 'info'}
+                icon={currentWorkflow.triggerType === 'event-based' ? SettingsFilledIcon : CalendarIcon}
+              >
+                {currentWorkflow.triggerType === 'event-based' ? 'Event-based' : 'Schedule-based'}
               </Badge>
             )}
             {nodes.length > 0 && (
               <Badge>
                 {`${nodes.length} nodes`}
+              </Badge>
+            )}
+            {isDirty && (
+              <Badge tone="attention">
+                Unsaved changes
               </Badge>
             )}
           </InlineStack>

@@ -144,9 +144,9 @@ const WorkflowListPage = () => {
 
   const getTriggerTypeBadge = (triggerType: TriggerType) => {
     return triggerType === 'event-based' ? (
-      <Badge tone="info" icon={SettingsFilledIcon}>Event-Based</Badge>
+      <Badge tone="attention" icon={SettingsFilledIcon}>Event-Based</Badge>
     ) : (
-      <Badge tone="attention" icon={CalendarIcon}>Schedule-Based</Badge>
+      <Badge tone="info" icon={CalendarIcon}>Schedule-Based</Badge>
     );
   };
 
