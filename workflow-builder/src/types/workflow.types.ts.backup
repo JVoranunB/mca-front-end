@@ -1,0 +1,74 @@
+export type NodeType = 'trigger' | 'condition' | 'action' | 'step';
+
+export interface WorkflowCondition {
+  id: string;
+  field: string;
+  operator: 'equals' | 'not_equals' | 'contains' | 'not_contains' | 'empty' | 'not_empty' | 'greater_than' | 'less_than';
+  value: string;
+  logicalOperator?: 'AND' | 'OR';
+}
+
+export interface NodeData {
+  label: string;
+  type: NodeType;
+  description?: string;
+  icon?: string;
+  status?: 'active' | 'review' | 'error' | 'disabled';
+  config?: {
+    [key: string]: any;
+  };
+  conditions?: WorkflowCondition[];
+  hasThenBranch?: boolean;
+  hasOtherwiseBranch?: boolean;
+}
+
+export interface WorkflowNode {
+  id: string;
+  type: NodeType;
+  position: { x: number; y: number };
+  data: NodeData;
+}
+
+export interface WorkflowEdge {
+  id: string;
+  source: string;
+  target: string;
+  sourceHandle?: string;
+  targetHandle?: string;
+  label?: string;
+  animated?: boolean;
+}
+
+export interface Workflow {
+  id: string;
+  name: string;
+  description?: string;
+  nodes: WorkflowNode[];
+  edges: WorkflowEdge[];
+  createdAt: string;
+  updatedAt: string;
+  status: 'draft' | 'active' | 'paused';
+}
+
+export interface NodeTemplate {
+  type: NodeType;
+  label: string;
+  description: string;
+  icon: string;
+  defaultConfig?: {
+    [key: string]: any;
+  };
+  category: 'triggers' | 'conditions' | 'actions' | 'utilities';
+}
+
+export interface ValidationError {
+  nodeId?: string;
+  edgeId?: string;
+  message: string;
+  severity: 'error' | 'warning';
+}
+
+export interface WorkflowValidationResult {
+  isValid: boolean;
+  errors: ValidationError[];
+}

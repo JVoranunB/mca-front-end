@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm create:*)",
+      "Bash(npm install)",
+      "Bash(npm install:*)",
+      "Bash(npm run dev:*)",
+      "Bash(cat:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm run lint)",
+      "Bash(sed:*)",
+      "Bash(npx tsc:*)",
+      "Read(c:\\Work\\Rocket\\mca-front-end/**)",
+      "mcp__ide__getDiagnostics",
+      "Bash(npx tsx:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

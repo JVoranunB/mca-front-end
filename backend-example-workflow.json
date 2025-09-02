@@ -1,0 +1,36 @@
+{
+  "workflow_id": "wf_12345",
+  "name": "Contact Loyalty Program Enrollment",
+  "version": "1.0",
+  "status": "active",
+  "actions": [
+    {
+      "action_id": "contact-enrollment-trigger",
+      "key": "a1",
+      "type": "trigger",
+      "config": {
+        "event": "user_info_updated",
+        "conditions": "ctx.contacts.point_balance < 1000 && ctx.contacts.total_sale_amount >= 1000"
+      },
+      "mapper": null
+    },
+    {
+      "action_id": "slack-action",
+      "key": "a2", 
+      "type": "action",      
+      "mapper": {
+        "value": {
+          "mode": "expression",
+          "value": "'🎉 Loyalty enrollment triggered for ' + a1.output.contact.email + ' (Balance: ' + a1.output.contact.point_balance + ', Total Sales: $' + a1.output.contact.total_sale_amount + ')'"
+        }
+      }      
+    }
+  ],
+  "peers": [
+    {
+      "parent_key": "a1",
+      "child_key": "a2",
+      "meta_output": "triggered"      
+    }
+  ] 
+}

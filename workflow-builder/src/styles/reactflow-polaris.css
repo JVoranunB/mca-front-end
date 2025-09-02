@@ -1,0 +1,315 @@
+/* React Flow Polaris Theme Integration */
+
+.react-flow__renderer {
+  background: #f6f6f7;
+}
+
+.react-flow__node {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  border-radius: 8px;
+  border: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  background: transparent;
+}
+
+.react-flow__node.selected {
+  box-shadow: 0 0 0 2px #5C6AC4;
+}
+
+.react-flow__edge-path {
+  stroke: #8c9196;
+  stroke-width: 2;
+}
+
+.react-flow__edge.selected .react-flow__edge-path {
+  stroke: #5C6AC4;
+  stroke-width: 3;
+  stroke-dasharray: 5, 5;
+  animation: dash 1s linear infinite;
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: -10;
+  }
+}
+
+/* Connection line preview animations */
+@keyframes dashMove {
+  0% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: -13;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
+.react-flow__edge-text {
+  font-size: 12px;
+  font-weight: 500;
+  fill: #202223;
+}
+
+.react-flow__handle {
+  background: #5C6AC4;
+  border: 2px solid #fff;
+  width: 16px;
+  height: 16px;
+  cursor: crosshair;
+  z-index: 10;
+}
+
+.react-flow__handle:hover:not(.react-flow__handle-connecting) {
+  transform: scale(1.2);
+  transform-origin: center;
+  transition: transform 0.2s ease;
+}
+
+.react-flow__handle-connecting {
+  transform: none !important;
+}
+
+.react-flow__handle-connecting {
+  background: #50B83C;
+}
+
+.react-flow__handle-valid {
+  background: #50B83C;
+}
+
+.react-flow__controls {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e1e3e5;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.react-flow__controls-button {
+  background: #fff;
+  border: none;
+  border-bottom: 1px solid #e1e3e5;
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #202223;
+}
+
+.react-flow__controls-button:hover {
+  background: #f6f6f7;
+}
+
+.react-flow__controls-button:last-child {
+  border-bottom: none;
+}
+
+.react-flow__controls-button svg {
+  width: 16px;
+  height: 16px;
+}
+
+.react-flow__minimap {
+  background: #fff;
+  border: 1px solid #e1e3e5;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.react-flow__minimap-mask {
+  fill: #f6f6f7;
+  opacity: 0.6;
+}
+
+.react-flow__minimap-node {
+  fill: #8c9196;
+  stroke: none;
+}
+
+.react-flow__background {
+  background-color: #f6f6f7;
+}
+
+.react-flow__background pattern {
+  stroke: #e1e3e5;
+}
+
+/* Custom connection line styling */
+.react-flow__connection-path {
+  stroke: #5C6AC4;
+  stroke-width: 2;
+}
+
+/* Polaris Card Integration */
+.Polaris-Card {
+  background: #fff;
+  border-radius: 8px;
+  border: 1px solid #e1e3e5;
+  transition: box-shadow 0.1s ease;
+}
+
+.react-flow__node.selected .Polaris-Card {
+  box-shadow: 0 0 0 2px #5C6AC4;
+}
+
+/* Ensure proper text rendering */
+.Polaris-Text--root {
+  color: #202223;
+}
+
+.Polaris-Text--subdued {
+  color: #6d7175;
+}
+
+/* Badge styling within nodes */
+.Polaris-Badge {
+  margin-left: 8px;
+}
+
+/* Icon container styling */
+.node-icon-container {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Ensure proper spacing in node content */
+.node-content {
+  padding: 12px;
+}
+
+/* Loading state */
+.workflow-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  background: #f6f6f7;
+}
+
+/* Validation error highlight */
+.node-error {
+  box-shadow: 0 0 0 2px #d72c0d !important;
+}
+
+.node-warning {
+  box-shadow: 0 0 0 2px #ffc453 !important;
+}
+
+/* Drag and drop indicator */
+.drop-target {
+  background: rgba(92, 106, 196, 0.1);
+  border: 2px dashed #5C6AC4;
+  border-radius: 8px;
+}
+
+/* Custom scrollbar for sidebars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f6f6f7;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c9cccf;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #8c9196;
+}
+
+/* Start Node Styling */
+div[data-node-type="start"] .node-icon-container {
+  background: #8B5A99 !important;
+  color: #FFFFFF !important;
+}
+
+/* Polaris Primary Button Custom Blue Override */
+.Polaris-Button--variantPrimary {
+  background: #0061ff !important; /* Custom blue background */
+  border: 1px solid #0061ff !important; /* Custom blue border */
+  color: #ffffff !important; /* White text */
+  box-shadow: none !important; /* Remove any default shadow */
+}
+
+.Polaris-Button--variantPrimary:hover {
+  background: #0051d9 !important; /* Darker shade on hover */
+  border: 1px solid #0051d9 !important;
+  box-shadow: none !important;
+}
+
+.Polaris-Button--variantPrimary:active {
+  background: #0041b3 !important; /* Even darker when pressed */
+  border: 1px solid #0041b3 !important;
+  box-shadow: none !important;
+}
+
+.Polaris-Button--variantPrimary:focus {
+  background: #0061ff !important;
+  border: 1px solid #0061ff !important;
+  box-shadow: 0 0 0 2px rgba(0, 97, 255, 0.3) !important; /* Custom blue focus ring */
+}
+
+.Polaris-Button--variantPrimary .Polaris-Text--root {
+  color: #ffffff !important;  
+}
+
+/* Polaris Toast Custom Blue Override */
+.Polaris-Frame-Toast {
+  background: #0061ff !important; /* Custom blue background */
+  border: 1px solid #0061ff !important;
+  color: #ffffff !important;
+}
+
+.Polaris-Frame-Toast .Polaris-Text--root {
+  color: #ffffff !important; /* White text in toast */
+}
+
+.Polaris-Frame-Toast .Polaris-Button {
+  color: #ffffff !important;
+  background: transparent !important;
+  border: 1px solid #ffffff !important;
+}
+
+.Polaris-Frame-Toast .Polaris-Button:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Success Toast with blue theme */
+.Polaris-Frame-Toast--tonePrimary,
+.Polaris-Frame-Toast--toneSuccess {
+  background: #0061ff !important;
+  border-color: #0061ff !important;
+}
+
+/* Action button in Toast */
+.Polaris-Frame-Toast__Action .Polaris-Button {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  color: #ffffff !important;
+}
+
+.Polaris-Frame-Toast__Action .Polaris-Button:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+}
