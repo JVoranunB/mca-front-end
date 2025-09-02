@@ -273,7 +273,7 @@ export const sampleWorkflows: Workflow[] = [
               collection: 'contacts',
               field: 'points_balance',
               fieldType: 'number',
-              operator: 'greater_than_or_equal',
+              operator: 'greater_equal',
               value: 1000
             },
             {
@@ -305,7 +305,7 @@ export const sampleWorkflows: Workflow[] = [
               collection: 'contacts',
               field: 'points_balance',
               fieldType: 'number',
-              operator: 'greater_than_or_equal',
+              operator: 'greater_equal',
               value: 5000
             },
             {
@@ -337,7 +337,7 @@ export const sampleWorkflows: Workflow[] = [
               collection: 'contacts',
               field: 'points_balance',
               fieldType: 'number',
-              operator: 'greater_than_or_equal',
+              operator: 'greater_equal',
               value: 10000
             }
           ]
