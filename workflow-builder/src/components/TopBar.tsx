@@ -38,6 +38,10 @@ const TopBar: React.FC<TopBarProps> = ({ onBackToList }) => {
   const [toastError, setToastError] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
   const [editingName, setEditingName] = useState('');
+  const [isValidationModalOpen, setIsValidationModalOpen] = useState(false);
+  const [validationErrorMessages, setValidationErrorMessages] = useState<string[]>([]);
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
   
   const {
     saveWorkflow,
@@ -48,6 +52,7 @@ const TopBar: React.FC<TopBarProps> = ({ onBackToList }) => {
     workflows,
     currentWorkflow,
     validateWorkflow,
+    validationErrors,
     isDirty,
     nodes,
     isSaving,
@@ -64,9 +69,34 @@ const TopBar: React.FC<TopBarProps> = ({ onBackToList }) => {
     
     const isValid = validateWorkflow();
     if (!isValid) {
-      setToastMessage('Workflow has validation errors. Please fix them before saving.');
-      setToastError(true);
-      setShowToast(true);
+      // Generate detailed error message
+      const errorMessages = validationErrors.map(error => {
+        const prefix = error.severity === 'error' ? '🚫' : '⚠️';
+        const nodeInfo = error.nodeId ? ` (Node: ${error.nodeId})` : '';
+        return `${prefix} ${error.message}${nodeInfo}`;
+      });
+      
+      const errorCount = validationErrors.filter(e => e.severity === 'error').length;
+      const warningCount = validationErrors.filter(e => e.severity === 'warning').length;
+      
+      let summary = '';
+      if (errorCount > 0) {
+        summary += `${errorCount} error${errorCount > 1 ? 's' : ''}`;
+      }
+      if (warningCount > 0) {
+        if (summary) summary += ` and `;
+        summary += `${warningCount} warning${warningCount > 1 ? 's' : ''}`;
+      }
+      
+      // Show detailed errors in a modal for better formatting
+      setValidationErrorMessages([
+        `Workflow has ${summary}:`,
+        '',
+        ...errorMessages,
+        '',
+        'Please fix the errors before saving.'
+      ]);
+      setIsValidationModalOpen(true);
       return;
     }
     
@@ -78,13 +108,13 @@ const TopBar: React.FC<TopBarProps> = ({ onBackToList }) => {
       setWorkflowDescription('');
       
       if (result.success) {
-        setToastMessage('✅ Workflow saved successfully (FAKE API) - Check console for request details');
-        setToastError(false);
+        setSuccessMessage('Workflow saved successfully!\n\nYour workflow has been saved to the workspace. You can continue editing or navigate back to the workflow list.');
+        setIsSuccessModalOpen(true);
       } else {
         setToastMessage(result.error || 'Failed to save workflow');
         setToastError(true);
+        setShowToast(true);
       }
-      setShowToast(true);
     } catch {
       setToastMessage('Unexpected error occurred while saving');
       setToastError(true);
@@ -378,12 +408,80 @@ const TopBar: React.FC<TopBarProps> = ({ onBackToList }) => {
           </FormLayout>
         </Modal.Section>
       </Modal>
+
+      <Modal
+        open={isValidationModalOpen}
+        onClose={() => setIsValidationModalOpen(false)}
+        title="❌ Workflow Validation Errors"
+        primaryAction={{
+          content: 'Close',
+          onAction: () => setIsValidationModalOpen(false),
+          destructive: true
+        }}
+        sectioned
+      >
+        <div style={{ 
+          padding: '16px', 
+          backgroundColor: '#fef2f2', 
+          border: '1px solid #fecaca', 
+          borderRadius: '6px',
+          marginBottom: '16px'
+        }}>
+          <div style={{ 
+            fontFamily: 'monospace', 
+            whiteSpace: 'pre-line', 
+            lineHeight: '1.5',
+            color: '#dc2626'
+          }}>
+            {validationErrorMessages.join('\n')}
+          </div>
+        </div>
+      </Modal>
+
+      <Modal
+        open={isSuccessModalOpen}
+        onClose={() => setIsSuccessModalOpen(false)}
+        title="✅ Success"
+        primaryAction={{
+          content: 'Continue Editing',
+          onAction: () => setIsSuccessModalOpen(false)
+        }}
+        secondaryActions={[
+          {
+            content: 'Back to List',
+            onAction: () => {
+              setIsSuccessModalOpen(false);
+              if (onBackToList) {
+                onBackToList();
+              }
+            }
+          }
+        ]}
+        sectioned
+      >
+        <div style={{ 
+          padding: '16px', 
+          backgroundColor: '#f0fdf4', 
+          border: '1px solid #bbf7d0', 
+          borderRadius: '6px',
+          marginBottom: '16px'
+        }}>
+          <div style={{ 
+            whiteSpace: 'pre-line', 
+            lineHeight: '1.5',
+            color: '#059669'
+          }}>
+            {successMessage}
+          </div>
+        </div>
+      </Modal>
       
       {showToast && (
         <Toast
           content={toastMessage}
           onDismiss={() => setShowToast(false)}
           error={toastError}
+          duration={toastError ? 8000 : 4000}
         />
       )}
       
