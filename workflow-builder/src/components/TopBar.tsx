@@ -6,7 +6,6 @@ import {
   TextField,
   Select,
   FormLayout,
-  Toast,
   Badge,
   InlineStack,
   Icon
@@ -22,6 +21,7 @@ import {
   CalendarIcon
 } from '@shopify/polaris-icons';
 import useWorkflowStore from '../store/workflowStore';
+import { SuccessModal, ErrorModal } from './modals';
 
 interface TopBarProps {
   onBackToList?: () => void;
@@ -33,15 +33,14 @@ const TopBar: React.FC<TopBarProps> = ({ onBackToList }) => {
   const [workflowName, setWorkflowName] = useState('');
   const [workflowDescription, setWorkflowDescription] = useState('');
   const [selectedWorkflowId, setSelectedWorkflowId] = useState('');
-  const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState('');
-  const [toastError, setToastError] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
   const [editingName, setEditingName] = useState('');
   const [isValidationModalOpen, setIsValidationModalOpen] = useState(false);
   const [validationErrorMessages, setValidationErrorMessages] = useState<string[]>([]);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   
   const {
     saveWorkflow,
@@ -61,23 +60,25 @@ const TopBar: React.FC<TopBarProps> = ({ onBackToList }) => {
   
   const handleSave = async () => {
     if (!workflowName.trim()) {
-      setToastMessage('Please enter a workflow name');
-      setToastError(true);
-      setShowToast(true);
+      setErrorMessage('Please enter a workflow name');
+      setIsErrorModalOpen(true);
       return;
     }
     
     const isValid = validateWorkflow();
     if (!isValid) {
+      // Get fresh validation errors from the store after validation
+      const freshValidationErrors = useWorkflowStore.getState().validationErrors;
+      
       // Generate detailed error message
-      const errorMessages = validationErrors.map(error => {
+      const errorMessages = freshValidationErrors.map(error => {
         const prefix = error.severity === 'error' ? '🚫' : '⚠️';
         const nodeInfo = error.nodeId ? ` (Node: ${error.nodeId})` : '';
         return `${prefix} ${error.message}${nodeInfo}`;
       });
       
-      const errorCount = validationErrors.filter(e => e.severity === 'error').length;
-      const warningCount = validationErrors.filter(e => e.severity === 'warning').length;
+      const errorCount = freshValidationErrors.filter(e => e.severity === 'error').length;
+      const warningCount = freshValidationErrors.filter(e => e.severity === 'warning').length;
       
       let summary = '';
       if (errorCount > 0) {
@@ -111,45 +112,73 @@ const TopBar: React.FC<TopBarProps> = ({ onBackToList }) => {
         setSuccessMessage('Workflow saved successfully!\n\nYour workflow has been saved to the workspace. You can continue editing or navigate back to the workflow list.');
         setIsSuccessModalOpen(true);
       } else {
-        setToastMessage(result.error || 'Failed to save workflow');
-        setToastError(true);
-        setShowToast(true);
+        setErrorMessage(result.error || 'Failed to save workflow');
+        setIsErrorModalOpen(true);
       }
     } catch {
-      setToastMessage('Unexpected error occurred while saving');
-      setToastError(true);
-      setShowToast(true);
+      setErrorMessage('Unexpected error occurred while saving');
+      setIsErrorModalOpen(true);
     }
   };
   
   const handleLoad = () => {
     if (!selectedWorkflowId) {
-      setToastMessage('Please select a workflow to load');
-      setToastError(true);
-      setShowToast(true);
+      setErrorMessage('Please select a workflow to load');
+      setIsErrorModalOpen(true);
       return;
     }
     
     loadWorkflow(selectedWorkflowId);
     setIsLoadModalOpen(false);
     setSelectedWorkflowId('');
-    setToastMessage('Workflow loaded successfully');
-    setToastError(false);
-    setShowToast(true);
+    setSuccessMessage('Workflow loaded successfully!\n\nThe selected workflow has been loaded into the editor.');
+    setIsSuccessModalOpen(true);
   };
   
   const handleClear = () => {
     clearWorkflow();
-    setToastMessage('Workflow cleared');
-    setToastError(false);
-    setShowToast(true);
+    setSuccessMessage('Workflow cleared!\n\nThe canvas has been cleared and is ready for a new workflow.');
+    setIsSuccessModalOpen(true);
   };
   
   const handleValidate = () => {
     const isValid = validateWorkflow();
-    setToastMessage(isValid ? 'Workflow is valid!' : 'Workflow has validation errors');
-    setToastError(!isValid);
-    setShowToast(true);
+    if (isValid) {
+      setSuccessMessage('Workflow is valid!\n\nAll workflow components are properly configured and connected.');
+      setIsSuccessModalOpen(true);
+    } else {
+      // Get fresh validation errors from the store after validation
+      const freshValidationErrors = useWorkflowStore.getState().validationErrors;
+      
+      // Generate detailed error message (same as save function)
+      const errorMessages = freshValidationErrors.map(error => {
+        const prefix = error.severity === 'error' ? '🚫' : '⚠️';
+        const nodeInfo = error.nodeId ? ` (Node: ${error.nodeId})` : '';
+        return `${prefix} ${error.message}${nodeInfo}`;
+      });
+      
+      const errorCount = freshValidationErrors.filter(e => e.severity === 'error').length;
+      const warningCount = freshValidationErrors.filter(e => e.severity === 'warning').length;
+      
+      let summary = '';
+      if (errorCount > 0) {
+        summary += `${errorCount} error${errorCount > 1 ? 's' : ''}`;
+      }
+      if (warningCount > 0) {
+        if (summary) summary += ` and `;
+        summary += `${warningCount} warning${warningCount > 1 ? 's' : ''}`;
+      }
+      
+      // Show detailed errors in validation modal
+      setValidationErrorMessages([
+        `Workflow has ${summary}:`,
+        '',
+        ...errorMessages,
+        '',
+        'Please fix the errors before saving.'
+      ]);
+      setIsValidationModalOpen(true);
+    }
   };
 
   const handleNameClick = () => {
@@ -162,9 +191,8 @@ const TopBar: React.FC<TopBarProps> = ({ onBackToList }) => {
   const handleNameSave = () => {
     if (editingName.trim() && currentWorkflow && editingName !== currentWorkflow.name) {
       updateWorkflowName(editingName.trim());
-      setToastMessage('Workflow name updated');
-      setToastError(false);
-      setShowToast(true);
+      setSuccessMessage('Workflow name updated!\n\nThe workflow name has been changed successfully.');
+      setIsSuccessModalOpen(true);
     }
     setIsEditingName(false);
   };
@@ -409,39 +437,18 @@ const TopBar: React.FC<TopBarProps> = ({ onBackToList }) => {
         </Modal.Section>
       </Modal>
 
-      <Modal
+      <ErrorModal
         open={isValidationModalOpen}
         onClose={() => setIsValidationModalOpen(false)}
-        title="❌ Workflow Validation Errors"
-        primaryAction={{
-          content: 'Close',
-          onAction: () => setIsValidationModalOpen(false),
-          destructive: true
-        }}
-        sectioned
-      >
-        <div style={{ 
-          padding: '16px', 
-          backgroundColor: '#fef2f2', 
-          border: '1px solid #fecaca', 
-          borderRadius: '6px',
-          marginBottom: '16px'
-        }}>
-          <div style={{ 
-            fontFamily: 'monospace', 
-            whiteSpace: 'pre-line', 
-            lineHeight: '1.5',
-            color: '#dc2626'
-          }}>
-            {validationErrorMessages.join('\n')}
-          </div>
-        </div>
-      </Modal>
+        title="Workflow Validation Errors"
+        message={validationErrorMessages.join('\n')}
+      />
 
-      <Modal
+      <SuccessModal
         open={isSuccessModalOpen}
         onClose={() => setIsSuccessModalOpen(false)}
-        title="✅ Success"
+        title="Success"
+        message={successMessage}
         primaryAction={{
           content: 'Continue Editing',
           onAction: () => setIsSuccessModalOpen(false)
@@ -457,42 +464,20 @@ const TopBar: React.FC<TopBarProps> = ({ onBackToList }) => {
             }
           }
         ]}
-        sectioned
-      >
-        <div style={{ 
-          padding: '16px', 
-          backgroundColor: '#f0fdf4', 
-          border: '1px solid #bbf7d0', 
-          borderRadius: '6px',
-          marginBottom: '16px'
-        }}>
-          <div style={{ 
-            whiteSpace: 'pre-line', 
-            lineHeight: '1.5',
-            color: '#059669'
-          }}>
-            {successMessage}
-          </div>
-        </div>
-      </Modal>
+      />
       
-      {showToast && (
-        <Toast
-          content={toastMessage}
-          onDismiss={() => setShowToast(false)}
-          error={toastError}
-          duration={toastError ? 8000 : 4000}
-        />
-      )}
       
-      {saveError && (
-        <Toast
-          content={`Save Error: ${saveError}`}
-          onDismiss={() => useWorkflowStore.getState().setSaveError(null)}
-          error={true}
-          duration={10000}
-        />
-      )}
+      <ErrorModal
+        open={isErrorModalOpen || !!saveError}
+        onClose={() => {
+          setIsErrorModalOpen(false);
+          if (saveError) {
+            useWorkflowStore.getState().setSaveError(null);
+          }
+        }}
+        title="Error"
+        message={saveError ? `Save Error: ${saveError}` : errorMessage}
+      />
     </>
   );
 };

@@ -30,6 +30,7 @@ import {
 } from '@shopify/polaris-icons';
 import useWorkflowStore from '../store/workflowStore';
 import type { TriggerType, WorkflowSummary } from '../types/workflow.types';
+import { SuccessModal } from '../components/modals';
 
 interface Filters {
   triggerType: TriggerType[];
@@ -56,6 +57,8 @@ const WorkflowListPage = () => {
   const [workflowToDelete, setWorkflowToDelete] = useState<string | null>(null);
   const [toastActive, setToastActive] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  const [successModalOpen, setSuccessModalOpen] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
   const workflows = getAllWorkflows();
 
@@ -77,6 +80,11 @@ const WorkflowListPage = () => {
     setToastActive(true);
   };
 
+  const showSuccessModal = (message: string) => {
+    setSuccessMessage(message);
+    setSuccessModalOpen(true);
+  };
+
   const handleCreateWorkflow = (triggerType: TriggerType) => {
     const workflowId = createWorkflowFromType(triggerType);
     navigate(`/workflow/${workflowId}/edit`);
@@ -87,15 +95,21 @@ const WorkflowListPage = () => {
   };
 
   const handleDuplicateWorkflow = (workflowId: string) => {
+    const workflow = workflows.find(w => w.id === workflowId);
     const newWorkflowId = duplicateWorkflow(workflowId);
-    if (newWorkflowId) {
-      showToast('Workflow duplicated successfully');
+    if (newWorkflowId && workflow) {
+      showSuccessModal(`Workflow "${workflow.name}" has been successfully duplicated!\n\nA new copy has been created and added to your workflow list. You can now edit the duplicate independently.`);
     }
   };
 
   const handleToggleStatus = (workflowId: string) => {
+    const workflow = workflows.find(w => w.id === workflowId);
     toggleWorkflowStatus(workflowId);
-    showToast('Workflow status updated');
+    if (workflow) {
+      const newStatus = workflow.status === 'active' ? 'paused' : 'active';
+      const statusText = newStatus === 'active' ? 'activated' : 'paused';
+      showSuccessModal(`Workflow "${workflow.name}" has been ${statusText}!\n\nThe workflow status has been updated successfully.`);
+    }
   };
 
   const handleDeleteClick = (workflowId: string) => {
@@ -105,10 +119,14 @@ const WorkflowListPage = () => {
 
   const handleDeleteConfirm = () => {
     if (workflowToDelete) {
+      const workflow = workflows.find(w => w.id === workflowToDelete);
       deleteWorkflow(workflowToDelete);
-      showToast('Workflow deleted successfully');
       setDeleteModalOpen(false);
       setWorkflowToDelete(null);
+      
+      if (workflow) {
+        showSuccessModal(`Workflow "${workflow.name}" has been deleted successfully!\n\nThe workflow has been permanently removed from your workspace.`);
+      }
     }
   };
 
@@ -347,6 +365,14 @@ const WorkflowListPage = () => {
         }
       >
         <Layout>
+          {!emptyStateMarkup && (
+            <Layout.Section>
+              <Card>
+                {filterControl}
+              </Card>
+            </Layout.Section>
+          )}
+          
           <Layout.Section>
             <Card>
               {emptyStateMarkup || (
@@ -369,14 +395,6 @@ const WorkflowListPage = () => {
               )}
             </Card>
           </Layout.Section>
-
-          {!emptyStateMarkup && (
-            <Layout.Section>
-              <Card>
-                {filterControl}
-              </Card>
-            </Layout.Section>
-          )}
         </Layout>
 
         <Modal
@@ -403,6 +421,13 @@ const WorkflowListPage = () => {
             </TextContainer>
           </Modal.Section>
         </Modal>
+
+        <SuccessModal
+          open={successModalOpen}
+          onClose={() => setSuccessModalOpen(false)}
+          title="Success"
+          message={successMessage}
+        />
 
         {toastMarkup}
       </Page>
