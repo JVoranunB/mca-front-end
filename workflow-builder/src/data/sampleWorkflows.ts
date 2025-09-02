@@ -2,6 +2,744 @@ import type { Workflow } from '../types/workflow.types';
 
 export const sampleWorkflows: Workflow[] = [
   {
+    id: 'sample-10',
+    name: 'User Birthday Celebration',
+    description: 'Send birthday greetings and special offers to customers on their birthday',
+    triggerType: 'schedule-based',
+    status: 'active',
+    createdAt: '2024-01-16T09:00:00Z',
+    updatedAt: '2024-01-16T09:00:00Z',
+    nodes: [
+      {
+        id: 'start-10',
+        type: 'start',
+        position: { x: 100, y: 300 },
+        data: {
+          label: 'Daily Birthday Check',
+          type: 'start',
+          description: 'Check for customer birthdays every day at 9 AM',
+          status: 'active',
+          config: {
+            label: 'Daily Birthday Check',
+            description: 'Runs daily to check for customer birthdays',
+            merchantId: 'SHOP001',
+            dataSource: 'CRM',
+            triggerCategory: 'scheduled',
+            scheduleTime: '09:00',
+            timezone: 'Asia/Bangkok',
+            recurrencePattern: 'daily',
+            scheduleType: 'recurring',
+            changeStreamEnabled: false,
+            collections: ['contacts']
+          }
+        }
+      },
+      {
+        id: 'condition-10',
+        type: 'condition',
+        position: { x: 700, y: 300 },
+        data: {
+          label: 'Is birthday today?',
+          type: 'condition',
+          description: 'Check if customer birthday is today',
+          status: 'active',
+          conditions: [
+            {
+              id: 'cond-10',
+              dataSource: 'CRM',
+              collection: 'contacts',
+              field: 'birthday',
+              fieldType: 'date',
+              operator: 'date_is_today',
+              value: 'today'
+            }
+          ]
+        }
+      },
+      {
+        id: 'action-31',
+        type: 'action',
+        position: { x: 1300, y: 150 },
+        data: {
+          label: 'Send birthday email',
+          type: 'action',
+          description: 'Send birthday wishes with special discount',
+          status: 'active',
+          config: {
+            emailTemplate: 'birthday-wishes',
+            subject: 'Happy Birthday ${customer_name}! 🎂',
+            emailField: 'email',
+            body: 'Dear ${customer_name}, wishing you a wonderful birthday! Enjoy 30% off with code BDAY30 - valid for 7 days.',
+            discountCode: 'BDAY30',
+            includeCustomerData: true
+          }
+        }
+      },
+      {
+        id: 'action-32',
+        type: 'action',
+        position: { x: 1300, y: 350 },
+        data: {
+          label: 'Send LINE birthday message',
+          type: 'action',
+          description: 'LINE notification with birthday greeting',
+          status: 'active',
+          config: {
+            message: '🎉 Happy Birthday ${customer_name}! 🎂 Celebrate with 30% off - use code BDAY30. Valid for 7 days!',
+            lineUserId: 'line_user_id',
+            includeCustomerData: true,
+            imageUrl: 'https://example.com/images/birthday-celebration.png'
+          }
+        }
+      },
+      {
+        id: 'action-33',
+        type: 'action',
+        position: { x: 1300, y: 550 },
+        data: {
+          label: 'Add birthday tag',
+          type: 'action',
+          description: 'Tag customer for birthday campaign tracking',
+          status: 'active',
+          config: {
+            tags: ['Birthday 2024', 'Birthday Campaign'],
+            updateCustomerProfile: true
+          }
+        }
+      }
+    ],
+    edges: [
+      {
+        id: 'e53',
+        source: 'start-10',
+        target: 'condition-10',
+        animated: true
+      },
+      {
+        id: 'e54-then',
+        source: 'condition-10',
+        target: 'action-31',
+        sourceHandle: 'then',
+        animated: true,
+        label: 'Then'
+      },
+      {
+        id: 'e55-then',
+        source: 'condition-10',
+        target: 'action-32',
+        sourceHandle: 'then',
+        animated: true,
+        label: 'Then'
+      },
+      {
+        id: 'e56-then',
+        source: 'condition-10',
+        target: 'action-33',
+        sourceHandle: 'then',
+        animated: true,
+        label: 'Then'
+      }
+    ]
+  },
+  {
+    id: 'sample-7',
+    name: 'Simple Points Milestone Notification',
+    description: 'Send LINE notification when customer points exceed 1000',
+    triggerType: 'event-based',
+    status: 'active',
+    createdAt: '2024-01-16T11:00:00Z',
+    updatedAt: '2024-01-16T11:00:00Z',
+    nodes: [
+      {
+        id: 'start-7',
+        type: 'start',
+        position: { x: 100, y: 300 },
+        data: {
+          label: 'Points Update Trigger',
+          type: 'start',
+          description: 'Triggers when customer points balance changes',
+          status: 'active',
+          config: {
+            label: 'Points Update Trigger',
+            description: 'Monitor points balance updates',
+            merchantId: 'SHOP001',
+            dataSource: 'CRM',
+            triggerCategory: 'event',
+            eventType: 'points_updated',
+            changeStreamEnabled: true,
+            collections: ['contacts']
+          }
+        }
+      },
+      {
+        id: 'condition-7',
+        type: 'condition',
+        position: { x: 700, y: 300 },
+        data: {
+          label: 'Points > 1000',
+          type: 'condition',
+          description: 'Check if points balance exceeds 1000',
+          status: 'active',
+          conditions: [
+            {
+              id: 'cond-7',
+              dataSource: 'CRM',
+              collection: 'contacts',
+              field: 'points_balance',
+              fieldType: 'number',
+              operator: 'greater_than',
+              value: 1000
+            }
+          ]
+        }
+      },
+      {
+        id: 'action-26',
+        type: 'action',
+        position: { x: 1300, y: 200 },
+        data: {
+          label: 'Send LINE notification',
+          type: 'action',
+          description: 'Notify customer via LINE about points milestone',
+          status: 'active',
+          config: {
+            message: 'Congratulations! You now have ${points_balance} points. Redeem them for exclusive rewards in our store!',
+            lineUserId: 'line_user_id',
+            includeCustomerData: true
+          }
+        }
+      }
+    ],
+    edges: [
+      {
+        id: 'e45',
+        source: 'start-7',
+        target: 'condition-7',
+        animated: true
+      },
+      {
+        id: 'e46-then',
+        source: 'condition-7',
+        target: 'action-26',
+        sourceHandle: 'then',
+        animated: true,
+        label: 'Then'
+      }
+    ]
+  },
+  {
+    id: 'sample-6',
+    name: 'Points Balance Exceeds Threshold',
+    description: 'Automatically trigger rewards and notifications when customer points balance exceeds defined thresholds',
+    triggerType: 'event-based',
+    status: 'active',
+    createdAt: '2024-01-16T10:00:00Z',
+    updatedAt: '2024-01-16T10:00:00Z',
+    nodes: [
+      {
+        id: 'start-6',
+        type: 'start',
+        position: { x: 100, y: 400 },
+        data: {
+          label: 'Points Balance Monitor',
+          type: 'start',
+          description: 'Monitor customer points balance changes in real-time',
+          status: 'active',
+          config: {
+            label: 'Points Balance Monitor',
+            description: 'Triggers when customer points balance is updated',
+            merchantId: 'SHOP001',
+            dataSource: 'CRM',
+            triggerCategory: 'event',
+            eventType: 'points_updated',
+            changeStreamEnabled: true,
+            collections: ['contacts', 'loyalty_points']
+          }
+        }
+      },
+      {
+        id: 'condition-6a',
+        type: 'condition',
+        position: { x: 700, y: 200 },
+        data: {
+          label: 'Points >= 1000 (Silver)',
+          type: 'condition',
+          description: 'Check if points balance reached Silver tier (1000 points)',
+          status: 'active',
+          conditions: [
+            {
+              id: 'cond-6a1',
+              dataSource: 'CRM',
+              collection: 'contacts',
+              field: 'points_balance',
+              fieldType: 'number',
+              operator: 'greater_than_or_equal',
+              value: 1000
+            },
+            {
+              id: 'cond-6a2',
+              dataSource: 'CRM',
+              collection: 'contacts',
+              field: 'points_balance',
+              fieldType: 'number',
+              operator: 'less_than',
+              value: 5000,
+              logicalOperator: 'AND'
+            }
+          ]
+        }
+      },
+      {
+        id: 'condition-6b',
+        type: 'condition',
+        position: { x: 700, y: 400 },
+        data: {
+          label: 'Points >= 5000 (Gold)',
+          type: 'condition',
+          description: 'Check if points balance reached Gold tier (5000 points)',
+          status: 'active',
+          conditions: [
+            {
+              id: 'cond-6b1',
+              dataSource: 'CRM',
+              collection: 'contacts',
+              field: 'points_balance',
+              fieldType: 'number',
+              operator: 'greater_than_or_equal',
+              value: 5000
+            },
+            {
+              id: 'cond-6b2',
+              dataSource: 'CRM',
+              collection: 'contacts',
+              field: 'points_balance',
+              fieldType: 'number',
+              operator: 'less_than',
+              value: 10000,
+              logicalOperator: 'AND'
+            }
+          ]
+        }
+      },
+      {
+        id: 'condition-6c',
+        type: 'condition',
+        position: { x: 700, y: 600 },
+        data: {
+          label: 'Points >= 10000 (Platinum)',
+          type: 'condition',
+          description: 'Check if points balance reached Platinum tier (10000 points)',
+          status: 'active',
+          conditions: [
+            {
+              id: 'cond-6c1',
+              dataSource: 'CRM',
+              collection: 'contacts',
+              field: 'points_balance',
+              fieldType: 'number',
+              operator: 'greater_than_or_equal',
+              value: 10000
+            }
+          ]
+        }
+      },
+      {
+        id: 'action-15',
+        type: 'action',
+        position: { x: 1300, y: 50 },
+        data: {
+          label: 'Send Silver tier email',
+          type: 'action',
+          description: 'Congratulate customer on reaching Silver tier',
+          status: 'active',
+          config: {
+            emailTemplate: 'silver-tier-achievement',
+            subject: 'Congratulations! You\'ve reached Silver status',
+            emailField: 'email',
+            includeCustomerData: true,
+            body: 'Hi ${customer_name}, you now have ${points_balance} points! Enjoy 10% off your next purchase with code SILVER10.'
+          }
+        }
+      },
+      {
+        id: 'action-16',
+        type: 'action',
+        position: { x: 1300, y: 200 },
+        data: {
+          label: 'Add Silver tier tags',
+          type: 'action',
+          description: 'Update customer profile with Silver tier status',
+          status: 'active',
+          config: {
+            tags: ['Silver Tier', 'Loyalty Member', 'Points Milestone 1K'],
+            updateCustomerProfile: true,
+            removeOldTierTags: true
+          }
+        }
+      },
+      {
+        id: 'action-17',
+        type: 'action',
+        position: { x: 1300, y: 300 },
+        data: {
+          label: 'Send Gold tier email',
+          type: 'action',
+          description: 'Congratulate customer on reaching Gold tier',
+          status: 'active',
+          config: {
+            emailTemplate: 'gold-tier-achievement',
+            subject: 'Amazing! You\'ve reached Gold status',
+            emailField: 'email',
+            includeCustomerData: true,
+            body: 'Hi ${customer_name}, with ${points_balance} points, you\'re now a Gold member! Enjoy 15% off and free shipping with code GOLD15.'
+          }
+        }
+      },
+      {
+        id: 'action-18',
+        type: 'action',
+        position: { x: 1300, y: 450 },
+        data: {
+          label: 'Send Gold SMS notification',
+          type: 'action',
+          description: 'SMS notification for Gold tier achievement',
+          status: 'active',
+          config: {
+            template: '🎉 ${customer_name}, you\'ve reached GOLD status with ${points_balance} points! Use GOLD15 for 15% off + free shipping.',
+            phoneField: 'phone_number',
+            includeCustomerData: true
+          }
+        }
+      },
+      {
+        id: 'action-19',
+        type: 'action',
+        position: { x: 1300, y: 550 },
+        data: {
+          label: 'Send Platinum tier email',
+          type: 'action',
+          description: 'VIP congratulations for Platinum tier',
+          status: 'active',
+          config: {
+            emailTemplate: 'platinum-tier-achievement',
+            subject: 'Welcome to Platinum - Our VIP tier!',
+            emailField: 'email',
+            includeCustomerData: true,
+            body: 'Dear ${customer_name}, with ${points_balance} points, you\'re now a Platinum VIP member! Enjoy 20% off, free express shipping, and exclusive early access.',
+            priority: 'high'
+          }
+        }
+      },
+      {
+        id: 'action-20',
+        type: 'action',
+        position: { x: 1300, y: 700 },
+        data: {
+          label: 'Send LINE VIP notification',
+          type: 'action',
+          description: 'Exclusive LINE message for Platinum members',
+          status: 'active',
+          config: {
+            message: '👑 ${customer_name}, welcome to PLATINUM VIP! You have ${points_balance} points. Enjoy exclusive benefits: 20% off everything, free express shipping, early access to sales!',
+            lineUserId: 'line_user_id',
+            includeCustomerData: true,
+            imageUrl: 'https://example.com/images/platinum-vip.png',
+            richMenu: 'platinum-benefits'
+          }
+        }
+      },
+      {
+        id: 'action-21',
+        type: 'action',
+        position: { x: 1300, y: 850 },
+        data: {
+          label: 'Trigger VIP webhook',
+          type: 'action',
+          description: 'Notify CRM and fulfillment systems of VIP status',
+          status: 'active',
+          config: {
+            url: 'https://api.company.com/loyalty/vip-status',
+            method: 'POST',
+            headers: {
+              'Authorization': 'Bearer ${api_token}',
+              'Content-Type': 'application/json'
+            },
+            payload: {
+              customerId: '${customer_id}',
+              tier: 'platinum',
+              points: '${points_balance}',
+              benefits: ['20_percent_discount', 'free_express_shipping', 'early_access'],
+              timestamp: '${current_timestamp}'
+            }
+          }
+        }
+      },
+      {
+        id: 'step-3',
+        type: 'step',
+        position: { x: 1700, y: 125 },
+        data: {
+          label: 'Log tier achievement',
+          type: 'step',
+          description: 'Record tier achievement in system logs',
+          status: 'active',
+          config: {
+            message: 'Customer ${customer_id} reached ${tier_name} tier with ${points_balance} points',
+            level: 'info',
+            includeTimestamp: true,
+            category: 'loyalty-milestones'
+          }
+        }
+      },
+      {
+        id: 'action-22',
+        type: 'action',
+        position: { x: 1700, y: 375 },
+        data: {
+          label: 'Add Gold tier tags',
+          type: 'action',
+          description: 'Update customer profile with Gold tier status',
+          status: 'active',
+          config: {
+            tags: ['Gold Tier', 'Loyalty Member', 'Points Milestone 5K', 'Free Shipping Eligible'],
+            updateCustomerProfile: true,
+            removeOldTierTags: true
+          }
+        }
+      },
+      {
+        id: 'action-23',
+        type: 'action',
+        position: { x: 1700, y: 700 },
+        data: {
+          label: 'Add Platinum VIP tags',
+          type: 'action',
+          description: 'Update customer profile with Platinum VIP status',
+          status: 'active',
+          config: {
+            tags: ['Platinum VIP', 'Top Tier', 'Points Milestone 10K', 'Priority Support', 'Early Access'],
+            updateCustomerProfile: true,
+            removeOldTierTags: true,
+            vipFlag: true
+          }
+        }
+      },
+      {
+        id: 'condition-6d',
+        type: 'condition',
+        position: { x: 2100, y: 400 },
+        data: {
+          label: 'First time reaching tier?',
+          type: 'condition',
+          description: 'Check if this is the first time customer reached this tier',
+          status: 'active',
+          conditions: [
+            {
+              id: 'cond-6d1',
+              dataSource: 'CRM',
+              collection: 'contacts',
+              field: 'tier_achievement_count',
+              fieldType: 'number',
+              operator: 'equals',
+              value: 1
+            }
+          ]
+        }
+      },
+      {
+        id: 'action-24',
+        type: 'action',
+        position: { x: 2500, y: 250 },
+        data: {
+          label: 'Send special bonus reward',
+          type: 'action',
+          description: 'One-time bonus for first tier achievement',
+          status: 'active',
+          config: {
+            emailTemplate: 'first-tier-bonus',
+            subject: 'Special bonus reward for your achievement!',
+            bonusPoints: 500,
+            couponCode: 'FIRSTTIER',
+            validityDays: 30
+          }
+        }
+      },
+      {
+        id: 'step-4',
+        type: 'step',
+        position: { x: 2500, y: 550 },
+        data: {
+          label: 'Wait 24 hours',
+          type: 'step',
+          description: 'Wait before sending follow-up engagement',
+          status: 'active',
+          config: {
+            duration: 24,
+            unit: 'hours'
+          }
+        }
+      },
+      {
+        id: 'action-25',
+        type: 'action',
+        position: { x: 2900, y: 400 },
+        data: {
+          label: 'Send tier benefits guide',
+          type: 'action',
+          description: 'Educational email about tier benefits and how to use them',
+          status: 'active',
+          config: {
+            emailTemplate: 'tier-benefits-guide',
+            subject: 'How to make the most of your ${tier_name} benefits',
+            includeCustomerData: true,
+            attachPDF: true,
+            pdfUrl: 'https://example.com/benefits/${tier_name}-guide.pdf'
+          }
+        }
+      }
+    ],
+    edges: [
+      {
+        id: 'e25',
+        source: 'start-6',
+        target: 'condition-6a',
+        animated: true
+      },
+      {
+        id: 'e26',
+        source: 'start-6',
+        target: 'condition-6b',
+        animated: true
+      },
+      {
+        id: 'e27',
+        source: 'start-6',
+        target: 'condition-6c',
+        animated: true
+      },
+      {
+        id: 'e28-then',
+        source: 'condition-6a',
+        target: 'action-15',
+        sourceHandle: 'then',
+        animated: true,
+        label: 'Then'
+      },
+      {
+        id: 'e29-then',
+        source: 'condition-6a',
+        target: 'action-16',
+        sourceHandle: 'then',
+        animated: true,
+        label: 'Then'
+      },
+      {
+        id: 'e30-then',
+        source: 'condition-6b',
+        target: 'action-17',
+        sourceHandle: 'then',
+        animated: true,
+        label: 'Then'
+      },
+      {
+        id: 'e31-then',
+        source: 'condition-6b',
+        target: 'action-18',
+        sourceHandle: 'then',
+        animated: true,
+        label: 'Then'
+      },
+      {
+        id: 'e32-then',
+        source: 'condition-6c',
+        target: 'action-19',
+        sourceHandle: 'then',
+        animated: true,
+        label: 'Then'
+      },
+      {
+        id: 'e33-then',
+        source: 'condition-6c',
+        target: 'action-20',
+        sourceHandle: 'then',
+        animated: true,
+        label: 'Then'
+      },
+      {
+        id: 'e34-then',
+        source: 'condition-6c',
+        target: 'action-21',
+        sourceHandle: 'then',
+        animated: true,
+        label: 'Then'
+      },
+      {
+        id: 'e35',
+        source: 'action-16',
+        target: 'step-3',
+        animated: true
+      },
+      {
+        id: 'e36',
+        source: 'action-18',
+        target: 'action-22',
+        animated: true
+      },
+      {
+        id: 'e37',
+        source: 'action-22',
+        target: 'step-3',
+        animated: true
+      },
+      {
+        id: 'e38',
+        source: 'action-21',
+        target: 'action-23',
+        animated: true
+      },
+      {
+        id: 'e39',
+        source: 'action-23',
+        target: 'step-3',
+        animated: true
+      },
+      {
+        id: 'e40',
+        source: 'step-3',
+        target: 'condition-6d',
+        animated: true
+      },
+      {
+        id: 'e41-then',
+        source: 'condition-6d',
+        target: 'action-24',
+        sourceHandle: 'then',
+        animated: true,
+        label: 'Then'
+      },
+      {
+        id: 'e42-otherwise',
+        source: 'condition-6d',
+        target: 'step-4',
+        sourceHandle: 'otherwise',
+        animated: true,
+        label: 'Otherwise'
+      },
+      {
+        id: 'e43',
+        source: 'action-24',
+        target: 'step-4',
+        animated: true
+      },
+      {
+        id: 'e44',
+        source: 'step-4',
+        target: 'action-25',
+        animated: true
+      }
+    ]
+  },
+  {
     id: 'sample-1',
     name: 'High Value Customer Follow-up',
     description: 'Automatically send SMS to customers who place orders over $500',
@@ -104,235 +842,7 @@ export const sampleWorkflows: Workflow[] = [
         label: 'Then'
       }
     ]
-  },
-  {
-    id: 'sample-2',
-    name: 'Daily Abandoned Cart Recovery',
-    description: 'Send email reminders for abandoned carts every day at 2 PM',
-    triggerType: 'schedule-based',
-    status: 'draft',
-    createdAt: '2024-01-15T11:00:00Z',
-    updatedAt: '2024-01-15T11:00:00Z',
-    nodes: [
-      {
-        id: 'start-2',
-        type: 'start',
-        position: { x: 100, y: 300 },
-        data: {
-          label: 'Cart Recovery Start',
-          type: 'start',
-          description: 'Starting point for cart recovery campaign',
-          status: 'active',
-          config: {
-            label: 'Cart Recovery Start',
-            description: 'Starting point for cart recovery campaign',
-            merchantId: 'SHOP001',
-            dataSource: 'CRM',
-            triggerCategory: 'scheduled',
-            scheduleTime: '14:00',
-            timezone: 'America/New_York',
-            recurrencePattern: 'daily',
-            scheduleType: 'recurring',
-            changeStreamEnabled: false,
-            collections: ['orders']
-          }
-        }
-      },
-      {
-        id: 'condition-2',
-        type: 'condition',
-        position: { x: 700, y: 300 },
-        data: {
-          label: 'Cart abandoned > 24 hours',
-          type: 'condition',
-          description: 'Find carts abandoned more than 24 hours ago',
-          status: 'active',
-          conditions: [
-            {
-              id: 'cond-2a',
-              dataSource: 'CRM',
-              collection: 'orders',
-              field: 'status',
-              fieldType: 'select',
-              operator: 'equals',
-              value: 'cancelled',
-              selectOptions: ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled']
-            },
-            {
-              id: 'cond-2b',
-              dataSource: 'CRM',
-              collection: 'orders',
-              field: 'updated_date',
-              fieldType: 'date',
-              operator: 'date_before',
-              value: '2024-01-14',
-              logicalOperator: 'AND'
-            }
-          ]
-        }
-      },
-      {
-        id: 'action-3',
-        type: 'action',
-        position: { x: 1300, y: 300 },
-        data: {
-          label: 'Send recovery email',
-          type: 'action',
-          description: 'Email with cart contents and discount code',
-          status: 'active',
-          config: {
-            emailTemplate: 'cart-recovery',
-            subject: 'Complete your purchase and save 15%',
-            discountCode: 'SAVE15'
-          }
-        }
-      }
-    ],
-    edges: [
-      {
-        id: 'e4',
-        source: 'start-2',
-        target: 'condition-2',
-        animated: true
-      },
-      {
-        id: 'e5-then',
-        source: 'condition-2',
-        target: 'action-3',
-        sourceHandle: 'then',
-        animated: true,
-        label: 'Then'
-      }
-    ]
-  },
-  {
-    id: 'sample-3',
-    name: 'New Customer Welcome Series',
-    description: 'Multi-step onboarding for first-time customers',
-    triggerType: 'event-based',
-    status: 'draft',
-    createdAt: '2024-01-15T12:00:00Z',
-    updatedAt: '2024-01-15T12:00:00Z',
-    nodes: [
-      {
-        id: 'start-3',
-        type: 'start',
-        position: { x: 100, y: 400 },
-        data: {
-          label: 'Customer Onboarding Start',
-          type: 'start',
-          description: 'Starting point for new customer welcome series',
-          status: 'active',
-          config: {
-            label: 'Customer Onboarding Start',
-            description: 'Starting point for new customer welcome series',
-            merchantId: 'SHOP001',
-            dataSource: 'CRM'
-          }
-        }
-      },
-      {
-        id: 'condition-3',
-        type: 'condition',
-        position: { x: 700, y: 400 },
-        data: {
-          label: 'First-time customer',
-          type: 'condition',
-          description: 'Check if this is their first account creation',
-          status: 'active',
-          conditions: [
-            {
-              id: 'cond-3',
-              dataSource: 'CRM',
-              collection: 'contacts',
-              field: 'total_order',
-              fieldType: 'number',
-              operator: 'equals',
-              value: 0
-            }
-          ]
-        }
-      },
-      {
-        id: 'action-4',
-        type: 'action',
-        position: { x: 1300, y: 250 },
-        data: {
-          label: 'Send welcome email',
-          type: 'action',
-          description: 'Immediate welcome message with brand introduction',
-          status: 'active',
-          config: {
-            emailTemplate: 'welcome-new-customer',
-            delayMinutes: 0
-          }
-        }
-      },
-      {
-        id: 'action-5',
-        type: 'action',
-        position: { x: 1300, y: 400 },
-        data: {
-          label: 'Send discount code',
-          type: 'action',
-          description: '20% off first order (sent 2 hours later)',
-          status: 'active',
-          config: {
-            emailTemplate: 'first-order-discount',
-            discountCode: 'WELCOME20',
-            delayMinutes: 120
-          }
-        }
-      },
-      {
-        id: 'action-6',
-        type: 'action',
-        position: { x: 1300, y: 600 },
-        data: {
-          label: 'Add welcome tags',
-          type: 'action',
-          description: 'Tag for segmentation and follow-up campaigns',
-          status: 'active',
-          config: {
-            tags: ['New Customer', 'Welcome Series'],
-            updateCustomerProfile: true
-          }
-        }
-      }
-    ],
-    edges: [
-      {
-        id: 'e6',
-        source: 'start-3',
-        target: 'condition-3',
-        animated: true
-      },
-      {
-        id: 'e7-then',
-        source: 'condition-3',
-        target: 'action-4',
-        sourceHandle: 'then',
-        animated: true,
-        label: 'Then'
-      },
-      {
-        id: 'e8-then',
-        source: 'condition-3',
-        target: 'action-5',
-        sourceHandle: 'then',
-        animated: true,
-        label: 'Then'
-      },
-      {
-        id: 'e9-then',
-        source: 'condition-3',
-        target: 'action-6',
-        sourceHandle: 'then',
-        animated: true,
-        label: 'Then'
-      }
-    ]
-  },
+  }, 
   {
     id: 'sample-4',
     name: 'Weekly Inventory Low Stock Alert',
@@ -776,4 +1286,5 @@ export const sampleWorkflows: Workflow[] = [
       }
     ]
   }
+  
 ];
