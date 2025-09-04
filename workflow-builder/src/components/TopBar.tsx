@@ -41,6 +41,9 @@ const TopBar: React.FC<TopBarProps> = ({ onBackToList }) => {
   const [successMessage, setSuccessMessage] = useState('');
   const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [, setToastMessage] = useState('');
+  const [, setToastError] = useState(false);
+  const [, setShowToast] = useState(false);
   
   const {
     saveWorkflow,
@@ -51,7 +54,6 @@ const TopBar: React.FC<TopBarProps> = ({ onBackToList }) => {
     workflows,
     currentWorkflow,
     validateWorkflow,
-    validationErrors,
     isDirty,
     nodes,
     isSaving,

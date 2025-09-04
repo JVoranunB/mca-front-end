@@ -56,7 +56,7 @@ const WorkflowListPage = () => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [workflowToDelete, setWorkflowToDelete] = useState<string | null>(null);
   const [toastActive, setToastActive] = useState(false);
-  const [toastMessage, setToastMessage] = useState('');
+  const [toastMessage] = useState('');
   const [successModalOpen, setSuccessModalOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
 
@@ -75,10 +75,6 @@ const WorkflowListPage = () => {
     });
   }, [workflows, filters]);
 
-  const showToast = (message: string) => {
-    setToastMessage(message);
-    setToastActive(true);
-  };
 
   const showSuccessModal = (message: string) => {
     setSuccessMessage(message);
