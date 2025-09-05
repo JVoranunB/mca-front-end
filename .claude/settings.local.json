@@ -29,6 +29,9 @@
       "Read(/C:\\Work\\Rocket\\mca-front-end\\workflow-builder/**)",
       "Read(/C:\\Work\\Rocket\\mca-front-end\\workflow-builder/**)",
       "Bash(npm uninstall:*)",
+      "Read(/C:\\Work\\Rocket\\mca-front-end\\workflow-builder/**)",
+      "Read(/C:\\Work\\Rocket\\mca-front-end\\workflow-builder/**)",
+      "Read(/C:\\Work\\Rocket\\mca-front-end/**)",
       "Read(/C:\\Work\\Rocket\\mca-front-end\\workflow-builder/**)"
     ],
     "deny": [],

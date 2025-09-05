@@ -1,1 +1,14 @@
-{}
+{
+  "name": "mca-front-end",
+  "private": true,
+  "workspaces": [
+    "workflow-builder"
+  ],
+  "scripts": {
+    "build:uat": "cd workflow-builder && npm run build:uat",
+    "build:production": "cd workflow-builder && npm run build:production",
+    "dev": "cd workflow-builder && npm run dev",
+    "deploy:uat": "cd workflow-builder && npm run deploy:uat",
+    "deploy:production": "cd workflow-builder && npm run deploy:production"
+  }
+}
