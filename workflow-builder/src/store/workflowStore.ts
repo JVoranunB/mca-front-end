@@ -208,7 +208,11 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
   },
   
   selectNode: (node) => {
-    set({ selectedNode: node, selectedEdge: null });
+    set((state) => ({ 
+      selectedNode: node, 
+      selectedEdge: null,
+      rightSidebarVisible: node !== null ? true : false
+    }));
   },
   
   selectEdge: (edge) => {
