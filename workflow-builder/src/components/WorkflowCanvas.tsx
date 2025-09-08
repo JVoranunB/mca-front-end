@@ -97,6 +97,21 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({ onDrop, onDragOver, set
   // Handle node and edge deletion with keyboard shortcut
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+      // Don't handle delete/backspace if user is typing in input fields
+      const target = event.target as HTMLElement;
+      const isTyping = target && (
+        target.tagName === 'INPUT' || 
+        target.tagName === 'TEXTAREA' || 
+        target.isContentEditable ||
+        target.closest('[contenteditable]') ||
+        target.closest('input') ||
+        target.closest('textarea')
+      );
+      
+      if (isTyping) {
+        return; // Let the input handle the keypress normally
+      }
+
       if (event.key === 'Delete' || event.key === 'Backspace') {
         if (selectedNode) {
           // Prevent deletion of start nodes

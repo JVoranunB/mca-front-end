@@ -242,13 +242,26 @@ const PropertiesSidebar: React.FC = () => {
       if (selectedNode.data.label.includes('LINE')) {
         return (
           <>
+            <Select
+              label="Message Type"
+              options={[
+                { label: 'Normal Text (Simple)', value: 'text' },
+                { label: 'Flex Message (Advanced)', value: 'flex' }
+              ]}
+              value={String(localConfig.messageType || 'text')}
+              onChange={(value) => handleConfigChange('messageType', value)}
+              helpText="Choose between simple text message or advanced flex message format"
+            />
             <TextField
               label="LINE Message"
               value={String(localConfig.message || '')}
               onChange={(value) => handleConfigChange('message', value)}
               multiline={4}
               autoComplete="off"
-              helpText="Message to send via LINE. Use {{variables}} for dynamic content"
+              helpText={localConfig.messageType === 'flex' 
+                ? "Flex message JSON payload. Use {{variables}} for dynamic content"
+                : "Message to send via LINE. Use {{variables}} for dynamic content"
+              }
             />
             <TextField
               label="LINE User ID Field"
@@ -257,13 +270,15 @@ const PropertiesSidebar: React.FC = () => {
               autoComplete="off"
               helpText="Field name containing the recipient's LINE user ID"
             />
-            <TextField
-              label="Image URL (Optional)"
-              value={String(localConfig.imageUrl || '')}
-              onChange={(value) => handleConfigChange('imageUrl', value)}
-              autoComplete="off"
-              helpText="Optional image URL to include in the LINE message"
-            />
+            {localConfig.messageType !== 'flex' && (
+              <TextField
+                label="Image URL (Optional)"
+                value={String(localConfig.imageUrl || '')}
+                onChange={(value) => handleConfigChange('imageUrl', value)}
+                autoComplete="off"
+                helpText="Optional image URL to include in the LINE message"
+              />
+            )}
           </>
         );
       }
