@@ -313,3 +313,108 @@ div[data-node-type="start"] .node-icon-container {
   background: rgba(255, 255, 255, 0.2) !important;
   border-color: rgba(255, 255, 255, 0.5) !important;
 }
+
+/* Readonly TextField and TextArea Styling - Multiple selectors for coverage */
+input[readonly],
+textarea[readonly],
+.Polaris-TextField input[readonly],
+.Polaris-TextField textarea[readonly],
+.Polaris-TextField__Input[readonly],
+.Polaris-TextField__Input input[readonly] {
+  background-color: #f6f6f7 !important;
+  color: #6d7175 !important;
+  cursor: default !important;
+}
+
+input[readonly]:focus,
+textarea[readonly]:focus,
+.Polaris-TextField input[readonly]:focus,
+.Polaris-TextField textarea[readonly]:focus,
+.Polaris-TextField__Input[readonly]:focus {
+  background-color: #f6f6f7 !important;
+  border-color: #c9cccf !important;
+  box-shadow: none !important;
+  color: #6d7175 !important;
+}
+
+/* Readonly TextField container styling */
+.Polaris-TextField--readonly,
+.Polaris-TextField[readonly] {
+  opacity: 0.8;
+}
+
+.Polaris-TextField--readonly .Polaris-TextField__Input,
+.Polaris-TextField--readonly input,
+.Polaris-TextField--readonly textarea {
+  background-color: #f6f6f7 !important;
+  color: #6d7175 !important;
+  cursor: default !important;
+}
+
+/* Additional specific selectors for Polaris internal classes */
+.Polaris-TextField__Input--readonly,
+.Polaris-TextField__Input[readonly="true"] {
+  background-color: #f6f6f7 !important;
+  color: #6d7175 !important;
+  cursor: default !important;
+}
+
+/* Readonly TextArea styling */
+.Polaris-TextField--readonly textarea,
+textarea[readonly] {
+  background-color: #f6f6f7 !important;
+  color: #6d7175 !important;
+  cursor: default !important;
+  resize: none !important;
+}
+
+/* Disabled state styling (similar to readonly) */
+input[disabled],
+textarea[disabled],
+.Polaris-TextField input[disabled],
+.Polaris-TextField textarea[disabled],
+.Polaris-TextField__Input[disabled] {
+  background-color: #f6f6f7 !important;
+  color: #6d7175 !important;
+  cursor: not-allowed !important;
+}
+
+/* Force readonly styling for any input/textarea with readonly attribute */
+*[readonly] {
+  background-color: #f6f6f7 !important;
+  color: #6d7175 !important;
+}
+
+/* Additional debug styles - catch all possible readonly states */
+.Polaris-TextField[readonly] input,
+.Polaris-TextField[readonly] textarea,
+.Polaris-TextField__Input[readonly],
+.Polaris-TextField input[readonly="readonly"],
+.Polaris-TextField input[readonly="true"],
+.Polaris-TextField textarea[readonly="readonly"],
+.Polaris-TextField textarea[readonly="true"] {
+  background-color: #f6f6f7 !important;
+  color: #6d7175 !important;
+  cursor: default !important;
+}
+
+/* Catch disabled fields that should look readonly */
+.Polaris-TextField input[disabled="disabled"],
+.Polaris-TextField input[disabled="true"],
+.Polaris-TextField textarea[disabled="disabled"],
+.Polaris-TextField textarea[disabled="true"] {
+  background-color: #f6f6f7 !important;
+  color: #6d7175 !important;
+  cursor: default !important;
+}
+
+/* Polaris-specific disabled/readonly classes */
+.Polaris-TextField--disabled input,
+.Polaris-TextField--disabled textarea,
+.Polaris-TextField--readOnly input,
+.Polaris-TextField--readOnly textarea {
+  background-color: #f6f6f7 !important;
+  color: #6d7175 !important;
+  cursor: default !important;
+}
+

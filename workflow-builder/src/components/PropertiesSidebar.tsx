@@ -16,22 +16,28 @@ import { ChevronLeftIcon, ChevronRightIcon } from '@shopify/polaris-icons';
 import { Icons } from '../utils/icons';
 import useWorkflowStore from '../store/workflowStore';
 import type { WorkflowCondition, StartConfig, TriggerConfig } from '../types/workflow.types';
-import { getDataSourcesForConditions, getCollectionsForDataSource, getFieldsForCollection, type DataSourceField } from '../utils/dataSourceFields';
+import { getCollectionsForDataSource, getFieldsForCollection, type DataSourceField } from '../utils/dataSourceFields';
 
 const PropertiesSidebar: React.FC = () => {
   const { selectedNode, updateNode, deleteNode, rightSidebarVisible, toggleRightSidebar, currentWorkflow } = useWorkflowStore();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [localConfig, setLocalConfig] = useState<Record<string, any>>({});
   const [conditions, setConditions] = useState<WorkflowCondition[]>([]);
+  const [localLabel, setLocalLabel] = useState<string>('');
+  const [localDescription, setLocalDescription] = useState<string>('');
   
   useEffect(() => {
     if (selectedNode) {
       setLocalConfig(selectedNode.data.config || {});
       setConditions(selectedNode.data.conditions || []);
+      setLocalLabel(selectedNode.data.label || '');
+      setLocalDescription(selectedNode.data.description || '');
     } else {
-      // Clear local config when no node is selected
+      // Clear local state when no node is selected
       setLocalConfig({});
       setConditions([]);
+      setLocalLabel('');
+      setLocalDescription('');
     }
   }, [selectedNode, currentWorkflow?.id]);
   
@@ -45,12 +51,14 @@ const PropertiesSidebar: React.FC = () => {
   };
   
   const handleLabelChange = (value: string) => {
+    setLocalLabel(value);
     if (selectedNode) {
       updateNode(selectedNode.id, { label: value });
     }
   };
   
   const handleDescriptionChange = (value: string) => {
+    setLocalDescription(value);
     if (selectedNode) {
       updateNode(selectedNode.id, { description: value });
     }
@@ -60,6 +68,7 @@ const PropertiesSidebar: React.FC = () => {
     const newCondition: WorkflowCondition = {
       id: Date.now().toString(),
       dataSource: 'CRM',
+      collection: undefined,
       field: '',
       fieldType: 'text',
       operator: 'equals',
@@ -644,13 +653,13 @@ const PropertiesSidebar: React.FC = () => {
               <FormLayout>
                 <TextField
                   label="Label"
-                  value={selectedNode.data.label}
+                  value={localLabel}
                   onChange={handleLabelChange}
                   autoComplete="off"
                 />
                 <TextField
                   label="Description"
-                  value={selectedNode.data.description || ''}
+                  value={localDescription}
                   onChange={handleDescriptionChange}
                   multiline={2}
                   autoComplete="off"
@@ -674,9 +683,11 @@ const PropertiesSidebar: React.FC = () => {
                       </InlineStack>
                       
                       {conditions.map((condition, index) => {
-                        const collections = getCollectionsForDataSource(condition.dataSource);
+                        // Ensure dataSource is always CRM
+                        const dataSource = condition.dataSource || 'CRM';
+                        const collections = getCollectionsForDataSource(dataSource);
                         const fields = condition.collection 
-                          ? getFieldsForCollection(condition.dataSource, condition.collection)
+                          ? getFieldsForCollection(dataSource, condition.collection)
                           : [];
                         const selectedField = fields.find((f: DataSourceField) => f.key === condition.field);
                         
@@ -697,17 +708,6 @@ const PropertiesSidebar: React.FC = () => {
                                 />
                               )}
                               
-                              <Select
-                                label="Data Source"
-                                options={getDataSourcesForConditions()}
-                                value={condition.dataSource}
-                                onChange={(value) => updateCondition(condition.id, { 
-                                  dataSource: value as 'CRM',
-                                  collection: undefined,
-                                  field: '',
-                                  value: ''
-                                })}
-                              />
                               
                               {collections.length > 0 && (
                                 <Select
