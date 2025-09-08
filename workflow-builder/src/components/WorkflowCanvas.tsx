@@ -30,8 +30,10 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({ onDrop, onDragOver, set
     onConnect,
     selectNode,
     selectEdge,
+    selectedNode,
     selectedEdge,
     deleteEdge,
+    deleteNode,
     addNode,
     setRightSidebarVisible
   } = useWorkflowStore();
@@ -91,19 +93,30 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({ onDrop, onDragOver, set
     }
   }, [deleteEdge, selectEdge]);
 
-  // Handle edge deletion with keyboard shortcut
+  // Handle node and edge deletion with keyboard shortcut
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if ((event.key === 'Delete' || event.key === 'Backspace') && selectedEdge) {
-        event.preventDefault();
-        deleteEdge(selectedEdge.id);
-        selectEdge(null);
+      if (event.key === 'Delete' || event.key === 'Backspace') {
+        if (selectedNode) {
+          // Prevent deletion of start nodes
+          if (selectedNode.type === 'start') {
+            console.log('Cannot delete start node');
+            return;
+          }
+          event.preventDefault();
+          deleteNode(selectedNode.id);
+          selectNode(null);
+        } else if (selectedEdge) {
+          event.preventDefault();
+          deleteEdge(selectedEdge.id);
+          selectEdge(null);
+        }
       }
     };
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [selectedEdge, deleteEdge, selectEdge]);
+  }, [selectedNode, selectedEdge, deleteNode, deleteEdge, selectNode, selectEdge]);
   
   const onPaneClick = useCallback(() => {
     selectNode(null);
