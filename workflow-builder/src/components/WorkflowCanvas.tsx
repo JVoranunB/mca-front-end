@@ -35,7 +35,8 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({ onDrop, onDragOver, set
     deleteEdge,
     deleteNode,
     addNode,
-    setRightSidebarVisible
+    setRightSidebarVisible,
+    showToast
   } = useWorkflowStore();
   
   // Auto-create start node when canvas is empty
@@ -153,13 +154,13 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({ onDrop, onDragOver, set
         edge.source === connection.source && edge.target !== connection.target
       );
       if (existingConnections.length > 0) {
-        console.log('Connection blocked: Start node can only connect to one condition node');
+        showToast('Start node can only connect to one condition node');
         return false;
       }
       
       // Only allow connections to condition nodes
       if (targetNode.type !== 'condition') {
-        console.log('Connection blocked: Start node can only connect to condition nodes');
+        showToast('Start node can only connect to condition nodes');
         return false;
       }
     }
@@ -195,12 +196,12 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({ onDrop, onDragOver, set
 
     // If there are nodes in between, prevent the connection (no crossing over)
     if (nodesBetween.length > 0) {
-      console.log('Connection blocked: Cannot skip over intermediate nodes');
+      showToast('Cannot skip over intermediate nodes');
       return false;
     }
 
     return true;
-  }, [nodes, edges]);
+  }, [nodes, edges, showToast]);
 
   // Handle connection line style during drag
   const connectionLineStyle = {

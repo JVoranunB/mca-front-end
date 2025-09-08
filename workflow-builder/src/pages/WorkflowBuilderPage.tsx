@@ -1,6 +1,6 @@
 import React, { useCallback, useRef, useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { AppProvider, Frame, Loading } from '@shopify/polaris';
+import { AppProvider, Frame, Loading, Toast } from '@shopify/polaris';
 import { ReactFlowProvider } from '@xyflow/react';
 import type { ReactFlowInstance } from '@xyflow/react';
 import '@shopify/polaris/build/esm/styles.css';
@@ -20,7 +20,17 @@ const WorkflowBuilderPage = () => {
   const navigate = useNavigate();
   const [reactFlowInstance, setReactFlowInstance] = useState<ReactFlowInstance | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const { addNode, loadWorkflow, createWorkflowFromType, leftSidebarVisible, rightSidebarVisible, setLeftSidebarVisible } = useWorkflowStore();
+  const { 
+    addNode, 
+    loadWorkflow, 
+    createWorkflowFromType, 
+    leftSidebarVisible, 
+    rightSidebarVisible, 
+    setLeftSidebarVisible,
+    toastActive,
+    toastMessage,
+    hideToast
+  } = useWorkflowStore();
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
@@ -115,6 +125,10 @@ const WorkflowBuilderPage = () => {
   const handleBackToList = () => {
     navigate('/');
   };
+
+  const toastMarkup = toastActive ? (
+    <Toast content={toastMessage} onDismiss={hideToast} error />
+  ) : null;
   
   if (isLoading) {
     return (
@@ -145,6 +159,7 @@ const WorkflowBuilderPage = () => {
             {(rightSidebarVisible || !rightSidebarVisible) && <PropertiesSidebar />}
           </div>
         </div>
+        {toastMarkup}
       </Frame>
     </AppProvider>
   );

@@ -19,6 +19,8 @@ interface WorkflowState {
   rightSidebarVisible: boolean;
   isSaving: boolean;
   saveError: string | null;
+  toastActive: boolean;
+  toastMessage: string;
   
   onNodesChange: (changes: NodeChange[]) => void;
   onEdgesChange: (changes: EdgeChange[]) => void;
@@ -60,6 +62,9 @@ interface WorkflowState {
   
   setSaving: (isSaving: boolean) => void;
   setSaveError: (error: string | null) => void;
+  
+  showToast: (message: string) => void;
+  hideToast: () => void;
 }
 
 // Helper function to initialize workflows with samples if localStorage is empty
@@ -86,6 +91,8 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
   rightSidebarVisible: true,
   isSaving: false,
   saveError: null,
+  toastActive: false,
+  toastMessage: '',
   
   onNodesChange: (changes) => {
     set({
@@ -208,11 +215,11 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
   },
   
   selectNode: (node) => {
-    set((state) => ({ 
+    set({ 
       selectedNode: node, 
       selectedEdge: null,
-      rightSidebarVisible: node !== null ? true : false
-    }));
+      rightSidebarVisible: node !== null
+    });
   },
   
   selectEdge: (edge) => {
@@ -642,6 +649,14 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
   
   setSaveError: (error) => {
     set({ saveError: error });
+  },
+
+  showToast: (message) => {
+    set({ toastActive: true, toastMessage: message });
+  },
+
+  hideToast: () => {
+    set({ toastActive: false, toastMessage: '' });
   },
 
   resetToSampleWorkflows: () => {
