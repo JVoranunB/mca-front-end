@@ -33,7 +33,9 @@
       "Read(/C:\\Work\\Rocket\\mca-front-end\\workflow-builder/**)",
       "Read(/C:\\Work\\Rocket\\mca-front-end/**)",
       "Read(/C:\\Work\\Rocket\\mca-front-end\\workflow-builder/**)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(npx vite:*)",
+      "Bash(taskkill:*)"
     ],
     "deny": [],
     "ask": []
