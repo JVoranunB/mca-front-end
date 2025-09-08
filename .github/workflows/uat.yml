@@ -38,16 +38,14 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
-          cache-dependency-path: workflow-builder/package-lock.json
+          cache-dependency-path: package-lock.json
           
       - name: Install dependencies
         run: |
-          cd workflow-builder
           npm install --legacy-peer-deps
           
       - name: Build for UAT
         run: |
-          cd workflow-builder
           npm run build:uat
           
       - name: Deploy to S3
