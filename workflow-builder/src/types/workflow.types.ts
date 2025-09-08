@@ -12,6 +12,7 @@ export interface WorkflowCondition {
   value: string | number;
   selectOptions?: string[];
   logicalOperator?: 'AND' | 'OR';
+  dateValueType?: 'dynamic' | 'specific';
 }
 
 export interface StartConfig {
