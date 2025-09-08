@@ -346,12 +346,15 @@ const WorkflowListPage = () => {
           <ButtonGroup>
             <Button
               variant="primary"
+              tone="success"
               icon={PlusIcon}
               onClick={() => handleCreateWorkflow('event-based')}
             >
               Create Event-Based Workflow
             </Button>
             <Button
+              variant="primary"
+              tone="success"
               icon={PlusIcon}
               onClick={() => handleCreateWorkflow('schedule-based')}
             >
