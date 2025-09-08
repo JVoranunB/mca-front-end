@@ -204,7 +204,6 @@ const PropertiesSidebar: React.FC = () => {
               autoComplete="off"
               helpText="Field name containing the recipient's phone number"
             />
-            {renderScheduleConfiguration(localConfig)}
           </>
         );
       }
@@ -235,7 +234,6 @@ const PropertiesSidebar: React.FC = () => {
               autoComplete="off"
               helpText="Field name containing the recipient's email address"
             />
-            {renderScheduleConfiguration(localConfig)}
           </>
         );
       }
@@ -266,7 +264,6 @@ const PropertiesSidebar: React.FC = () => {
               autoComplete="off"
               helpText="Optional image URL to include in the LINE message"
             />
-            {renderScheduleConfiguration(localConfig)}
           </>
         );
       }
@@ -304,7 +301,6 @@ const PropertiesSidebar: React.FC = () => {
               multiline={3}
               autoComplete="off"
             />
-            {renderScheduleConfiguration(localConfig)}
           </>
         );
       }
@@ -345,7 +341,6 @@ const PropertiesSidebar: React.FC = () => {
               autoComplete="off"
               helpText="Optional HTTP headers in JSON format"
             />
-            {renderScheduleConfiguration(localConfig)}
           </>
         );
       }
@@ -359,7 +354,6 @@ const PropertiesSidebar: React.FC = () => {
               onChange={(value) => handleConfigChange('tags', value.split(',').map(t => t.trim()))}
               autoComplete="off"
             />
-            {renderScheduleConfiguration(localConfig)}
           </>
         );
       }
@@ -411,7 +405,6 @@ const PropertiesSidebar: React.FC = () => {
               value={String(localConfig.unit || 'seconds')}
               onChange={(value) => handleConfigChange('unit', value)}
             />
-            {renderScheduleConfiguration(localConfig)}
           </>
         );
       }
@@ -439,7 +432,6 @@ const PropertiesSidebar: React.FC = () => {
               value={String(localConfig.level || 'info')}
               onChange={(value) => handleConfigChange('level', value)}
             />
-            {renderScheduleConfiguration(localConfig)}
           </>
         );
       }
