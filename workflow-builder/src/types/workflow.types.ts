@@ -12,7 +12,9 @@ export interface WorkflowCondition {
   value: string | number;
   selectOptions?: string[];
   logicalOperator?: 'AND' | 'OR';
-  dateValueType?: 'dynamic' | 'specific';
+  dateType?: 'today' | 'specific' | 'relative';
+  periodNumber?: number;
+  periodUnit?: 'days' | 'weeks' | 'months' | 'years';
 }
 
 export interface StartConfig {

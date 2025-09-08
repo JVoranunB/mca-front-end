@@ -765,18 +765,20 @@ const PropertiesSidebar: React.FC = () => {
                                   ) : selectedField?.type === 'date' ? (
                                     <>
                                       <Select
-                                        label="Date Value Type"
+                                        label="Date Type"
                                         options={[
-                                          { label: 'Dynamic Date', value: 'dynamic' },
-                                          { label: 'Specific Date', value: 'specific' }
+                                          { label: 'Today', value: 'today' },
+                                          { label: 'Specific Date', value: 'specific' },
+                                          { label: 'Relative Period', value: 'relative' }
                                         ]}
-                                        value={condition.dateValueType || 'specific'}
+                                        value={condition.dateType || 'specific'}
                                         onChange={(value) => updateCondition(condition.id, { 
-                                          dateValueType: value,
-                                          value: value === 'dynamic' ? 'today' : ''
+                                          dateType: value as 'today' | 'specific' | 'relative',
+                                          value: value === 'today' ? 'today' : value === 'relative' ? `${condition.periodNumber || 1}_${condition.periodUnit || 'days'}` : ''
                                         })}
                                       />
-                                      {(condition.dateValueType || 'specific') === 'specific' ? (
+                                      
+                                      {condition.dateType === 'specific' && (
                                         <TextField
                                           label="Specific Date"
                                           type="date"
@@ -784,24 +786,41 @@ const PropertiesSidebar: React.FC = () => {
                                           onChange={(value) => updateCondition(condition.id, { value })}
                                           autoComplete="off"
                                         />
-                                      ) : (
-                                        <Select
-                                          label="Dynamic Date"
-                                          options={[
-                                            { label: 'Today', value: 'today' },
-                                            { label: 'Yesterday', value: 'yesterday' },
-                                            { label: 'Tomorrow', value: 'tomorrow' },
-                                            { label: 'Start of this week', value: 'start_of_week' },
-                                            { label: 'End of this week', value: 'end_of_week' },
-                                            { label: 'Start of this month', value: 'start_of_month' },
-                                            { label: 'End of this month', value: 'end_of_month' },
-                                            { label: 'Start of this year', value: 'start_of_year' },
-                                            { label: 'End of this year', value: 'end_of_year' }
-                                          ]}
-                                          value={String(condition.value)}
-                                          onChange={(value) => updateCondition(condition.id, { value })}
-                                          placeholder="Select dynamic date"
-                                        />
+                                      )}
+                                      
+                                      {condition.dateType === 'relative' && (
+                                        <>
+                                          <TextField
+                                            label="Number of Periods"
+                                            type="number"
+                                            value={String(condition.periodNumber || 1)}
+                                            onChange={(value) => {
+                                              const num = parseInt(value) || 1;
+                                              updateCondition(condition.id, { 
+                                                periodNumber: num,
+                                                value: `${num}_${condition.periodUnit || 'days'}`
+                                              });
+                                            }}
+                                            autoComplete="off"
+                                            min="1"
+                                            helpText="Enter a positive number"
+                                          />
+                                          
+                                          <Select
+                                            label="Period Unit"
+                                            options={[
+                                              { label: 'Days', value: 'days' },
+                                              { label: 'Weeks', value: 'weeks' },
+                                              { label: 'Months', value: 'months' },
+                                              { label: 'Years', value: 'years' }
+                                            ]}
+                                            value={condition.periodUnit || 'days'}
+                                            onChange={(value) => updateCondition(condition.id, { 
+                                              periodUnit: value as 'days' | 'weeks' | 'months' | 'years',
+                                              value: `${condition.periodNumber || 1}_${value}`
+                                            })}
+                                          />
+                                        </>
                                       )}
                                     </>
                                   ) : selectedField?.type === 'number' ? (

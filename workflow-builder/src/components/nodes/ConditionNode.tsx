@@ -5,14 +5,29 @@ import { Icons } from '../../utils/icons';
 import type { NodeData } from '../../types/workflow.types';
 import { getOperatorLabel } from '../../utils/dataSourceFields';
 
-// Helper function to format date values for display
-const formatDateValue = (value: string | number, dateValueType?: 'dynamic' | 'specific'): string => {
+// Helper function to format date values for display  
+const formatDateValue = (value: string | number, dateType?: 'today' | 'specific' | 'relative'): string => {
   const valueStr = String(value);
   
-  // Handle dynamic dates
-  if (dateValueType === 'dynamic' || !dateValueType) {
+  // Handle dynamic dates (today and relative)
+  if (dateType === 'today' || dateType === 'relative' || !dateType) {
+    // Handle simple "today"
+    if (valueStr === 'today') {
+      return 'Today';
+    }
+    
+    // Handle relative period format: "3_months" or "2_weeks"
+    const relativeParts = valueStr.split('_');
+    if (relativeParts.length === 2) {
+      const [number, unit] = relativeParts;
+      const num = parseInt(number);
+      const unitLabel = num === 1 ? unit.slice(0, -1) : unit; // Remove 's' for singular
+      
+      return `${num} ${unitLabel}`;
+    }
+    
+    // Legacy dynamic date labels (backward compatibility)
     const dynamicDateLabels: Record<string, string> = {
-      'today': 'Today',
       'yesterday': 'Yesterday',
       'tomorrow': 'Tomorrow',
       'start_of_week': 'Start of this week',
@@ -23,7 +38,6 @@ const formatDateValue = (value: string | number, dateValueType?: 'dynamic' | 'sp
       'end_of_year': 'End of this year'
     };
     
-    // If it's a known dynamic date, return the label
     if (dynamicDateLabels[valueStr]) {
       return dynamicDateLabels[valueStr];
     }
@@ -132,7 +146,7 @@ const ConditionNode = memo(({ data }: NodeProps) => {
                         {!['is_empty', 'is_not_empty'].includes(condition.operator) && condition.value !== undefined && (
                           <Text as="span" variant="bodySm" fontWeight="semibold">
                             {condition.fieldType === 'date' 
-                              ? formatDateValue(condition.value, condition.dateValueType)
+                              ? formatDateValue(condition.value, condition.dateType)
                               : String(condition.value)}
                           </Text>
                         )}
