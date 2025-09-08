@@ -146,6 +146,24 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({ onDrop, onDragOver, set
       return false;
     }
 
+    // Restrict start nodes to only connect to one condition node
+    if (sourceNode.type === 'start') {
+      // Check if start node already has outgoing connections to other targets
+      const existingConnections = edges.filter(edge => 
+        edge.source === connection.source && edge.target !== connection.target
+      );
+      if (existingConnections.length > 0) {
+        console.log('Connection blocked: Start node can only connect to one condition node');
+        return false;
+      }
+      
+      // Only allow connections to condition nodes
+      if (targetNode.type !== 'condition') {
+        console.log('Connection blocked: Start node can only connect to condition nodes');
+        return false;
+      }
+    }
+
     // Sequential connection validation based on node positions
     // Nodes can only connect to nodes that are positioned to their right and within reasonable vertical range
     const sourceX = sourceNode.position.x;
@@ -182,7 +200,7 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({ onDrop, onDragOver, set
     }
 
     return true;
-  }, [nodes]);
+  }, [nodes, edges]);
 
   // Handle connection line style during drag
   const connectionLineStyle = {
