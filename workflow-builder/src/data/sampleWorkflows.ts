@@ -45,7 +45,7 @@ export const sampleWorkflows: Workflow[] = [
               id: 'cond-7',
               dataSource: 'CRM',
               collection: 'contacts',
-              field: 'points_balance',
+              field: 'point_balance',
               fieldType: 'number',
               operator: 'greater_than',
               value: 1000
