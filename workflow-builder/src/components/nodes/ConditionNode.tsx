@@ -5,6 +5,40 @@ import { Icons } from '../../utils/icons';
 import type { NodeData } from '../../types/workflow.types';
 import { getOperatorLabel } from '../../utils/dataSourceFields';
 
+// Helper function to format date values for display
+const formatDateValue = (value: string | number, dateValueType?: 'dynamic' | 'specific'): string => {
+  const valueStr = String(value);
+  
+  // Handle dynamic dates
+  if (dateValueType === 'dynamic' || !dateValueType) {
+    const dynamicDateLabels: Record<string, string> = {
+      'today': 'Today',
+      'yesterday': 'Yesterday',
+      'tomorrow': 'Tomorrow',
+      'start_of_week': 'Start of this week',
+      'end_of_week': 'End of this week',
+      'start_of_month': 'Start of this month',
+      'end_of_month': 'End of this month',
+      'start_of_year': 'Start of this year',
+      'end_of_year': 'End of this year'
+    };
+    
+    // If it's a known dynamic date, return the label
+    if (dynamicDateLabels[valueStr]) {
+      return dynamicDateLabels[valueStr];
+    }
+  }
+  
+  // Handle specific dates or fallback
+  const date = new Date(valueStr);
+  if (!isNaN(date.getTime())) {
+    return date.toLocaleDateString();
+  }
+  
+  // If all else fails, return the raw value
+  return valueStr;
+};
+
 const ConditionNode = memo(({ data }: NodeProps) => {
   const nodeData = data as NodeData;
   return (
@@ -98,7 +132,7 @@ const ConditionNode = memo(({ data }: NodeProps) => {
                         {!['is_empty', 'is_not_empty'].includes(condition.operator) && condition.value !== undefined && (
                           <Text as="span" variant="bodySm" fontWeight="semibold">
                             {condition.fieldType === 'date' 
-                              ? new Date(String(condition.value)).toLocaleDateString()
+                              ? formatDateValue(condition.value, condition.dateValueType)
                               : String(condition.value)}
                           </Text>
                         )}
