@@ -164,6 +164,7 @@ const PropertiesSidebar: React.FC = () => {
             onChange={(value) => handleConfigChange('merchantId', value)}
             autoComplete="off"
             helpText="Unique identifier for the merchant account"
+            readOnly
           />
           <Select
             label="Data Source"

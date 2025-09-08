@@ -284,7 +284,7 @@ export const sampleWorkflows: Workflow[] = [
               id: 'cond-10',
               dataSource: 'CRM',
               collection: 'contacts',
-              field: 'birthday',
+              field: 'date_of_birth',
               fieldType: 'date',
               operator: 'equals',
               value: 'today'

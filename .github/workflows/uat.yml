@@ -1,0 +1,63 @@
+name: CI Frontend UAT
+
+on:
+  push:
+    branches: 
+    - main
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: ${{ github.repository }}-frontend-${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  prepare-env:
+    uses: Rocket-Innovation/github-reusable-workflows/.github/workflows/reusable-prepare-env.yaml@feat/argocd-pipeline
+    with:
+      env: uat
+
+  build-and-deploy:
+    needs:
+    - prepare-env
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Configure AWS credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::249281617777:role/rocket-uat-gtihub-oidc
+          aws-region: ap-southeast-1
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: workflow-builder/package-lock.json
+          
+      - name: Install dependencies
+        run: |
+          cd workflow-builder
+          npm ci
+          
+      - name: Build for UAT
+        run: |
+          cd workflow-builder
+          npm run build:uat
+          
+      - name: Deploy to S3
+        run: |
+          cd workflow-builder
+          aws s3 sync dist/ s3://rocket-mca-frontend-uat --delete --exclude "*.map"
+          
+      - name: Invalidate CloudFront
+        run: |
+          aws cloudfront create-invalidation --distribution-id EFJ0YRLCDZ0BQ --paths "/*"
+          
+      - name: Deployment complete
+        run: echo "Frontend UAT deployment completed successfully!"
