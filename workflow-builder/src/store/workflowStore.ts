@@ -248,6 +248,11 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
         status: currentState.currentWorkflow?.status || 'draft'
       };
       
+      // Console log the workflow JSON when saving
+      console.log('=== SAVING WORKFLOW ===');
+      console.log('Workflow JSON:', JSON.stringify(workflow, null, 2));
+      console.log('=======================');
+      
       // Transform workflow to backend format
       const backendWorkflow = WorkflowTransformer.transformToBackend(workflow);
       
@@ -314,6 +319,11 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
           updatedAt: new Date().toISOString(),
           status: currentState.currentWorkflow?.status || 'draft'
         };
+        
+        // Console log the workflow JSON when saving (fallback)
+        console.log('=== SAVING WORKFLOW (FALLBACK) ===');
+        console.log('Workflow JSON:', JSON.stringify(workflow, null, 2));
+        console.log('=================================');
         
         const existingIndex = currentState.workflows.findIndex(w => w.id === workflow.id);
         let workflows;

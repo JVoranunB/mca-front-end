@@ -536,4 +536,128 @@ export const sampleWorkflows: Workflow[] = [
       }
     ]
   },
+  {
+    id: 'sample-11',
+    name: 'Customer Product Purchase Follow-up',
+    description: 'Target customers who  bought specific product in past 30 days',
+    triggerType: 'event-based',
+    status: 'active',
+    createdAt: '2024-01-16T14:00:00Z',
+    updatedAt: '2024-01-16T14:00:00Z',
+    nodes: [
+      {
+        id: 'start-11',
+        type: 'start',
+        position: { x: 100, y: 300 },
+        data: {
+          label: 'Order Processing Trigger',
+          type: 'start',
+          description: 'Triggers when a new order is processed',
+          status: 'active',
+          config: {
+            label: 'Order Processing Trigger',
+            description: 'Monitor new order events from CRM',
+            merchantId: 'SHOP001',
+            dataSource: 'CRM',
+            triggerCategory: 'event',
+            eventType: 'order_created',
+            changeStreamEnabled: true,
+            collections: ['orders', 'order_items', 'contacts']
+          }
+        }
+      },
+      {
+        id: 'condition-11',
+        type: 'condition',
+        position: { x: 700, y: 300 },
+        data: {
+          label: 'Product PROD-XX123 in past 30 days',
+          type: 'condition',
+          description: 'Check if purchased specific product in past 30 days',
+          status: 'active',
+          conditions: [
+            {
+              id: 'cond-11a',
+              dataSource: 'CRM',
+              collection: 'orders',
+              field: 'created_date',
+              fieldType: 'date',
+              operator: 'date_before',
+              value: '30_days',
+              dateType: 'relative',
+              periodNumber: 30,
+              periodUnit: 'days',
+              logicalOperator: 'AND'
+            },
+            {
+              id: 'cond-11b',
+              dataSource: 'CRM',
+              collection: 'order_items',
+              field: 'product_name',
+              fieldType: 'text',
+              operator: 'equals',
+              value: 'PROD-XX123'
+            }
+          ]
+        }
+      },
+      {
+        id: 'action-35',
+        type: 'action',
+        position: { x: 1300, y: 250 },
+        data: {
+          label: 'Send VIP email',
+          type: 'action',
+          description: 'Send detailed VIP program information email',
+          status: 'active',
+          config: {
+            emailTemplate: 'vip-program',
+            subject: 'Welcome to VIP Program - Exclusive Benefits Await!',
+            emailField: 'email',
+            body: 'Dear ${customer_name}, congratulations on reaching VIP status with ${total_sales_30days} in purchases! You now have access to: priority support, exclusive discounts, early product access, and a dedicated account manager.',
+            includeCustomerData: true
+          }
+        }
+      },        
+      {
+        id: 'log-11',
+        type: 'step',
+        position: { x: 1300, y: 700 },
+        data: {
+          label: 'Log conditions not met',
+          type: 'step',
+          description: 'Log when customer does not meet VIP criteria',
+          status: 'active',
+          config: {
+            message: 'Customer ${customer_name} does not meet VIP criteria - Sales: ${total_sales_30days}, Product PROD-XX123 purchased: false',
+            level: 'info'
+          }
+        }
+      }
+    ],
+    edges: [
+      {
+        id: 'e58',
+        source: 'start-11',
+        target: 'condition-11',
+        animated: true
+      },
+      {
+        id: 'e60-then',
+        source: 'condition-11',
+        target: 'action-35',
+        sourceHandle: 'then',
+        animated: true,
+        label: 'Then'
+      },  
+      {
+        id: 'e63-otherwise',
+        source: 'condition-11',
+        target: 'log-11',
+        sourceHandle: 'otherwise',
+        animated: true,
+        label: 'Otherwise'
+      }
+    ]
+  }
 ];

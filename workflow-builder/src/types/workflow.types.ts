@@ -8,13 +8,15 @@ export interface WorkflowCondition {
   collection?: string;
   field: string;
   fieldType: 'text' | 'number' | 'date' | 'select';
-  operator: 'equals' | 'not_equals' | 'greater_than' | 'less_than' | 'greater_equal' | 'less_equal' | 'contains' | 'not_contains' | 'date_before' | 'date_after' | 'is_empty' | 'is_not_empty';
+  operator: 'equals' | 'not_equals' | 'greater_than' | 'less_than' | 'greater_equal' | 'less_equal' | 'contains' | 'not_contains' | 'date_before' | 'date_after' | 'date_between' | 'date_not_between' | 'is_empty' | 'is_not_empty';
   value: string | number;
   selectOptions?: string[];
   logicalOperator?: 'AND' | 'OR';
-  dateType?: 'today' | 'specific' | 'relative';
+  dateType?: 'today' | 'specific' | 'relative' | 'range';
   periodNumber?: number;
   periodUnit?: 'days' | 'weeks' | 'months' | 'years';
+  dateFrom?: string;
+  dateTo?: string;
 }
 
 export interface StartConfig {

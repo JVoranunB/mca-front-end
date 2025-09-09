@@ -584,16 +584,16 @@ const PropertiesSidebar: React.FC = () => {
     );
   };
   
-  const getOperatorOptions = (fieldType?: string) => {
+  const getOperatorOptions = (fieldType?: string, dateType?: string) => {
     const baseOptions = [
-      { label: 'Equals', value: 'equals' },
-      { label: 'Not equals', value: 'not_equals' },
       { label: 'Is empty', value: 'is_empty' },
       { label: 'Is not empty', value: 'is_not_empty' }
     ];
     
     if (fieldType === 'number') {
       return [
+        { label: 'Equals', value: 'equals' },
+        { label: 'Not equals', value: 'not_equals' },
         ...baseOptions,
         { label: 'Greater than', value: 'greater_than' },
         { label: 'Less than', value: 'less_than' },
@@ -604,6 +604,8 @@ const PropertiesSidebar: React.FC = () => {
     
     if (fieldType === 'text') {
       return [
+        { label: 'Equals', value: 'equals' },
+        { label: 'Not equals', value: 'not_equals' },
         ...baseOptions,
         { label: 'Contains', value: 'contains' },
         { label: 'Does not contain', value: 'not_contains' }
@@ -611,14 +613,23 @@ const PropertiesSidebar: React.FC = () => {
     }
     
     if (fieldType === 'date') {
+      // Always show all date operators for date fields, regardless of dateType
       return [
+        { label: 'Equals', value: 'equals' },
+        { label: 'Not equals', value: 'not_equals' },
         ...baseOptions,
         { label: 'Before', value: 'date_before' },
-        { label: 'After', value: 'date_after' }
+        { label: 'After', value: 'date_after' },
+        { label: 'Between', value: 'date_between' },
+        { label: 'Not Between', value: 'date_not_between' }
       ];
     }
     
-    return baseOptions;
+    return [
+      { label: 'Equals', value: 'equals' },
+      { label: 'Not equals', value: 'not_equals' },
+      ...baseOptions
+    ];
   };
   
   return (
@@ -731,12 +742,35 @@ const PropertiesSidebar: React.FC = () => {
                                   value={condition.field}
                                   onChange={(value) => {
                                     const field = fields.find((f: DataSourceField) => f.key === value);
-                                    updateCondition(condition.id, { 
+                                    const updates: Partial<WorkflowCondition> = {
                                       field: value,
                                       fieldType: field?.type || 'text',
                                       selectOptions: field?.options,
                                       value: ''
-                                    });
+                                    };
+                                    
+                                    // Set smart defaults for date fields
+                                    if (field?.type === 'date') {
+                                      if (condition.operator === 'equals' || condition.operator === 'not_equals') {
+                                        updates.dateType = 'today';
+                                        updates.value = 'today';
+                                      } else if (['date_before', 'date_after'].includes(condition.operator)) {
+                                        updates.dateType = 'relative';
+                                        updates.periodNumber = 1;
+                                        updates.periodUnit = 'days';
+                                        updates.value = '1_days';
+                                      } else if (['date_between', 'date_not_between'].includes(condition.operator)) {
+                                        updates.dateType = 'range';
+                                        updates.value = 'range';
+                                        updates.dateFrom = '';
+                                        updates.dateTo = '';
+                                      } else {
+                                        updates.dateType = 'today';
+                                        updates.value = 'today';
+                                      }
+                                    }
+                                    
+                                    updateCondition(condition.id, updates);
                                   }}
                                   placeholder="Select field"
                                 />
@@ -745,11 +779,37 @@ const PropertiesSidebar: React.FC = () => {
                               {condition.field && (
                                 <Select
                                   label="Operator"
-                                  options={getOperatorOptions(selectedField?.type)}
+                                  options={getOperatorOptions(selectedField?.type, condition.dateType)}
                                   value={condition.operator}
-                                  onChange={(value) => updateCondition(condition.id, { 
-                                    operator: value as WorkflowCondition['operator']
-                                  })}
+                                  onChange={(value) => {
+                                    const newOperator = value as WorkflowCondition['operator'];
+                                    const updates: Partial<WorkflowCondition> = { operator: newOperator };
+                                    
+                                    // Reset values when switching between different operator types
+                                    if (selectedField?.type === 'date') {
+                                      if (['date_between', 'date_not_between'].includes(newOperator)) {
+                                        // Range operators
+                                        updates.dateType = 'range';
+                                        updates.value = 'range';
+                                        updates.dateFrom = '';
+                                        updates.dateTo = '';
+                                      } else if (['date_before', 'date_after'].includes(newOperator)) {
+                                        // Check current dateType - if it's range, switch to relative
+                                        if (condition.dateType === 'range') {
+                                          updates.dateType = 'relative';
+                                          updates.value = `${condition.periodNumber || 1}_${condition.periodUnit || 'days'}`;
+                                        }
+                                      } else if (['equals', 'not_equals'].includes(newOperator)) {
+                                        // Check current dateType - if it's range or relative, switch to specific
+                                        if (['range', 'relative'].includes(condition.dateType || '')) {
+                                          updates.dateType = 'specific';
+                                          updates.value = '';
+                                        }
+                                      }
+                                    }
+                                    
+                                    updateCondition(condition.id, updates);
+                                  }}
                                 />
                               )}
                               
@@ -767,16 +827,69 @@ const PropertiesSidebar: React.FC = () => {
                                     <>
                                       <Select
                                         label="Date Type"
-                                        options={[
-                                          { label: 'Today', value: 'today' },
-                                          { label: 'Specific Date', value: 'specific' },
-                                          { label: 'Relative Period', value: 'relative' }
-                                        ]}
+                                        options={(() => {
+                                          if (['equals', 'not_equals'].includes(condition.operator)) {
+                                            return [
+                                              { label: 'Today', value: 'today' },
+                                              { label: 'Specific Date', value: 'specific' }
+                                            ];
+                                          } else if (['date_before', 'date_after'].includes(condition.operator)) {
+                                            return [
+                                              { label: 'Today', value: 'today' },
+                                              { label: 'Specific Date', value: 'specific' },
+                                              { label: 'Relative Period', value: 'relative' }
+                                            ];
+                                          } else if (['date_between', 'date_not_between'].includes(condition.operator)) {
+                                            return [
+                                              { label: 'Date Range', value: 'range' }
+                                            ];
+                                          } else {
+                                            // Default - show all options
+                                            return [
+                                              { label: 'Today', value: 'today' },
+                                              { label: 'Specific Date', value: 'specific' },
+                                              { label: 'Relative Period', value: 'relative' },
+                                              { label: 'Date Range', value: 'range' }
+                                            ];
+                                          }
+                                        })()}
                                         value={condition.dateType || 'specific'}
-                                        onChange={(value) => updateCondition(condition.id, { 
-                                          dateType: value as 'today' | 'specific' | 'relative',
-                                          value: value === 'today' ? 'today' : value === 'relative' ? `${condition.periodNumber || 1}_${condition.periodUnit || 'days'}` : ''
-                                        })}
+                                        onChange={(value) => {
+                                          const newDateType = value as 'today' | 'specific' | 'relative' | 'range';
+                                          const newValue = value === 'today' ? 'today' : value === 'relative' ? `${condition.periodNumber || 1}_${condition.periodUnit || 'days'}` : value === 'range' ? 'range' : '';
+                                          
+                                          // Reset operator to valid default for new date type
+                                          let newOperator = condition.operator;
+                                          const validOperators = getOperatorOptions(selectedField?.type, newDateType).map(op => op.value);
+                                          if (!validOperators.includes(condition.operator)) {
+                                            if (newDateType === 'range') {
+                                              newOperator = 'date_between';
+                                            } else if (newDateType === 'relative') {
+                                              newOperator = 'date_before';
+                                            } else if (newDateType === 'today') {
+                                              newOperator = 'equals';
+                                            } else {
+                                              newOperator = 'equals';
+                                            }
+                                          }
+                                          
+                                          // Additional updates based on dateType
+                                          const additionalUpdates: Partial<WorkflowCondition> = {};
+                                          if (newDateType === 'range') {
+                                            additionalUpdates.dateFrom = condition.dateFrom || '';
+                                            additionalUpdates.dateTo = condition.dateTo || '';
+                                          } else if (newDateType === 'relative') {
+                                            additionalUpdates.periodNumber = condition.periodNumber || 1;
+                                            additionalUpdates.periodUnit = condition.periodUnit || 'days';
+                                          }
+                                          
+                                          updateCondition(condition.id, { 
+                                            dateType: newDateType,
+                                            value: newValue,
+                                            operator: newOperator as WorkflowCondition['operator'],
+                                            ...additionalUpdates
+                                          });
+                                        }}
                                       />
                                       
                                       {condition.dateType === 'specific' && (
@@ -820,6 +933,34 @@ const PropertiesSidebar: React.FC = () => {
                                               periodUnit: value as 'days' | 'weeks' | 'months' | 'years',
                                               value: `${condition.periodNumber || 1}_${value}`
                                             })}
+                                          />
+                                        </>
+                                      )}
+                                      
+                                      {condition.dateType === 'range' && (
+                                        <>
+                                          <TextField
+                                            label="From Date"
+                                            type="date"
+                                            value={String(condition.dateFrom || '')}
+                                            onChange={(value) => updateCondition(condition.id, { 
+                                              dateFrom: value,
+                                              value: 'range'
+                                            })}
+                                            autoComplete="off"
+                                            helpText="Start date of the range"
+                                          />
+                                          
+                                          <TextField
+                                            label="To Date"
+                                            type="date"
+                                            value={String(condition.dateTo || '')}
+                                            onChange={(value) => updateCondition(condition.id, { 
+                                              dateTo: value,
+                                              value: 'range'
+                                            })}
+                                            autoComplete="off"
+                                            helpText="End date of the range"
                                           />
                                         </>
                                       )}

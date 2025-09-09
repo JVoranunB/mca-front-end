@@ -35,12 +35,12 @@ A professional workflow automation builder application inspired by Shopify Flow,
 ## Installation
 
 1. Clone the repository
-2. Navigate to the project directory:
+2. Navigate to the **root project directory**:
 ```bash
-cd workflow-builder
+cd mca-front-end
 ```
 
-3. Install dependencies:
+3. Install dependencies (uses npm workspaces):
 ```bash
 npm install
 ```
@@ -50,10 +50,12 @@ npm install
 npm run dev
 ```
 
-5. Open your browser and navigate to:
+5. Open your browser and navigate to the URL shown in terminal (typically):
 ```
 http://localhost:5173
 ```
+
+**Note**: This project uses npm workspaces. All commands should be run from the root directory, not the `workflow-builder/` subdirectory.
 
 ## Usage Guide
 
@@ -100,8 +102,13 @@ http://localhost:5173
 ## Project Structure
 
 ```
-workflow-builder/
-├── src/
+mca-front-end/                    # Root project directory
+├── node_modules/                 # All dependencies (npm workspaces)
+├── package.json                  # Workspace configuration
+├── package-lock.json             # Dependency lockfile
+├── .github/workflows/            # GitHub Actions CI/CD
+└── workflow-builder/             # Main application workspace
+    ├── src/
 │   ├── components/
 │   │   ├── nodes/          # Custom React Flow node components
 │   │   │   ├── StartNode.tsx
@@ -156,10 +163,16 @@ workflow-builder/
 
 ### Available Scripts
 
+**Root Level Commands** (run from `mca-front-end/`):
 - `npm run dev` - Start development server
-- `npm run build` - Build for production
+- `npm run build:uat` - Build for UAT environment
+- `npm run build:production` - Build for production
+- `npm run deploy:uat` - Deploy to UAT (requires AWS credentials)
+- `npm run deploy:production` - Deploy to production (requires AWS credentials)
+
+**Workspace Commands** (available via root):
+- `npm run lint` - Run ESLint (in workflow-builder)
 - `npm run preview` - Preview production build
-- `npm run lint` - Run ESLint
 
 ### Extending the Application
 
@@ -197,6 +210,34 @@ The application fully integrates Shopify's Polaris design system:
 
 MIT
 
+## Deployment
+
+### GitHub Actions CI/CD
+
+The project includes automated deployment via GitHub Actions:
+
+- **UAT Deployment**: Triggers on push to `main` branch
+- **Production Deployment**: Manual trigger or tag-based
+- **AWS Integration**: Deploys to S3 + CloudFront
+
+### Environment Configuration
+
+- `.env.uat` - UAT environment variables
+- `.env.production` - Production environment variables
+- Vite build modes handle environment switching
+
+### Manual Deployment
+
+```bash
+# UAT deployment
+npm run build:uat
+npm run deploy:uat
+
+# Production deployment
+npm run build:production
+npm run deploy:production
+```
+
 ## Recent Updates
 
 ### New Features
@@ -208,11 +249,21 @@ MIT
 - ✅ Removed minimap for cleaner interface
 - ✅ Start node auto-creation
 - ✅ Workflow list page with filters and search
+- ✅ GitHub Actions CI/CD pipeline
+- ✅ npm workspaces structure
+- ✅ AWS S3 + CloudFront deployment
+
+### Infrastructure Improvements
+- ✅ Fixed GitHub Actions deployment configuration
+- ✅ Proper npm workspace setup with single node_modules
+- ✅ Environment-specific builds (UAT/Production)
+- ✅ Automated dependency caching in CI
 
 ### Removed Features
 - ❌ "Issue reward" action (removed)
 - ❌ "Update customer data" action (removed)
 - ❌ Minimap (removed for cleaner UI)
+- ❌ Duplicate node_modules folders
 
 ## Future Enhancements
 
