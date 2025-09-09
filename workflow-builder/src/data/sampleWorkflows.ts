@@ -583,7 +583,7 @@ export const sampleWorkflows: Workflow[] = [
               field: 'created_date',
               fieldType: 'date',
               operator: 'date_before',
-              value: 'relative',
+              value: '30_days',
               dateType: 'relative',
               periodNumber: 30,
               periodUnit: 'days',
@@ -618,47 +618,7 @@ export const sampleWorkflows: Workflow[] = [
             includeCustomerData: true
           }
         }
-      },
-      {
-        id: 'action-36',
-        type: 'action',
-        position: { x: 1300, y: 400 },
-        data: {
-          label: 'Add VIP tags',
-          type: 'action',
-          description: 'Tag customer as VIP and high-value segment',
-          status: 'active',
-          config: {
-            tags: ['VIP Customer', 'High Value 20K+', 'Product XX Buyer', 'Premium Segment'],
-            updateCustomerProfile: true
-          }
-        }
-      },
-      {
-        id: 'action-37',
-        type: 'action',
-        position: { x: 1300, y: 550 },
-        data: {
-          label: 'Webhook to CRM',
-          type: 'action',
-          description: 'Notify CRM system to assign dedicated account manager',
-          status: 'active',
-          config: {
-            webhookUrl: 'https://crm.example.com/api/assign-account-manager',
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': 'Bearer ${api_token}'
-            },
-            body: {
-              customer_id: '${customer_id}',
-              total_sales: '${total_sales_30days}',
-              product_purchased: 'PROD-XX123',
-              vip_tier: 'platinum'
-            }
-          }
-        }
-      },
+      },        
       {
         id: 'log-11',
         type: 'step',
@@ -689,23 +649,7 @@ export const sampleWorkflows: Workflow[] = [
         sourceHandle: 'then',
         animated: true,
         label: 'Then'
-      },
-      {
-        id: 'e61-then',
-        source: 'condition-11',
-        target: 'action-36',
-        sourceHandle: 'then',
-        animated: true,
-        label: 'Then'
-      },
-      {
-        id: 'e62-then',
-        source: 'condition-11',
-        target: 'action-37',
-        sourceHandle: 'then',
-        animated: true,
-        label: 'Then'
-      },
+      },  
       {
         id: 'e63-otherwise',
         source: 'condition-11',
