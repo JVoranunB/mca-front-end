@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Structure
 
-This is a React-based workflow automation builder POC that mimics Shopify Flow. The main application lives in the `workflow-builder/` directory.
+This is a React-based workflow automation builder POC that mimics Shopify Flow. The project uses **npm workspaces** with the main application in the `workflow-builder/` directory and dependencies managed at the root level.
 
 ### Key Architecture Components
 
@@ -41,20 +41,39 @@ src/
 
 ## Development Commands
 
-**Working Directory**: Always run commands from `workflow-builder/` directory.
+**Working Directory**: Always run commands from **root directory** (`mca-front-end/`), NOT from `workflow-builder/`.
 
 ```bash
-cd workflow-builder
+# Installation (uses npm workspaces)
+npm install          # Install all dependencies to root node_modules
 
 # Development
-npm run dev          # Start development server (localhost:5173)
-npm run build        # Build for production (TypeScript + Vite)
-npm run preview      # Preview production build
-npm run lint         # Run ESLint
+npm run dev          # Start development server (automatically finds available port)
+npm run build:uat    # Build for UAT environment  
+npm run build:production # Build for production environment
+npm run deploy:uat   # Deploy to UAT (requires AWS credentials)
+npm run deploy:production # Deploy to production (requires AWS credentials)
 
-# Installation
-npm install          # Install dependencies
+# Workspace-specific commands (run from root)
+cd workflow-builder && npm run lint    # Run ESLint
+cd workflow-builder && npm run preview # Preview production build
 ```
+
+## npm Workspaces Structure
+
+```
+mca-front-end/                    # Root workspace
+├── node_modules/                 # All dependencies (centralized)
+├── package.json                  # Workspace configuration + deployment scripts
+├── package-lock.json             # Single lockfile for entire project
+├── .github/workflows/uat.yml     # GitHub Actions CI/CD
+└── workflow-builder/             # Application workspace
+    ├── package.json              # App-specific config + build scripts
+    ├── src/                      # Application source code
+    └── dist/                     # Build output (created by Vite)
+```
+
+**Important**: Do NOT create duplicate `node_modules` in `workflow-builder/`. All dependencies are hoisted to the root.
 
 ## State Management Architecture
 
@@ -156,3 +175,54 @@ Complete Shopify Polaris integration:
 - Toast notifications for user feedback
 - Links for clickable workflow names
 - Consistent button and icon usage
+
+## Deployment & CI/CD
+
+### GitHub Actions Configuration
+
+The project includes automated deployment via GitHub Actions (`.github/workflows/uat.yml`):
+
+- **Trigger**: Push to `main` branch
+- **Build Process**: 
+  1. Install dependencies from root `package-lock.json`
+  2. Run `npm run build:uat` (from root, navigates to workflow-builder)
+  3. Deploy `workflow-builder/dist/` to AWS S3
+  4. Invalidate CloudFront distribution
+- **AWS Integration**: Uses OIDC for secure credential management
+- **Environment**: UAT environment with specific S3 bucket and CloudFront distribution
+
+### Deployment Commands
+
+```bash
+# From root directory
+npm run build:uat           # Build for UAT environment
+npm run build:production    # Build for production environment
+npm run deploy:uat          # Build + Deploy to UAT S3 + Invalidate CloudFront
+npm run deploy:production   # Build + Deploy to Production S3 + Invalidate CloudFront
+```
+
+### Environment Configuration
+
+- `.env.uat` - UAT environment variables
+- `.env.production` - Production environment variables  
+- Vite build modes automatically load correct environment files
+
+### Common Deployment Issues
+
+1. **Missing Dependencies**: Ensure `npm install` runs from root directory
+2. **Build Path**: GitHub Actions builds from root but deploys `workflow-builder/dist/`
+3. **Cache Configuration**: GitHub Actions caches using root `package-lock.json`
+4. **Port Conflicts**: Dev server automatically finds available ports (5173, 5174, 5175, etc.)
+
+### AWS Resources
+
+- **UAT S3 Bucket**: `rocket-mca-frontend-uat`
+- **UAT CloudFront ID**: `EFJ0YRLCDZ0BQ`
+- **IAM Role**: `rocket-uat-gtihub-oidc` (OIDC-based authentication)
+- **Region**: `ap-southeast-1`
+
+# deployment-reminders
+This project uses npm workspaces - ALWAYS run commands from the root directory.
+The GitHub Actions configuration has been fixed - dependencies install from root, builds run from workspace.
+Do NOT create duplicate node_modules folders - only the root node_modules should exist.
+Dev server will auto-select available ports (5173, 5174, 5175, etc.) to avoid conflicts.
