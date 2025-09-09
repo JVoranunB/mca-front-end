@@ -584,7 +584,7 @@ const PropertiesSidebar: React.FC = () => {
     );
   };
   
-  const getOperatorOptions = (fieldType?: string, dateType?: string) => {
+  const getOperatorOptions = (fieldType?: string) => {
     const baseOptions = [
       { label: 'Is empty', value: 'is_empty' },
       { label: 'Is not empty', value: 'is_not_empty' }
@@ -779,7 +779,7 @@ const PropertiesSidebar: React.FC = () => {
                               {condition.field && (
                                 <Select
                                   label="Operator"
-                                  options={getOperatorOptions(selectedField?.type, condition.dateType)}
+                                  options={getOperatorOptions(selectedField?.type)}
                                   value={condition.operator}
                                   onChange={(value) => {
                                     const newOperator = value as WorkflowCondition['operator'];
@@ -860,7 +860,7 @@ const PropertiesSidebar: React.FC = () => {
                                           
                                           // Reset operator to valid default for new date type
                                           let newOperator = condition.operator;
-                                          const validOperators = getOperatorOptions(selectedField?.type, newDateType).map(op => op.value);
+                                          const validOperators = getOperatorOptions(selectedField?.type).map(op => op.value);
                                           if (!validOperators.includes(condition.operator)) {
                                             if (newDateType === 'range') {
                                               newOperator = 'date_between';

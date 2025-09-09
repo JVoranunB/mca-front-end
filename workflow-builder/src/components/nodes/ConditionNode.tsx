@@ -6,8 +6,13 @@ import type { NodeData } from '../../types/workflow.types';
 import { getOperatorLabel } from '../../utils/dataSourceFields';
 
 // Helper function to format date values for display  
-const formatDateValue = (value: string | number, dateType?: 'today' | 'specific' | 'relative'): string => {
+const formatDateValue = (value: string | number, dateType?: 'today' | 'specific' | 'relative' | 'range'): string => {
   const valueStr = String(value);
+  
+  // Handle range dates
+  if (dateType === 'range') {
+    return 'Date Range';
+  }
   
   // Handle dynamic dates (today and relative)
   if (dateType === 'today' || dateType === 'relative' || !dateType) {
