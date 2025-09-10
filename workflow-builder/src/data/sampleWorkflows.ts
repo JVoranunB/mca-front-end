@@ -176,15 +176,18 @@ export const sampleWorkflows: Workflow[] = [
       {
         id: 'action-2',
         type: 'action',
-        position: { x: 1300, y: 450 },
+        position: { x: 1300, y: 380 },
         data: {
-          label: 'Add to VIP segment',
+          label: 'Send Slack notification',
           type: 'action',
-          description: 'Tag customer as VIP for future campaigns',
+          description: 'Notify team about high-value customer order',
           status: 'active',
           config: {
-            tags: ['VIP', 'High Value Customer'],
-            updateCustomerProfile: true
+            message: '🎉 High-value customer alert! ${customer_name} just placed a ${order_total} order. Consider reaching out for personalized service.',
+            channel: '#customer-success',
+            username: 'Order Bot',
+            includeCustomerData: true,
+            attachments: []
           }
         }
       },

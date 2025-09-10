@@ -1,36 +1,45 @@
 {
-  "workflow_id": "wf_12345",
-  "name": "Contact Loyalty Program Enrollment",
-  "version": "1.0",
-  "status": "active",
-  "actions": [
-    {
-      "action_id": "contact-enrollment-trigger",
-      "key": "a1",
-      "type": "trigger",
-      "config": {
-        "event": "user_info_updated",
-        "conditions": "ctx.contacts.point_balance < 1000 && ctx.contacts.total_sale_amount >= 1000"
-      },
-      "mapper": null
-    },
-    {
-      "action_id": "slack-action",
-      "key": "a2", 
-      "type": "action",      
-      "mapper": {
-        "value": {
-          "mode": "expression",
-          "value": "'🎉 Loyalty enrollment triggered for ' + a1.output.contact.email + ' (Balance: ' + a1.output.contact.point_balance + ', Total Sales: $' + a1.output.contact.total_sale_amount + ')'"
+    "actions": [
+        {
+            "action_id": "contact-enrollment-trigger",
+            "key": "a1",
+            "type": "trigger",
+            "config": {
+                "event": "user_info_updated",
+                "condition":"true"
+            }
+        }, 
+        {
+            "action_id": "query-action",
+            "key": "a2",
+            "mapper": {
+                "query": {
+                    "mode": "expression",
+                    "value": "{\"users\":{\"limit\":5,\"select\":[\"user_id\",\"first_name\",\"last_name\",\"points_balance\",\"id_card\"],\"where\":{\"and\":[{\"status\":\"ACTIVE\"},{\"points_balance\":{\"\\u003e\":100}},{\"user_id\":\"684bc1b694537bbbc606660a\"}]}}}"
+                }
+            }
+        },
+        {
+            "action_id": "slack-action",
+            "key": "a3",
+            "mapper": {
+                "value": {
+                    "mode": "expression",
+                    "value": "'Send Line notification for total sale greater than 20000 bth to user id is ' + builtin.string(a2.output.value.id) + ' ' + builtin.string(a2.output.value.first_name) + ' ' + builtin.string(a2.output.value.last_name)'"
+                }
+            }
         }
-      }      
-    }
-  ],
-  "peers": [
-    {
-      "parent_key": "a1",
-      "child_key": "a2",
-      "meta_output": "triggered"      
-    }
-  ] 
+    ],
+    "peers": [
+        {
+            "parent_key": "a1",
+            "meta_output": "triggered",
+            "child_key": "a2"
+        },
+        {
+            "parent_key": "a2",
+            "meta_output": "success",
+            "child_key": "a3"
+        }
+    ]
 }
