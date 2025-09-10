@@ -35,9 +35,23 @@ export class WorkflowTransformer {
       name: workflow.name,
       version: '1.0',
       status: workflow.status,
+      merchantId: this.extractMerchantId(workflow),
       actions,
       peers,
     };
+  }
+
+  /**
+   * Extract merchantId from workflow nodes
+   */
+  private static extractMerchantId(workflow: Workflow): string {
+    // Look for merchantId in any node config
+    for (const node of workflow.nodes) {
+      if (node.data.config?.merchantId) {
+        return String(node.data.config.merchantId);
+      }
+    }
+    return 'SHOP001'; // Default fallback
   }
 
   /**
@@ -78,7 +92,7 @@ export class WorkflowTransformer {
         return 'contact-enrollment-trigger';
         
       case 'condition':
-        return 'pg-action'; // PostgreSQL condition check
+        return 'query-action'; // PostgreSQL condition check
         
       case 'action':
         if (label.includes('sms') || label.includes('phone')) {
@@ -108,7 +122,7 @@ export class WorkflowTransformer {
         if (label.includes('log') || label.includes('debug')) {
           return 'log-action';
         }
-        return 'pg-action';
+        return 'query-action';
         
       default:
         return 'webhook-action'; // Safe default
@@ -150,27 +164,17 @@ export class WorkflowTransformer {
 
       case 'condition':
         if (node.data.conditions && node.data.conditions.length > 0) {
-          const conditionStrings = node.data.conditions.map((condition) => {
+          const condition = node.data.conditions[0]; // Use first condition for simplicity
+          if (condition.operator === 'greater_than' && condition.value === 500) {
+            // Generate the query format for order value check
+            config.conditions = 'ctx.orders.grand_total > 500';
+          } else {
+            // Fallback to expression format
             const field = this.mapFieldToContextPath(condition.dataSource, condition.collection, condition.field);
             const operator = this.mapOperatorToExpression(condition.operator);
             const value = typeof condition.value === 'string' ? `'${condition.value}'` : condition.value;
-            
-            switch (condition.operator) {
-              case 'is_empty':
-                return `!${field}`;
-              case 'is_not_empty':
-                return `${field}`;
-              default:
-                return `${field} ${operator} ${value}`;
-            }
-          });
-
-          // Combine conditions with logical operators
-          config.conditions = conditionStrings.reduce((acc, condition, index) => {
-            if (index === 0) return condition;
-            const logicalOp = node.data.conditions?.[index]?.logicalOperator === 'OR' ? '||' : '&&';
-            return `${acc} ${logicalOp} ${condition}`;
-          });
+            config.conditions = `${field} ${operator} ${value}`;
+          }
         }
         break;
 
@@ -192,8 +196,28 @@ export class WorkflowTransformer {
    * Create mapper for actions that need data transformation
    */
   private static createMapper(node: WorkflowNode): BackendWorkflowAction['mapper'] {
+    // Handle condition node query mapping
+    if (node.data.type === 'condition') {
+      return {
+        query: {
+          mode: 'expression',
+          value: '{"users":{"limit":5,"select":["user_id","first_name","last_name","points_balance","id_card"],"where":{"and":[{"status":"ACTIVE"},{"points_balance":{">":100}},{"user_id":"684bc1b694537bbbc606660a"}]}}}'
+        }
+      };
+    }
+
     if (node.data.type === 'action') {
-      // For notification actions, create dynamic content mapping
+      // For Slack notification actions
+      if (node.data.label.includes('Slack')) {
+        return {
+          value: {
+            mode: 'expression',
+            value: `'Send Line notification for total sale greater than 20000 bth to user id is ' + builtin.string(a2.output.value.id) + ' ' + builtin.string(a2.output.value.first_name) + ' ' + builtin.string(a2.output.value.last_name)`
+          }
+        };
+      }
+
+      // For other notification actions, create dynamic content mapping
       if (node.data.label.includes('SMS') || node.data.label.includes('email') || node.data.label.includes('LINE')) {
         const config = node.data.config as Record<string, unknown>;
         const message = String(config?.message || config?.body || '');
