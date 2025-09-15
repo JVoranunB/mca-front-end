@@ -93,20 +93,20 @@ export const sampleWorkflows: Workflow[] = [
         animated: true
       },
       {
-        id: 'e46-then',
+        id: 'e46-yes',
         source: 'condition-7',
         target: 'action-26',
-        sourceHandle: 'then',
+        sourceHandle: 'yes',
         animated: true,
-        label: 'Then'
+        label: 'Yes'
       },
       {
-        id: 'e47-otherwise',
+        id: 'e47-no',
         source: 'condition-7',
         target: 'log-7',
-        sourceHandle: 'otherwise',
+        sourceHandle: 'no',
         animated: true,
-        label: 'Otherwise'
+        label: 'No'
       }
     ]
   },
@@ -215,28 +215,28 @@ export const sampleWorkflows: Workflow[] = [
         animated: true
       },
       {
-        id: 'e2-then',
+        id: 'e2-yes',
         source: 'condition-1',
         target: 'action-1',
-        sourceHandle: 'then',
+        sourceHandle: 'yes',
         animated: true,
-        label: 'Then'
+        label: 'Yes'
       },
       {
-        id: 'e3-then',
+        id: 'e3-yes',
         source: 'condition-1',
         target: 'action-2',
-        sourceHandle: 'then',
+        sourceHandle: 'yes',
         animated: true,
-        label: 'Then'
+        label: 'Yes'
       },
       {
-        id: 'e4-otherwise',
+        id: 'e4-no',
         source: 'condition-1',
         target: 'log-1',
-        sourceHandle: 'otherwise',
+        sourceHandle: 'no',
         animated: true,
-        label: 'Otherwise'
+        label: 'No'
       }
     ]
   }, 
@@ -370,36 +370,36 @@ export const sampleWorkflows: Workflow[] = [
         animated: true
       },
       {
-        id: 'e54-then',
+        id: 'e54-yes',
         source: 'condition-10',
         target: 'action-31',
-        sourceHandle: 'then',
+        sourceHandle: 'yes',
         animated: true,
-        label: 'Then'
+        label: 'Yes'
       },
       {
-        id: 'e55-then',
+        id: 'e55-yes',
         source: 'condition-10',
         target: 'action-32',
-        sourceHandle: 'then',
+        sourceHandle: 'yes',
         animated: true,
-        label: 'Then'
+        label: 'Yes'
       },
       {
-        id: 'e56-then',
+        id: 'e56-yes',
         source: 'condition-10',
         target: 'action-33',
-        sourceHandle: 'then',
+        sourceHandle: 'yes',
         animated: true,
-        label: 'Then'
+        label: 'Yes'
       },
       {
-        id: 'e57-otherwise',
+        id: 'e57-no',
         source: 'condition-10',
         target: 'log-10',
-        sourceHandle: 'otherwise',
+        sourceHandle: 'no',
         animated: true,
-        label: 'Otherwise'
+        label: 'No'
       }
     ]
   },
@@ -514,28 +514,28 @@ export const sampleWorkflows: Workflow[] = [
         animated: true
       },
       {
-        id: 'e11-then',
+        id: 'e11-yes',
         source: 'condition-4',
         target: 'action-7',
-        sourceHandle: 'then',
+        sourceHandle: 'yes',
         animated: true,
-        label: 'Then'
+        label: 'Yes'
       },
       {
-        id: 'e12-then',
+        id: 'e12-yes',
         source: 'condition-4',
         target: 'action-8',
-        sourceHandle: 'then',
+        sourceHandle: 'yes',
         animated: true,
-        label: 'Then'
+        label: 'Yes'
       },
       {
-        id: 'e13-otherwise',
+        id: 'e13-no',
         source: 'condition-4',
         target: 'log-4',
-        sourceHandle: 'otherwise',
+        sourceHandle: 'no',
         animated: true,
-        label: 'Otherwise'
+        label: 'No'
       }
     ]
   },
@@ -646,20 +646,20 @@ export const sampleWorkflows: Workflow[] = [
         animated: true
       },
       {
-        id: 'e60-then',
+        id: 'e60-yes',
         source: 'condition-11',
         target: 'action-35',
-        sourceHandle: 'then',
+        sourceHandle: 'yes',
         animated: true,
-        label: 'Then'
+        label: 'Yes'
       },  
       {
-        id: 'e63-otherwise',
+        id: 'e63-no',
         source: 'condition-11',
         target: 'log-11',
-        sourceHandle: 'otherwise',
+        sourceHandle: 'no',
         animated: true,
-        label: 'Otherwise'
+        label: 'No'
       }
     ]
   }

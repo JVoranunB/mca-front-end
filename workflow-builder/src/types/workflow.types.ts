@@ -56,8 +56,8 @@ export interface NodeData {
     [key: string]: any;
   };
   conditions?: WorkflowCondition[];
-  hasThenBranch?: boolean;
-  hasOtherwiseBranch?: boolean;
+  hasYesBranch?: boolean;
+  hasNoBranch?: boolean;
   [key: string]: unknown; // Index signature for ReactFlow compatibility
 }
 

@@ -142,9 +142,9 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({ onDrop, onDragOver, set
   // Custom connection validation to ensure proper handle connections and sequential order
   const isValidConnection = useCallback((connection: WorkflowEdge | Connection) => {
     // Ensure we're connecting from output (source) to input (target)
-    // Source handles should be 'output', 'then', or 'otherwise'
+    // Source handles should be 'output', 'yes', or 'no'
     // Target handles should be 'input'
-    const validSourceHandles = ['output', 'then', 'otherwise'];
+    const validSourceHandles = ['output', 'yes', 'no'];
     const validTargetHandles = ['input'];
     
     const isValidSource = !connection.sourceHandle || validSourceHandles.includes(connection.sourceHandle);
