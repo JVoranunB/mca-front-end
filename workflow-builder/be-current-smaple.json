@@ -1,16 +1,16 @@
 {
-  "workflow_id": "sample-1",
   "name": "High Value Customer Follow-up",
   "version": "1.0",
   "status": "draft",
   "merchantId": "SHOP001",
+  "trigger_type": "event",
   "actions": [
     {
       "action_id": "contact-enrollment-trigger",
       "key": "a1",
       "type": "trigger",
       "config": {
-        "event": "workflow_start", 
+        "event": "user_info_updated", 
         "merchantId": "SHOP001",       
         "dataSource": "CRM",
         "condition":"true"
@@ -20,7 +20,10 @@
     {
       "action_id": "query-action",
       "key": "a2",
-      "type": "condition",      
+      "type": "condition",
+      "info":{
+        
+      },      
       "mapper": {
          "query": {
             "mode": "expression",
@@ -32,14 +35,13 @@
       "action_id": "slack-action",
       "key": "a3",
       "type": "action",
-      "config": {
+      "info": {
         "actionType": "generic",
         "message": "🎉 High-value customer alert! ${customer_name} just placed a ${order_total} order. Consider reaching out for personalized service.",
         "channel": "#customer-success",
-        "username": "Order Bot",
-        "includeCustomerData": true,
-        "attachments": []
+        "username": "Order Bot"
       },
+      "config":{},
       "mapper": {
           "value": {
               "mode": "expression",
@@ -57,12 +59,12 @@
     {
       "parent_key": "a2",
       "child_key": "a3",
-      "meta_output": "then"
+      "meta_output": "yes"
     },
     {
       "parent_key": "a2",
       "child_key": "a3",
-      "meta_output": "otherwise"
+      "meta_output": "no"
     }
   ]
 }

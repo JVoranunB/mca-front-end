@@ -180,7 +180,15 @@ export class WorkflowTransformer {
 
       case 'action':
         config.actionType = this.getActionType(node.data.label);
-        Object.assign(config, node.data.config || {});
+        const nodeConfig = node.data.config || {};
+        
+        // For Slack actions, exclude includeCustomerData and attachments
+        if (node.data.label.includes('Slack')) {
+          const { includeCustomerData, attachments, ...slackConfig } = nodeConfig as any;
+          Object.assign(config, slackConfig);
+        } else {
+          Object.assign(config, nodeConfig);
+        }
         break;
 
       case 'step':

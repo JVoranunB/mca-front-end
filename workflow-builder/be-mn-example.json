@@ -6,12 +6,16 @@
             "type": "trigger",
             "config": {
                 "event": "user_info_updated",
+                "merchantId": "SHOP001",
+                "dataSource": "CRM",
                 "condition":"true"
-            }
-        }, 
+            },
+            "mapper": null
+        },
         {
             "action_id": "query-action",
             "key": "a2",
+            "type": "condition",            
             "mapper": {
                 "query": {
                     "mode": "expression",
@@ -22,10 +26,17 @@
         {
             "action_id": "slack-action",
             "key": "a3",
+            "type": "action",
+            "config": {
+                "actionType": "generic",
+                "message": "🎉 High-value customer alert! ${customer_name} just placed a ${order_total} order. Consider reaching out for personalized service.",
+                "channel": "#customer-success",
+                "username": "Order Bot"
+            },
             "mapper": {
                 "value": {
                     "mode": "expression",
-                    "value": "'Send Line notification for total sale greater than 20000 bth to user id is ' + builtin.string(a2.output.value.id) + ' ' + builtin.string(a2.output.value.first_name) + ' ' + builtin.string(a2.output.value.last_name)'"
+                    "value": "'Send Line notification for total sale greater than 20000 bth to user id is ' + builtin.string(a2.output.value.id) + ' ' + builtin.string(a2.output.value.first_name) + ' ' + builtin.string(a2.output.value.last_name)"
                 }
             }
         }
@@ -33,13 +44,13 @@
     "peers": [
         {
             "parent_key": "a1",
-            "meta_output": "triggered",
-            "child_key": "a2"
+            "child_key": "a2",
+            "meta_output": "triggered"
         },
         {
             "parent_key": "a2",
-            "meta_output": "success",
-            "child_key": "a3"
+            "child_key": "a3",
+            "meta_output": "success"
         }
     ]
 }
