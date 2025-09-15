@@ -53,6 +53,20 @@ export const nodeTemplates: NodeTemplate[] = [
   },
   {
     type: 'action',
+    label: 'Send Slack notification',
+    description: 'Send message to Slack channel or user',
+    icon: 'ChatIcon',
+    category: 'actions',
+    defaultConfig: {
+      message: '',
+      channel: '',
+      username: 'Workflow Bot',
+      includeCustomerData: true,
+      attachments: []
+    }
+  },
+  {
+    type: 'action',
     label: 'Trigger webhook',
     description: 'Call external API with customer and trigger data',
     icon: 'ExportIcon',

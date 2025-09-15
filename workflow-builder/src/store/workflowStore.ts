@@ -129,7 +129,7 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
       sourceHandle: params.sourceHandle || undefined,
       targetHandle: params.targetHandle || undefined,
       animated: true,
-      label: params.sourceHandle === 'otherwise' ? 'Otherwise' : params.sourceHandle === 'then' ? 'Then' : undefined,
+      label: params.sourceHandle === 'no' ? 'No' : params.sourceHandle === 'yes' ? 'Yes' : undefined,
     };
     
     set((state) => ({
@@ -485,14 +485,24 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
       
       // Condition node validation
       if (node.data.type === 'condition') {
-        const thenEdge = edges.find((e) => e.source === node.id && e.sourceHandle === 'then');
-        const otherwiseEdge = edges.find((e) => e.source === node.id && e.sourceHandle === 'otherwise');
+        const yesEdge = edges.find((e) => e.source === node.id && e.sourceHandle === 'yes');
+        const noEdge = edges.find((e) => e.source === node.id && e.sourceHandle === 'no');
         
-        if (!thenEdge || !otherwiseEdge) {
+        // Only require the "yes" branch - "no" branch is optional
+        if (!yesEdge) {
           errors.push({
             nodeId: node.id,
-            message: `Condition node "${node.data.label}" must have both Then and Otherwise branches`,
+            message: `Condition node "${node.data.label}" must have a Yes branch connected`,
             severity: 'error'
+          });
+        }
+        
+        // Optional warning when no "no" branch is connected
+        if (!noEdge) {
+          errors.push({
+            nodeId: node.id,
+            message: `Condition node "${node.data.label}" has no No branch connected`,
+            severity: 'warning'
           });
         }
         

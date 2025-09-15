@@ -166,7 +166,7 @@ const ConditionNode = memo(({ data }: NodeProps) => {
       </Card>
       
       <Handle
-        id="then"
+        id="yes"
         type="source"
         position={Position.Right}
         style={{
@@ -192,11 +192,11 @@ const ConditionNode = memo(({ data }: NodeProps) => {
         borderRadius: '4px',
         border: '1px solid #50B83C'
       }}>
-        Then
+        Yes
       </div>
       
       <Handle
-        id="otherwise"
+        id="no"
         type="source"
         position={Position.Right}
         style={{
@@ -211,7 +211,7 @@ const ConditionNode = memo(({ data }: NodeProps) => {
       />
       <div style={{
         position: 'absolute',
-        right: -85,
+        right: -55,
         top: '70%',
         transform: 'translateY(-50%)',
         fontSize: '12px',
@@ -222,7 +222,7 @@ const ConditionNode = memo(({ data }: NodeProps) => {
         borderRadius: '4px',
         border: '1px solid #F49342'
       }}>
-        Otherwise
+        No
       </div>
     </div>
   );

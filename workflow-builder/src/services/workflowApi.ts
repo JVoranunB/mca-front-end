@@ -10,6 +10,10 @@ export interface BackendWorkflowAction {
       mode: string;
       value: string;
     };
+    query?: {
+      mode: string;
+      value: string;
+    };
     [key: string]: unknown;
   } | null;
 }
@@ -25,6 +29,7 @@ export interface BackendWorkflow {
   name: string;
   version: string;
   status: 'active' | 'paused' | 'draft';
+  merchantId: string;
   actions: BackendWorkflowAction[];
   peers: BackendWorkflowPeer[];
 }

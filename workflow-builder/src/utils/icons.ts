@@ -23,6 +23,7 @@ import {
   XCircleIcon,
   ProductIcon,
   ClockIcon,
+  ChatIcon,
 } from '@shopify/polaris-icons';
 
 // Export all icons with descriptive names
@@ -59,6 +60,7 @@ export const Icons = {
   Email: EmailIcon,
   Tag: ProductIcon,
   Timer: ClockIcon,
+  Chat: ChatIcon,
   
   // Fallback for any missing icons
   Default: InfoIcon
