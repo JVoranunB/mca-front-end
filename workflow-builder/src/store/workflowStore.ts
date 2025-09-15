@@ -488,11 +488,21 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
         const yesEdge = edges.find((e) => e.source === node.id && e.sourceHandle === 'yes');
         const noEdge = edges.find((e) => e.source === node.id && e.sourceHandle === 'no');
         
-        if (!yesEdge || !noEdge) {
+        // Only require the "yes" branch - "no" branch is optional
+        if (!yesEdge) {
           errors.push({
             nodeId: node.id,
-            message: `Condition node "${node.data.label}" must have both Yes and No branches`,
+            message: `Condition node "${node.data.label}" must have a Yes branch connected`,
             severity: 'error'
+          });
+        }
+        
+        // Optional warning when no "no" branch is connected
+        if (!noEdge) {
+          errors.push({
+            nodeId: node.id,
+            message: `Condition node "${node.data.label}" has no No branch connected`,
+            severity: 'warning'
           });
         }
         
