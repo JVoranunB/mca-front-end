@@ -17,6 +17,21 @@ export interface WorkflowCondition {
   period_unit?: 'days' | 'weeks' | 'months' | 'years';
   date_from?: string;
   date_to?: string;
+
+  // Enhanced query support
+  group_by?: string[];
+  having?: Record<string, unknown>;
+  joins?: {
+    [table: string]: {
+      select: string[];
+      join: string;
+    };
+  };
+  aggregations?: {
+    field: string;
+    function: 'SUM' | 'COUNT' | 'AVG' | 'MIN' | 'MAX';
+    alias?: string;
+  }[];
 }
 
 export interface StartConfig {

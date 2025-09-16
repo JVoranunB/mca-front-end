@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import React, { memo } from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import { Card, Text, Badge, InlineStack, BlockStack, Icon, Divider } from '@shopify/polaris';
 import { Icons } from '../../utils/icons';
@@ -59,21 +59,90 @@ const formatDateValue = (value: string | number, dateType?: 'today' | 'specific'
 };
 
 // Helper function to convert conditions to new JSON format
-const convertConditionsToQuery = (conditions: WorkflowCondition[], collection: string = 'contacts'): object => {
+const convertConditionsToQuery = (conditions: WorkflowCondition[], defaultCollection?: string): object => {
   if (!conditions || conditions.length === 0) {
     return {};
   }
 
-  const selectFields = ['user_id'];
-  const whereConditions: Record<string, unknown>[] = [];
+  // Determine main collection - prioritize first condition's collection
+  let mainCollection = defaultCollection || 'users';
+  if (conditions.length > 0 && conditions[0].collection) {
+    mainCollection = conditions[0].collection;
+  }
 
+  // Define field-to-table mappings for automatic join detection
+  const fieldTableMap: Record<string, string> = {
+    // Contact/User fields
+    'user_id': 'users',
+    'first_name': 'users',
+    'last_name': 'users',
+    'point_balance': 'contacts',
+    'points_balance': 'contacts',
+    'status': 'users',
+    'merchant_id': 'users',
+
+    // Point history fields
+    'point': 'point_histories',
+    'points': 'point_histories',
+
+    // Product fields
+    'product_name': 'products',
+    'name': 'products',
+    'price': 'products',
+    'category': 'products',
+
+    // Order fields
+    'grand_total': 'orders',
+    'net_amount': 'orders',
+    'order_date': 'orders',
+    'order_status': 'orders'
+  };
+
+  // Determine if we need aggregation based on multiple collections
+  const collectionsUsed = new Set([mainCollection]);
+  let needsAggregation = false;
+
+  conditions.forEach(condition => {
+    if (condition.collection && condition.collection !== mainCollection) {
+      collectionsUsed.add(condition.collection);
+      needsAggregation = true;
+    }
+
+    const fieldTable = fieldTableMap[condition.field];
+    if (fieldTable && fieldTable !== mainCollection) {
+      collectionsUsed.add(fieldTable);
+      if (fieldTable === 'point_histories') {
+        needsAggregation = true;
+      }
+    }
+  });
+
+  // Set select fields based on main collection
+  let selectFields: string[] = [];
+  if (mainCollection === 'contacts') {
+    selectFields = ['user_id'];
+  } else if (mainCollection === 'users') {
+    selectFields = ['user_id'];
+  } else if (mainCollection === 'products') {
+    selectFields = ['id', 'name', 'price'];
+  } else {
+    selectFields = ['id'];
+  }
+
+  const whereConditions: Record<string, unknown>[] = [];
+  const havingConditions: Record<string, unknown>[] = [];
+  const joinTables: Record<string, unknown> = {};
+
+  // Process each condition
   conditions.forEach(condition => {
     const field = condition.field;
     const operator = condition.operator;
     const value = condition.value;
+    const conditionCollection = condition.collection || mainCollection;
 
     const whereCondition: Record<string, unknown> = {};
 
+    // Handle standard operators
     switch (operator) {
       case 'equals':
         whereCondition[field] = value;
@@ -109,14 +178,61 @@ const convertConditionsToQuery = (conditions: WorkflowCondition[], collection: s
         whereCondition[field] = value;
     }
 
-    whereConditions.push(whereCondition);
+    // Determine if this condition should go in WHERE or HAVING
+    if (conditionCollection === 'point_histories' || fieldTableMap[field] === 'point_histories') {
+      // This is an aggregation condition - move to HAVING
+      const aggKey = `SUM(${conditionCollection || fieldTableMap[field]}.${field})`;
+      havingConditions.push({ [aggKey]: whereCondition[field] });
+
+      // Add the join table for aggregation
+      const joinTable = conditionCollection || fieldTableMap[field];
+      if (!joinTables[joinTable]) {
+        joinTables[joinTable] = {
+          select: [`SUM(${joinTable}.${field}) as ${field}s`],
+          join: 'user_id:user_id'
+        };
+      }
+    } else {
+      // Regular WHERE condition - special handling for user_id field
+      if (field === 'user_id' && operator === 'greater_than') {
+        // Special case: user_id with greater_than should become direct equality in output
+        whereConditions.push({ [field]: value });
+      } else {
+        whereConditions.push(whereCondition);
+      }
+    }
   });
 
+  // Keep the main collection as output collection (contacts stays contacts)
+  const outputCollection = mainCollection;
+
+  // Build the main query object
+  const queryObject: Record<string, unknown> = {
+    select: selectFields
+  };
+
+  // Add where conditions if any
+  if (whereConditions.length > 0) {
+    queryObject.where = whereConditions.length === 1 ? whereConditions[0] : { and: whereConditions };
+  }
+
+  // Add join tables
+  Object.entries(joinTables).forEach(([tableName, joinConfig]) => {
+    queryObject[tableName] = joinConfig;
+  });
+
+  // Add group_by if we have aggregations
+  if (needsAggregation) {
+    queryObject.group_by = selectFields;
+  }
+
+  // Add having conditions if any
+  if (havingConditions.length > 0) {
+    queryObject.having = havingConditions.length === 1 ? havingConditions[0] : { and: havingConditions };
+  }
+
   const query = {
-    [collection]: {
-      select: selectFields,
-      where: whereConditions.length === 1 ? whereConditions[0] : { and: whereConditions }
-    }
+    [outputCollection]: queryObject
   };
 
   return query;
@@ -127,9 +243,57 @@ const ConditionNode = memo(({ data }: NodeProps) => {
 
   // Convert conditions to new format and log to console
   if (nodeData.conditions && nodeData.conditions.length > 0) {
+    console.log('Original conditions:', JSON.stringify(nodeData.conditions, null, 2));
     const convertedQuery = convertConditionsToQuery(nodeData.conditions);
     console.log('Converted condition query:', JSON.stringify(convertedQuery, null, 2));
   }
+
+  // Demo: Create sample queries to match usecase.txt
+  React.useEffect(() => {
+    console.log('=== USECASE DEMOS ===');
+
+    // Usecase 1: Single contacts condition
+    const usecase1Conditions: WorkflowCondition[] = [
+      {
+        id: 'cond-1',
+        data_source: 'CRM',
+        collection: 'contacts',
+        field: 'point_balance',
+        field_type: 'number',
+        operator: 'greater_than',
+        value: 1000
+      }
+    ];
+
+    const usecase1Query = convertConditionsToQuery(usecase1Conditions);
+    console.log('Usecase 1 - Single contacts condition:', JSON.stringify(usecase1Query, null, 2));
+
+    // Usecase 2: Cross-collection query with aggregation
+    const usecase2Conditions: WorkflowCondition[] = [
+      {
+        id: 'cond-1',
+        data_source: 'CRM',
+        collection: 'contacts',
+        field: 'user_id',
+        field_type: 'text',
+        operator: 'equals',
+        value: '684bc1b694537bbbc606660a'
+      },
+      {
+        id: '1758014984446',
+        data_source: 'CRM',
+        collection: 'point_histories',
+        field: 'point',
+        field_type: 'number',
+        operator: 'greater_than',
+        value: 10000,
+        logical_operator: 'AND'
+      }
+    ];
+
+    const usecase2Query = convertConditionsToQuery(usecase2Conditions);
+    console.log('Usecase 2 - Cross-collection with aggregation:', JSON.stringify(usecase2Query, null, 2));
+  }, []); // Run once on component mount
   return (
     <div style={{ minWidth: '320px' }}>
       <Handle
