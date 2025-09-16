@@ -2,7 +2,7 @@ import { memo } from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import { Card, Text, Badge, InlineStack, BlockStack, Icon, Divider } from '@shopify/polaris';
 import { Icons } from '../../utils/icons';
-import type { NodeData } from '../../types/workflow.types';
+import type { NodeData, WorkflowCondition } from '../../types/workflow.types';
 import { getOperatorLabel } from '../../utils/dataSourceFields';
 
 // Helper function to format date values for display  
@@ -58,8 +58,78 @@ const formatDateValue = (value: string | number, dateType?: 'today' | 'specific'
   return valueStr;
 };
 
+// Helper function to convert conditions to new JSON format
+const convertConditionsToQuery = (conditions: WorkflowCondition[], collection: string = 'contacts'): object => {
+  if (!conditions || conditions.length === 0) {
+    return {};
+  }
+
+  const selectFields = ['user_id'];
+  const whereConditions: Record<string, unknown>[] = [];
+
+  conditions.forEach(condition => {
+    const field = condition.field;
+    const operator = condition.operator;
+    const value = condition.value;
+
+    const whereCondition: Record<string, unknown> = {};
+
+    switch (operator) {
+      case 'equals':
+        whereCondition[field] = value;
+        break;
+      case 'not_equals':
+        whereCondition[field] = { "!=": value };
+        break;
+      case 'greater_than':
+        whereCondition[field] = { ">": value };
+        break;
+      case 'less_than':
+        whereCondition[field] = { "<": value };
+        break;
+      case 'greater_equal':
+        whereCondition[field] = { ">=": value };
+        break;
+      case 'less_equal':
+        whereCondition[field] = { "<=": value };
+        break;
+      case 'contains':
+        whereCondition[field] = { "like": `%${value}%` };
+        break;
+      case 'not_contains':
+        whereCondition[field] = { "not like": `%${value}%` };
+        break;
+      case 'is_empty':
+        whereCondition[field] = null;
+        break;
+      case 'is_not_empty':
+        whereCondition[field] = { "!=": null };
+        break;
+      default:
+        whereCondition[field] = value;
+    }
+
+    whereConditions.push(whereCondition);
+  });
+
+  const query = {
+    [collection]: {
+      select: selectFields,
+      where: whereConditions.length === 1 ? whereConditions[0] : { and: whereConditions }
+    }
+  };
+
+  return query;
+};
+
 const ConditionNode = memo(({ data }: NodeProps) => {
   const nodeData = data as NodeData;
+
+  // Convert conditions to new format and log to console
+  if (nodeData.conditions && nodeData.conditions.length > 0) {
+    const convertedQuery = convertConditionsToQuery(nodeData.conditions);
+    console.log('Converted condition query:', JSON.stringify(convertedQuery, null, 2));
+  }
   return (
     <div style={{ minWidth: '320px' }}>
       <Handle
