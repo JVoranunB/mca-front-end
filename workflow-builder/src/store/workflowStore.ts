@@ -1,16 +1,16 @@
 import { create } from 'zustand';
 import { applyNodeChanges, applyEdgeChanges } from '@xyflow/react';
 import type { Connection, NodeChange, EdgeChange } from '@xyflow/react';
-import type { WorkflowNode, WorkflowEdge, Workflow, ValidationError, WorkflowSummary, TriggerType, StartConfig } from '../types/workflow.types';
+import type { WorkflowNode, WorkflowPeer, Workflow, ValidationError, WorkflowSummary, TriggerType, StartConfig } from '../types/workflow.types';
 import { workflowApiService } from '../services/workflowApi';
 import { WorkflowTransformer } from '../utils/workflowTransformer';
 import { sampleWorkflows } from '../data/sampleWorkflows';
 
 interface WorkflowState {
   nodes: WorkflowNode[];
-  edges: WorkflowEdge[];
+  peers: WorkflowPeer[];
   selectedNode: WorkflowNode | null;
-  selectedEdge: WorkflowEdge | null;
+  selectedPeer: WorkflowPeer | null;
   workflows: Workflow[];
   currentWorkflow: Workflow | null;
   validationErrors: ValidationError[];
@@ -23,19 +23,19 @@ interface WorkflowState {
   toastMessage: string;
   
   onNodesChange: (changes: NodeChange[]) => void;
-  onEdgesChange: (changes: EdgeChange[]) => void;
+  onPeersChange: (changes: EdgeChange[]) => void;
   onConnect: (params: Connection) => void;
   
   addNode: (node: WorkflowNode) => void;
   updateNode: (nodeId: string, data: Partial<WorkflowNode['data']>) => void;
   deleteNode: (nodeId: string) => void;
   
-  addEdge: (edge: WorkflowEdge) => void;
-  updateEdge: (edgeId: string, data: Partial<WorkflowEdge>) => void;
-  deleteEdge: (edgeId: string) => void;
+  addPeer: (peer: WorkflowPeer) => void;
+  updatePeer: (peerId: string, data: Partial<WorkflowPeer>) => void;
+  deletePeer: (peerId: string) => void;
   
   selectNode: (node: WorkflowNode | null) => void;
-  selectEdge: (edge: WorkflowEdge | null) => void;
+  selectPeer: (peer: WorkflowPeer | null) => void;
   
   saveWorkflow: (name: string, description?: string) => Promise<{ success: boolean; error?: string }>;
   loadWorkflow: (workflowId: string) => void;
@@ -80,9 +80,9 @@ const initializeWorkflows = (): Workflow[] => {
 
 const useWorkflowStore = create<WorkflowState>((set, get) => ({
   nodes: [],
-  edges: [],
+  peers: [],
   selectedNode: null,
-  selectedEdge: null,
+  selectedPeer: null,
   workflows: initializeWorkflows(),
   currentWorkflow: null,
   validationErrors: [],
@@ -101,28 +101,28 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
     });
   },
   
-  onEdgesChange: (changes) => {
+  onPeersChange: (changes) => {
     set({
-      edges: applyEdgeChanges(changes, get().edges) as WorkflowEdge[],
+      peers: applyEdgeChanges(changes, get().peers) as WorkflowPeer[],
       isDirty: true
     });
   },
   
   onConnect: (params) => {
-    // Create unique edge ID that includes source handle to prevent duplicates
+    // Create unique peer ID that includes source handle to prevent duplicates
     const handleSuffix = params.sourceHandle ? `-${params.sourceHandle}` : '';
-    const baseId = `e${params.source}-${params.target}${handleSuffix}`;
+    const baseId = `p${params.source}-${params.target}${handleSuffix}`;
     
-    // Ensure uniqueness by checking existing edges and adding a counter if needed
-    const existingEdges = get().edges;
+    // Ensure uniqueness by checking existing peers and adding a counter if needed
+    const existingPeers = get().peers;
     let uniqueId = baseId;
     let counter = 1;
-    while (existingEdges.some(edge => edge.id === uniqueId)) {
+    while (existingPeers.some(peer => peer.id === uniqueId)) {
       uniqueId = `${baseId}-${counter}`;
       counter++;
     }
     
-    const newEdge: WorkflowEdge = {
+    const newPeer: WorkflowPeer = {
       id: uniqueId,
       source: params.source!,
       target: params.target!,
@@ -133,7 +133,7 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
     };
     
     set((state) => ({
-      edges: [...state.edges, newEdge],
+      peers: [...state.peers, newPeer],
       isDirty: true
     }));
   },
@@ -175,41 +175,41 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
       
       return {
         nodes: state.nodes.filter((node) => node.id !== nodeId),
-        edges: state.edges.filter((edge) => edge.source !== nodeId && edge.target !== nodeId),
+        peers: state.peers.filter((peer) => peer.source !== nodeId && peer.target !== nodeId),
         selectedNode: state.selectedNode?.id === nodeId ? null : state.selectedNode,
         isDirty: true
       };
     });
   },
   
-  addEdge: (edge) => {
+  addPeer: (peer) => {
     set((state) => {
-      // Check if edge with same ID already exists
-      const existingEdge = state.edges.find(e => e.id === edge.id);
-      if (existingEdge) {
-        console.warn(`Edge with ID '${edge.id}' already exists. Skipping duplicate.`);
+      // Check if peer with same ID already exists
+      const existingPeer = state.peers.find(p => p.id === peer.id);
+      if (existingPeer) {
+        console.warn(`Peer with ID '${peer.id}' already exists. Skipping duplicate.`);
         return state;
       }
       return {
-        edges: [...state.edges, edge],
+        peers: [...state.peers, peer],
         isDirty: true
       };
     });
   },
   
-  updateEdge: (edgeId, data) => {
+  updatePeer: (peerId, data) => {
     set((state) => ({
-      edges: state.edges.map((edge) =>
-        edge.id === edgeId ? { ...edge, ...data } : edge
+      peers: state.peers.map((peer) =>
+        peer.id === peerId ? { ...peer, ...data } : peer
       ),
       isDirty: true
     }));
   },
   
-  deleteEdge: (edgeId) => {
+  deletePeer: (peerId) => {
     set((state) => ({
-      edges: state.edges.filter((edge) => edge.id !== edgeId),
-      selectedEdge: state.selectedEdge?.id === edgeId ? null : state.selectedEdge,
+      peers: state.peers.filter((peer) => peer.id !== peerId),
+      selectedPeer: state.selectedPeer?.id === peerId ? null : state.selectedPeer,
       isDirty: true
     }));
   },
@@ -217,13 +217,13 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
   selectNode: (node) => {
     set({ 
       selectedNode: node, 
-      selectedEdge: null,
+      selectedPeer: null,
       rightSidebarVisible: node !== null
     });
   },
   
-  selectEdge: (edge) => {
-    set({ selectedEdge: edge, selectedNode: null });
+  selectPeer: (peer) => {
+    set({ selectedPeer: peer, selectedNode: null });
   },
   
   saveWorkflow: async (name, description) => {
@@ -242,7 +242,7 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
         description: description || '',
         triggerType,
         nodes: currentState.nodes,
-        edges: currentState.edges,
+        peers: currentState.peers,
         createdAt: currentState.currentWorkflow?.createdAt || new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         status: currentState.currentWorkflow?.status || 'draft'
@@ -314,7 +314,7 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
           description: description || '',
           triggerType,
           nodes: currentState.nodes,
-          edges: currentState.edges,
+          peers: currentState.peers,
           createdAt: currentState.currentWorkflow?.createdAt || new Date().toISOString(),
           updatedAt: new Date().toISOString(),
           status: currentState.currentWorkflow?.status || 'draft'
@@ -355,10 +355,10 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
     if (workflow) {
       set({
         nodes: workflow.nodes,
-        edges: workflow.edges,
+        peers: workflow.peers,
         currentWorkflow: workflow,
         selectedNode: null,
-        selectedEdge: null,
+        selectedPeer: null,
         rightSidebarVisible: false,
         isDirty: false
       });
@@ -368,9 +368,9 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
   clearWorkflow: () => {
     set({
       nodes: [],
-      edges: [],
+      peers: [],
       selectedNode: null,
-      selectedEdge: null,
+      selectedPeer: null,
       currentWorkflow: null,
       validationErrors: [],
       isDirty: false
@@ -435,7 +435,7 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
   
   validateWorkflow: () => {
     const errors: ValidationError[] = [];
-    const { nodes, edges } = get();
+    const { nodes, peers } = get();
     
     const startNodes = nodes.filter((n) => n.data.type === 'start');
     if (startNodes.length === 0) {
@@ -473,7 +473,7 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
     });
     
     nodes.forEach((node) => {
-      const hasIncoming = edges.some((e) => e.target === node.id);
+      const hasIncoming = peers.some((p) => p.target === node.id);
       
       if (node.data.type !== 'start' && !hasIncoming) {
         errors.push({
@@ -485,8 +485,8 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
       
       // Condition node validation
       if (node.data.type === 'condition') {
-        const yesEdge = edges.find((e) => e.source === node.id && e.sourceHandle === 'yes');
-        const noEdge = edges.find((e) => e.source === node.id && e.sourceHandle === 'no');
+        const yesEdge = peers.find((p) => p.source === node.id && p.sourceHandle === 'yes');
+        const noEdge = peers.find((p) => p.source === node.id && p.sourceHandle === 'no');
         
         // Only require the "yes" branch - "no" branch is optional
         if (!yesEdge) {
@@ -569,7 +569,7 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
       description: '',
       triggerType,
       nodes: [],
-      edges: [],
+      peers: [],
       createdAt: now,
       updatedAt: now,
       status: 'draft'
@@ -582,9 +582,9 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
       workflows,
       currentWorkflow: workflow,
       nodes: [],
-      edges: [],
+      peers: [],
       selectedNode: null,
-      selectedEdge: null,
+      selectedPeer: null,
       rightSidebarVisible: false,
       validationErrors: [],
       isDirty: false
@@ -687,9 +687,9 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
       workflows: sampleWorkflows,
       currentWorkflow: null,
       nodes: [],
-      edges: [],
+      peers: [],
       selectedNode: null,
-      selectedEdge: null,
+      selectedPeer: null,
       validationErrors: [],
       isDirty: false
     });

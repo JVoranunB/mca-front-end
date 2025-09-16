@@ -60,11 +60,11 @@ const WorkflowBuilderPage = () => {
         }
       } else {
         // Legacy route - load sample if no nodes exist
-        if (store.nodes.length === 0 && store.edges.length === 0) {
+        if (store.nodes.length === 0 && store.peers.length === 0) {
           const firstSample = sampleWorkflows[0];
           if (firstSample) {
             firstSample.nodes.forEach((node: WorkflowNode) => store.addNode(node));
-            firstSample.edges.forEach((edge) => store.addEdge(edge));
+            firstSample.peers.forEach((peer) => store.addPeer(peer));
           }
         }
       }

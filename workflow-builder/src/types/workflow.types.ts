@@ -68,7 +68,7 @@ export interface WorkflowNode {
   data: NodeData;
 }
 
-export interface WorkflowEdge {
+export interface WorkflowPeer {
   id: string;
   source: string;
   target: string;
@@ -78,13 +78,16 @@ export interface WorkflowEdge {
   animated?: boolean;
 }
 
+// Keep WorkflowEdge as alias for backward compatibility
+export type WorkflowEdge = WorkflowPeer;
+
 export interface Workflow {
   id: string;
   name: string;
   description?: string;
   triggerType: TriggerType;
   nodes: WorkflowNode[];
-  edges: WorkflowEdge[];
+  peers: WorkflowPeer[];
   createdAt: string;
   updatedAt: string;
   status: 'draft' | 'active' | 'paused';

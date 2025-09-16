@@ -1,4 +1,4 @@
-import type { Workflow, WorkflowNode, WorkflowEdge } from '../types/workflow.types';
+import type { Workflow, WorkflowNode, WorkflowPeer } from '../types/workflow.types';
 import type { BackendWorkflow, BackendWorkflowAction, BackendWorkflowPeer } from '../services/workflowApi';
 import { DATA_SOURCE_FIELDS } from './dataSourceFields';
 
@@ -25,9 +25,9 @@ export class WorkflowTransformer {
       return this.transformNodeToAction(node, nodeMapping);
     });
 
-    // Transform edges to peers
-    const peers: BackendWorkflowPeer[] = workflow.edges.map((edge) => {
-      return this.transformEdgeToPeer(edge, nodeMapping);
+    // Transform peers to backend peers
+    const peers: BackendWorkflowPeer[] = workflow.peers.map((peer) => {
+      return this.transformPeerToPeer(peer, nodeMapping);
     });
 
     return {
@@ -178,23 +178,26 @@ export class WorkflowTransformer {
         }
         break;
 
-      case 'action':
+      case 'action': {
         config.actionType = this.getActionType(node.data.label);
         const nodeConfig = node.data.config || {};
         
         // For Slack actions, exclude includeCustomerData and attachments
         if (node.data.label.includes('Slack')) {
-          const { includeCustomerData, attachments, ...slackConfig } = nodeConfig as any;
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { includeCustomerData, attachments, ...slackConfig } = nodeConfig as Record<string, unknown>;
           Object.assign(config, slackConfig);
         } else {
           Object.assign(config, nodeConfig);
         }
         break;
+      }
 
-      case 'step':
+      case 'step': {
         config.stepType = this.getStepType(node.data.label);
         Object.assign(config, node.data.config || {});
         break;
+      }
     }
 
     return config;
@@ -411,20 +414,20 @@ export class WorkflowTransformer {
   /**
    * Transform edge to peer relationship
    */
-  private static transformEdgeToPeer(edge: WorkflowEdge, nodeMapping: NodeMapping): BackendWorkflowPeer {
-    const peer: BackendWorkflowPeer = {
-      parent_key: nodeMapping[edge.source],
-      child_key: nodeMapping[edge.target],
+  private static transformPeerToPeer(peer: WorkflowPeer, nodeMapping: NodeMapping): BackendWorkflowPeer {
+    const backendPeer: BackendWorkflowPeer = {
+      parent_key: nodeMapping[peer.source],
+      child_key: nodeMapping[peer.target],
     };
 
     // Add meta_output for condition branches
-    if (edge.sourceHandle) {
-      peer.meta_output = edge.sourceHandle;
+    if (peer.sourceHandle) {
+      backendPeer.meta_output = peer.sourceHandle;
     } else {
-      peer.meta_output = 'triggered';
+      backendPeer.meta_output = 'triggered';
     }
 
-    return peer;
+    return backendPeer;
   }
 
   /**

@@ -10,7 +10,7 @@ import {
 import '@xyflow/react/dist/style.css';
 import { nodeTypes } from './nodes';
 import useWorkflowStore from '../store/workflowStore';
-import type { WorkflowNode, WorkflowEdge, NodeData, StartConfig } from '../types/workflow.types';
+import type { WorkflowNode, WorkflowPeer, NodeData, StartConfig } from '../types/workflow.types';
 
 interface WorkflowCanvasProps {
   onDrop: (event: React.DragEvent) => void;
@@ -24,15 +24,15 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({ onDrop, onDragOver, set
   
   const {
     nodes,
-    edges,
+    peers,
     onNodesChange,
-    onEdgesChange,
+    onPeersChange,
     onConnect,
     selectNode,
-    selectEdge,
+    selectPeer,
     selectedNode,
-    selectedEdge,
-    deleteEdge,
+    selectedPeer,
+    deletePeer,
     deleteNode,
     addNode,
     setRightSidebarVisible,
@@ -79,20 +79,20 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({ onDrop, onDragOver, set
   }, [selectNode, setRightSidebarVisible]);
   
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const onEdgeClick = useCallback((_event: React.MouseEvent, edge: any) => {
+  const onPeerClick = useCallback((_event: React.MouseEvent, peer: any) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    selectEdge(edge as any);
-  }, [selectEdge]);
+    selectPeer(peer as any);
+  }, [selectPeer]);
 
-  // Handle edge context menu (right-click)
-  const onEdgeContextMenu = useCallback((event: React.MouseEvent, edge: WorkflowEdge) => {
+  // Handle peer context menu (right-click)
+  const onPeerContextMenu = useCallback((event: React.MouseEvent, peer: WorkflowPeer) => {
     event.preventDefault();
     const confirmDelete = window.confirm('Delete this connection?');
     if (confirmDelete) {
-      deleteEdge(edge.id);
-      selectEdge(null);
+      deletePeer(peer.id);
+      selectPeer(null);
     }
-  }, [deleteEdge, selectEdge]);
+  }, [deletePeer, selectPeer]);
 
   // Handle node and edge deletion with keyboard shortcut
   useEffect(() => {
@@ -122,25 +122,25 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({ onDrop, onDragOver, set
           event.preventDefault();
           deleteNode(selectedNode.id);
           selectNode(null);
-        } else if (selectedEdge) {
+        } else if (selectedPeer) {
           event.preventDefault();
-          deleteEdge(selectedEdge.id);
-          selectEdge(null);
+          deletePeer(selectedPeer.id);
+          selectPeer(null);
         }
       }
     };
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [selectedNode, selectedEdge, deleteNode, deleteEdge, selectNode, selectEdge]);
+  }, [selectedNode, selectedPeer, deleteNode, deletePeer, selectNode, selectPeer]);
   
   const onPaneClick = useCallback(() => {
     selectNode(null);
-    selectEdge(null);
-  }, [selectNode, selectEdge]);
+    selectPeer(null);
+  }, [selectNode, selectPeer]);
 
   // Custom connection validation to ensure proper handle connections and sequential order
-  const isValidConnection = useCallback((connection: WorkflowEdge | Connection) => {
+  const isValidConnection = useCallback((connection: WorkflowPeer | Connection) => {
     // Ensure we're connecting from output (source) to input (target)
     // Source handles should be 'output', 'yes', or 'no'
     // Target handles should be 'input'
@@ -165,8 +165,8 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({ onDrop, onDragOver, set
     // Restrict start nodes to only connect to one condition node
     if (sourceNode.type === 'start') {
       // Check if start node already has outgoing connections to other targets
-      const existingConnections = edges.filter(edge => 
-        edge.source === connection.source && edge.target !== connection.target
+      const existingConnections = peers.filter(peer => 
+        peer.source === connection.source && peer.target !== connection.target
       );
       if (existingConnections.length > 0) {
         showToast('Start node can only connect to one condition node');
@@ -216,7 +216,7 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({ onDrop, onDragOver, set
     }
 
     return true;
-  }, [nodes, edges, showToast]);
+  }, [nodes, peers, showToast]);
 
   // Handle connection line style during drag
   const connectionLineStyle = {
@@ -289,7 +289,7 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({ onDrop, onDragOver, set
     );
   }, []);
   
-  const edgeOptions = {
+  const peerOptions = {
     animated: true,
     style: { stroke: '#8c9196', strokeWidth: 2 },
     markerEnd: {
@@ -304,20 +304,20 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({ onDrop, onDragOver, set
     <div ref={reactFlowWrapper} style={{ width: '100%', height: '100%' }}>
       <ReactFlow
         nodes={nodes}
-        edges={edges}
+        edges={peers}
         onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
+        onEdgesChange={onPeersChange}
         onConnect={onConnect}
         onInit={onInit}
         onNodeClick={onNodeClick}
-        onEdgeClick={onEdgeClick}
-        onEdgeContextMenu={onEdgeContextMenu}
+        onEdgeClick={onPeerClick}
+        onEdgeContextMenu={onPeerContextMenu}
         onPaneClick={onPaneClick}
         onDrop={onDrop}
         onDragOver={onDragOver}
         nodeTypes={nodeTypes}
         connectionMode={ConnectionMode.Loose}
-        defaultEdgeOptions={edgeOptions}
+        defaultEdgeOptions={peerOptions}
         isValidConnection={isValidConnection}
         connectionLineStyle={connectionLineStyle}
         connectionLineComponent={connectionLineComponent}

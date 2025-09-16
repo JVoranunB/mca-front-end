@@ -85,7 +85,7 @@ export const sampleWorkflows: Workflow[] = [
         }
       }
     ],
-    edges: [
+    peers: [
       {
         id: 'e45',
         source: 'start-7',
@@ -207,7 +207,7 @@ export const sampleWorkflows: Workflow[] = [
         }
       }
     ],
-    edges: [
+    peers: [
       {
         id: 'e1',
         source: 'start-1',
@@ -362,7 +362,7 @@ export const sampleWorkflows: Workflow[] = [
         }
       }
     ],
-    edges: [
+    peers: [
       {
         id: 'e53',
         source: 'start-10',
@@ -506,7 +506,7 @@ export const sampleWorkflows: Workflow[] = [
         }
       }
     ],
-    edges: [
+    peers: [
       {
         id: 'e10',
         source: 'start-4',
@@ -638,7 +638,7 @@ export const sampleWorkflows: Workflow[] = [
         }
       }
     ],
-    edges: [
+    peers: [
       {
         id: 'e58',
         source: 'start-11',
@@ -662,5 +662,5 @@ export const sampleWorkflows: Workflow[] = [
         label: 'No'
       }
     ]
-  }
+  }  
 ];

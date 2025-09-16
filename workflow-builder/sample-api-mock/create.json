@@ -1,0 +1,147 @@
+{  
+  "id": "sample-12",
+  "name": "Simple  Notification",
+  "description": "Send notification when customer points",
+  "version": "1.0",
+  "status": "draft",
+  "merchantId": "SHOP001",
+  "trigger_type": "event-based",
+  "created_date": "2024-01-16T11:00:00Z",
+  "updated_date": "2024-01-16T11:00:00Z",
+  "actions": [
+    {
+      "action_id": "contact-enrollment-trigger",
+      "key": "a1",
+      "type": "trigger",
+      "info": {
+        "id": "start-7",
+        "type": "start",
+        "position": { "x": 100, "y": 300 },
+        "data": {
+          "label": "Points Update Trigger",
+          "type": "start",
+          "description": "Triggers when customer points balance changes",
+          "status": "active",
+          "config": {
+            "label": "Points Update Trigger",
+            "description": "Monitor points balance updates",
+            "merchantId": "SHOP001",
+            "dataSource": "CRM",
+            "triggerCategory": "event",
+            "eventType": "points_updated",
+            "changeStreamEnabled": true,
+            "collections": ["contacts"]
+          }
+        }
+      },
+      "config": {
+        "event": "user_info_created",
+        "conditions": "true"
+      },
+      "mapper": null
+    },
+    {
+      "action_id": "query-action",
+      "key": "a2",
+      "type": "condition",
+      "info": {
+        "id": "condition-7",
+        "type": "condition",
+        "position": { "x": 700, "y": 300 },
+        "data": {
+          "label": "Points > 1000",
+          "type": "condition",
+          "description": "Check if points balance exceeds 1000",
+          "status": "active",
+          "conditions": [
+            {
+              "id": "cond-7",
+              "dataSource": "CRM",
+              "collection": "contacts",
+              "field": "point_balance",
+              "fieldType": "number",
+              "operator": "greater_than",
+              "value": 1000
+            }
+          ]
+        }
+      },
+      "mapper": {
+        "query": {
+          "mode": "expression",
+          "value": "{\"users\":{\"limit\":5,\"select\":[\"user_id\",\"first_name\",\"last_name\",\"points_balance\",\"id_card\"],\"where\":{\"and\":[{\"status\":\"ACTIVE\"},{\"points_balance\":{\"\\u003e\":100}},{\"user_id\":\"684bc1b694537bbbc606660a\"}]}}}"
+        }
+      }
+    },
+    {
+      "action_id": "slack-action",
+      "key": "a3",
+      "type": "action",
+      "info": {
+        "id": "action-26",
+        "type": "action",
+        "position": { "x": 1300, "y": 200 },
+        "data": {
+          "label": "Send Slack notification",
+          "type": "action",
+          "description": "Notify team about high-value customer order",
+          "status": "active",
+          "config": {
+            "message": "🎉 High-value customer alert! ${customer_name} just placed a ${order_total} order. Consider reaching out for personalized service.",
+            "channel": "#customer-success",
+            "username": "Order Bot",
+            "includeCustomerData": true,
+            "attachments": []
+          }
+        }
+      },
+      "config": {        
+      },
+      "mapper": {
+        "value": {
+          "mode": "expression",
+          "value": "'Welcome ' + a1.output.value.user_id + '!'"
+        }
+      }
+    }
+  ],
+  "peers": [
+    {
+      "parent_key": "a1",
+      "child_key": "a2",
+      "meta_output": "triggered",
+      "info": {
+        "id": "e45",
+        "source": "start-7",
+        "target": "condition-7",
+        "animated": true
+      }
+    },
+    {
+      "parent_key": "a2",
+      "child_key": "a3",
+      "meta_output": "yes",
+      "info": {
+        "id": "e46-yes",
+        "source": "condition-7",
+        "target": "action-26",
+        "sourceHandle": "yes",
+        "animated": true,
+        "label": "Yes"
+      }
+    },
+    {
+      "parent_key": "a2",
+      "child_key": "a3",
+      "meta_output": "no",
+      "info": {
+        "id": "e47-no",
+        "source": "condition-7",
+        "target": "log-7",
+        "sourceHandle": "no",
+        "animated": true,
+        "label": "No"
+      }
+    }
+  ]
+}
