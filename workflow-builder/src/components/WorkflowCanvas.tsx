@@ -23,31 +23,31 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({ onDrop, onDragOver, set
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   
   const {
-    nodes,
+    actions,
     peers,
-    onNodesChange,
+    onActionsChange,
     onPeersChange,
     onConnect,
-    selectNode,
+    selectAction,
     selectPeer,
-    selectedNode,
+    selectedAction,
     selectedPeer,
     deletePeer,
-    deleteNode,
-    addNode,
+    deleteAction,
+    addAction,
     setRightSidebarVisible,
     showToast
   } = useWorkflowStore();
   
-  // Auto-create start node when canvas is empty
+  // Auto-create start action when canvas is empty
   useEffect(() => {
-    const hasStartNode = nodes.some(node => node.type === 'start');
+    const hasStartAction = actions.some(action => action.type === 'start');
     
-    // Only add start node if there are no start-type nodes
-    // Store now handles duplicate prevention, so we can safely call addNode
-    if (!hasStartNode) {
-      const startNode: WorkflowNode = {
-        id: 'start-node',
+    // Only add start action if there are no start-type actions
+    // Store now handles duplicate prevention, so we can safely call addAction
+    if (!hasStartAction) {
+      const startAction: WorkflowNode = {
+        id: 'start-action',
         type: 'start',
         position: { x: 250, y: 200 },
         data: {
@@ -63,20 +63,20 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({ onDrop, onDragOver, set
         } as NodeData
       };
       
-      addNode(startNode); // Store will handle duplicate prevention
+      addAction(startAction); // Store will handle duplicate prevention
     }
-  }, [nodes, addNode]);
+  }, [actions, addAction]);
   
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onInit = (instance: any) => {
     setReactFlowInstance(instance);
   };
   
-  const onNodeClick = useCallback((_event: React.MouseEvent, node: WorkflowNode) => {
-    selectNode(node);
-    // Auto-open right sidebar when a node is selected
+  const onActionClick = useCallback((_event: React.MouseEvent, action: WorkflowNode) => {
+    selectAction(action);
+    // Auto-open right sidebar when an action is selected
     setRightSidebarVisible(true);
-  }, [selectNode, setRightSidebarVisible]);
+  }, [selectAction, setRightSidebarVisible]);
   
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onPeerClick = useCallback((_event: React.MouseEvent, peer: any) => {
@@ -113,15 +113,15 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({ onDrop, onDragOver, set
       }
 
       if (event.key === 'Delete' || event.key === 'Backspace') {
-        if (selectedNode) {
-          // Prevent deletion of start nodes
-          if (selectedNode.type === 'start') {
-            console.log('Cannot delete start node');
+        if (selectedAction) {
+          // Prevent deletion of start actions
+          if (selectedAction.type === 'start') {
+            console.log('Cannot delete start action');
             return;
           }
           event.preventDefault();
-          deleteNode(selectedNode.id);
-          selectNode(null);
+          deleteAction(selectedAction.id);
+          selectAction(null);
         } else if (selectedPeer) {
           event.preventDefault();
           deletePeer(selectedPeer.id);
@@ -132,12 +132,12 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({ onDrop, onDragOver, set
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [selectedNode, selectedPeer, deleteNode, deletePeer, selectNode, selectPeer]);
+  }, [selectedAction, selectedPeer, deleteAction, deletePeer, selectAction, selectPeer]);
   
   const onPaneClick = useCallback(() => {
-    selectNode(null);
+    selectAction(null);
     selectPeer(null);
-  }, [selectNode, selectPeer]);
+  }, [selectAction, selectPeer]);
 
   // Custom connection validation to ensure proper handle connections and sequential order
   const isValidConnection = useCallback((connection: WorkflowPeer | Connection) => {
@@ -154,69 +154,69 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({ onDrop, onDragOver, set
       return false;
     }
 
-    // Get source and target nodes
-    const sourceNode = nodes.find(node => node.id === connection.source);
-    const targetNode = nodes.find(node => node.id === connection.target);
+    // Get source and target actions
+    const sourceAction = actions.find(action => action.id === connection.source);
+    const targetAction = actions.find(action => action.id === connection.target);
     
-    if (!sourceNode || !targetNode) {
+    if (!sourceAction || !targetAction) {
       return false;
     }
 
-    // Restrict start nodes to only connect to one condition node
-    if (sourceNode.type === 'start') {
-      // Check if start node already has outgoing connections to other targets
+    // Restrict start actions to only connect to one condition action
+    if (sourceAction.type === 'start') {
+      // Check if start action already has outgoing connections to other targets
       const existingConnections = peers.filter(peer => 
         peer.source === connection.source && peer.target !== connection.target
       );
       if (existingConnections.length > 0) {
-        showToast('Start node can only connect to one condition node');
+        showToast('Start action can only connect to one condition action');
         return false;
       }
       
-      // Only allow connections to condition nodes
-      if (targetNode.type !== 'condition') {
-        showToast('Start node can only connect to condition nodes');
+      // Only allow connections to condition actions
+      if (targetAction.type !== 'condition') {
+        showToast('Start action can only connect to condition actions');
         return false;
       }
     }
 
-    // Sequential connection validation based on node positions
-    // Nodes can only connect to nodes that are positioned to their right and within reasonable vertical range
-    const sourceX = sourceNode.position.x;
-    const sourceY = sourceNode.position.y;
-    const targetX = targetNode.position.x;
+    // Sequential connection validation based on action positions
+    // Actions can only connect to actions that are positioned to their right and within reasonable vertical range
+    const sourceX = sourceAction.position.x;
+    const sourceY = sourceAction.position.y;
+    const targetX = targetAction.position.x;
 
     // Target must be to the right of source (left-to-right flow)
     if (targetX <= sourceX + 50) { // Adding 50px buffer for same-column positioning
       return false;
     }
 
-    // Prevent connecting to nodes that are too far to the right (skip prevention)
-    // Find all nodes between source and target horizontally
-    const nodesBetween = nodes.filter(node => {
-      const nodeX = node.position.x;
-      const nodeY = node.position.y;
+    // Prevent connecting to actions that are too far to the right (skip prevention)
+    // Find all actions between source and target horizontally
+    const actionsBetween = actions.filter(action => {
+      const actionX = action.position.x;
+      const actionY = action.position.y;
       
-      // Node is between source and target horizontally
-      const isBetweenHorizontally = nodeX > sourceX + 50 && nodeX < targetX - 50;
+      // Action is between source and target horizontally
+      const isBetweenHorizontally = actionX > sourceX + 50 && actionX < targetX - 50;
       
-      // Node is within reasonable vertical range (same workflow level)
-      const verticalDistance = Math.abs(nodeY - sourceY);
+      // Action is within reasonable vertical range (same workflow level)
+      const verticalDistance = Math.abs(actionY - sourceY);
       const isInVerticalRange = verticalDistance < 200; // Allow some vertical spacing
       
-      // Exclude the source and target nodes themselves
+      // Exclude the source and target actions themselves
       return isBetweenHorizontally && isInVerticalRange && 
-             node.id !== connection.source && node.id !== connection.target;
+             action.id !== connection.source && action.id !== connection.target;
     });
 
-    // If there are nodes in between, prevent the connection (no crossing over)
-    if (nodesBetween.length > 0) {
-      showToast('Cannot skip over intermediate nodes');
+    // If there are actions in between, prevent the connection (no crossing over)
+    if (actionsBetween.length > 0) {
+      showToast('Cannot skip over intermediate actions');
       return false;
     }
 
     return true;
-  }, [nodes, peers, showToast]);
+  }, [actions, peers, showToast]);
 
   // Handle connection line style during drag
   const connectionLineStyle = {
@@ -303,13 +303,13 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({ onDrop, onDragOver, set
   return (
     <div ref={reactFlowWrapper} style={{ width: '100%', height: '100%' }}>
       <ReactFlow
-        nodes={nodes}
+        nodes={actions}
         edges={peers}
-        onNodesChange={onNodesChange}
+        onNodesChange={onActionsChange}
         onEdgesChange={onPeersChange}
         onConnect={onConnect}
         onInit={onInit}
-        onNodeClick={onNodeClick}
+        onNodeClick={onActionClick}
         onEdgeClick={onPeerClick}
         onEdgeContextMenu={onPeerContextMenu}
         onPaneClick={onPaneClick}

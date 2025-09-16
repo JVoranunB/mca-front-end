@@ -1,15 +1,15 @@
 import { create } from 'zustand';
 import { applyNodeChanges, applyEdgeChanges } from '@xyflow/react';
 import type { Connection, NodeChange, EdgeChange } from '@xyflow/react';
-import type { WorkflowNode, WorkflowPeer, Workflow, ValidationError, WorkflowSummary, TriggerType, StartConfig } from '../types/workflow.types';
+import type { WorkflowNode, WorkflowPeer, Workflow, ValidationError, WorkflowSummary, TriggerType, StartConfig, WorkflowCondition } from '../types/workflow.types';
 import { workflowApiService } from '../services/workflowApi';
 import { WorkflowTransformer } from '../utils/workflowTransformer';
 import { sampleWorkflows } from '../data/sampleWorkflows';
 
 interface WorkflowState {
-  nodes: WorkflowNode[];
+  actions: WorkflowNode[];
   peers: WorkflowPeer[];
-  selectedNode: WorkflowNode | null;
+  selectedAction: WorkflowNode | null;
   selectedPeer: WorkflowPeer | null;
   workflows: Workflow[];
   currentWorkflow: Workflow | null;
@@ -22,19 +22,19 @@ interface WorkflowState {
   toastActive: boolean;
   toastMessage: string;
   
-  onNodesChange: (changes: NodeChange[]) => void;
+  onActionsChange: (changes: NodeChange[]) => void;
   onPeersChange: (changes: EdgeChange[]) => void;
   onConnect: (params: Connection) => void;
   
-  addNode: (node: WorkflowNode) => void;
-  updateNode: (nodeId: string, data: Partial<WorkflowNode['data']>) => void;
-  deleteNode: (nodeId: string) => void;
+  addAction: (action: WorkflowNode) => void;
+  updateAction: (actionId: string, data: Partial<WorkflowNode['data']>) => void;
+  deleteAction: (actionId: string) => void;
   
   addPeer: (peer: WorkflowPeer) => void;
   updatePeer: (peerId: string, data: Partial<WorkflowPeer>) => void;
   deletePeer: (peerId: string) => void;
   
-  selectNode: (node: WorkflowNode | null) => void;
+  selectAction: (action: WorkflowNode | null) => void;
   selectPeer: (peer: WorkflowPeer | null) => void;
   
   saveWorkflow: (name: string, description?: string) => Promise<{ success: boolean; error?: string }>;
@@ -65,6 +65,15 @@ interface WorkflowState {
   
   showToast: (message: string) => void;
   hideToast: () => void;
+  
+  // Backward compatibility methods for nodes → actions transition
+  get nodes(): WorkflowNode[];
+  addNode: (node: WorkflowNode) => void;
+  updateNode: (nodeId: string, data: Partial<WorkflowNode['data']>) => void;
+  deleteNode: (nodeId: string) => void;
+  selectNode: (node: WorkflowNode | null) => void;
+  selectedNode: WorkflowNode | null;
+  onNodesChange: (changes: NodeChange[]) => void;
 }
 
 // Helper function to initialize workflows with samples if localStorage is empty
@@ -79,9 +88,9 @@ const initializeWorkflows = (): Workflow[] => {
 };
 
 const useWorkflowStore = create<WorkflowState>((set, get) => ({
-  nodes: [],
+  actions: [],
   peers: [],
-  selectedNode: null,
+  selectedAction: null,
   selectedPeer: null,
   workflows: initializeWorkflows(),
   currentWorkflow: null,
@@ -94,9 +103,9 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
   toastActive: false,
   toastMessage: '',
   
-  onNodesChange: (changes) => {
+  onActionsChange: (changes) => {
     set({
-      nodes: applyNodeChanges(changes, get().nodes) as WorkflowNode[],
+      actions: applyNodeChanges(changes, get().actions) as WorkflowNode[],
       isDirty: true
     });
   },
@@ -138,45 +147,45 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
     }));
   },
   
-  addNode: (node) => {
+  addAction: (action) => {
     set((state) => {
-      // Check if node with same ID already exists
-      const existingNode = state.nodes.find(n => n.id === node.id);
-      if (existingNode) {
-        console.warn(`Node with id "${node.id}" already exists, skipping duplicate`);
+      // Check if action with same ID already exists
+      const existingAction = state.actions.find(a => a.id === action.id);
+      if (existingAction) {
+        console.warn(`Action with id "${action.id}" already exists, skipping duplicate`);
         return state; // Return unchanged state
       }
       
       return {
-        nodes: [...state.nodes, node],
+        actions: [...state.actions, action],
         isDirty: true
       };
     });
   },
   
-  updateNode: (nodeId, data) => {
+  updateAction: (actionId, data) => {
     set((state) => ({
-      nodes: state.nodes.map((node) =>
-        node.id === nodeId ? { ...node, data: { ...node.data, ...data } } : node
+      actions: state.actions.map((action) =>
+        action.id === actionId ? { ...action, data: { ...action.data, ...data } } : action
       ),
       isDirty: true
     }));
   },
   
-  deleteNode: (nodeId) => {
+  deleteAction: (actionId) => {
     set((state) => {
-      const nodeToDelete = state.nodes.find(node => node.id === nodeId);
+      const actionToDelete = state.actions.find(action => action.id === actionId);
       
-      // Prevent deletion of start nodes
-      if (nodeToDelete?.type === 'start') {
-        console.warn('Cannot delete start node');
+      // Prevent deletion of start actions
+      if (actionToDelete?.type === 'start') {
+        console.warn('Cannot delete start action');
         return state;
       }
       
       return {
-        nodes: state.nodes.filter((node) => node.id !== nodeId),
-        peers: state.peers.filter((peer) => peer.source !== nodeId && peer.target !== nodeId),
-        selectedNode: state.selectedNode?.id === nodeId ? null : state.selectedNode,
+        actions: state.actions.filter((action) => action.id !== actionId),
+        peers: state.peers.filter((peer) => peer.source !== actionId && peer.target !== actionId),
+        selectedAction: state.selectedAction?.id === actionId ? null : state.selectedAction,
         isDirty: true
       };
     });
@@ -214,16 +223,16 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
     }));
   },
   
-  selectNode: (node) => {
+  selectAction: (action) => {
     set({ 
-      selectedNode: node, 
+      selectedAction: action, 
       selectedPeer: null,
-      rightSidebarVisible: node !== null
+      rightSidebarVisible: action !== null
     });
   },
   
   selectPeer: (peer) => {
-    set({ selectedPeer: peer, selectedNode: null });
+    set({ selectedPeer: peer, selectedAction: null });
   },
   
   saveWorkflow: async (name, description) => {
@@ -241,7 +250,7 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
         name,
         description: description || '',
         triggerType,
-        nodes: currentState.nodes,
+        actions: currentState.actions,
         peers: currentState.peers,
         createdAt: currentState.currentWorkflow?.createdAt || new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -313,7 +322,7 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
           name,
           description: description || '',
           triggerType,
-          nodes: currentState.nodes,
+          actions: currentState.actions,
           peers: currentState.peers,
           createdAt: currentState.currentWorkflow?.createdAt || new Date().toISOString(),
           updatedAt: new Date().toISOString(),
@@ -354,10 +363,10 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
     const workflow = get().workflows.find((w) => w.id === workflowId);
     if (workflow) {
       set({
-        nodes: workflow.nodes,
+        actions: workflow.actions,
         peers: workflow.peers,
         currentWorkflow: workflow,
-        selectedNode: null,
+        selectedAction: null,
         selectedPeer: null,
         rightSidebarVisible: false,
         isDirty: false
@@ -367,9 +376,9 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
   
   clearWorkflow: () => {
     set({
-      nodes: [],
+      actions: [],
       peers: [],
-      selectedNode: null,
+      selectedAction: null,
       selectedPeer: null,
       currentWorkflow: null,
       validationErrors: [],
@@ -435,29 +444,29 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
   
   validateWorkflow: () => {
     const errors: ValidationError[] = [];
-    const { nodes, peers } = get();
+    const { actions, peers } = get();
     
-    const startNodes = nodes.filter((n) => n.data.type === 'start');
-    if (startNodes.length === 0) {
+    const startActions = actions.filter((a) => a.data.type === 'start');
+    if (startActions.length === 0) {
       errors.push({
-        message: 'Workflow must have a start node',
+        message: 'Workflow must have a start action',
         severity: 'error'
       });
-    } else if (startNodes.length > 1) {
+    } else if (startActions.length > 1) {
       errors.push({
-        message: 'Workflow should have only one start node',
+        message: 'Workflow should have only one start action',
         severity: 'warning'
       });
     }
     
-    // Validate start node configurations
-    startNodes.forEach((node) => {
-      const config = node.data.config as StartConfig | undefined;
+    // Validate start action configurations
+    startActions.forEach((action) => {
+      const config = action.data.config as StartConfig | undefined;
       
       if (!config) {
         errors.push({
-          nodeId: node.id,
-          message: `Start node "${node.data.label}" is missing configuration`,
+          nodeId: action.id,
+          message: `Start action "${action.data.label}" is missing configuration`,
           severity: 'error'
         });
         return;
@@ -465,34 +474,34 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
       
       if (!config.dataSource) {
         errors.push({
-          nodeId: node.id,
-          message: `Start node "${node.data.label}" must specify a data source`,
+          nodeId: action.id,
+          message: `Start action "${action.data.label}" must specify a data source`,
           severity: 'error'
         });
       }
     });
     
-    nodes.forEach((node) => {
-      const hasIncoming = peers.some((p) => p.target === node.id);
+    actions.forEach((action) => {
+      const hasIncoming = peers.some((p) => p.target === action.id);
       
-      if (node.data.type !== 'start' && !hasIncoming) {
+      if (action.data.type !== 'start' && !hasIncoming) {
         errors.push({
-          nodeId: node.id,
-          message: `Node "${node.data.label}" has no incoming connections`,
+          nodeId: action.id,
+          message: `Action "${action.data.label}" has no incoming connections`,
           severity: 'warning'
         });
       }
       
-      // Condition node validation
-      if (node.data.type === 'condition') {
-        const yesEdge = peers.find((p) => p.source === node.id && p.sourceHandle === 'yes');
-        const noEdge = peers.find((p) => p.source === node.id && p.sourceHandle === 'no');
+      // Condition action validation
+      if (action.data.type === 'condition') {
+        const yesEdge = peers.find((p) => p.source === action.id && p.sourceHandle === 'yes');
+        const noEdge = peers.find((p) => p.source === action.id && p.sourceHandle === 'no');
         
         // Only require the "yes" branch - "no" branch is optional
         if (!yesEdge) {
           errors.push({
-            nodeId: node.id,
-            message: `Condition node "${node.data.label}" must have a Yes branch connected`,
+            nodeId: action.id,
+            message: `Condition action "${action.data.label}" must have a Yes branch connected`,
             severity: 'error'
           });
         }
@@ -500,35 +509,35 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
         // Optional warning when no "no" branch is connected
         if (!noEdge) {
           errors.push({
-            nodeId: node.id,
-            message: `Condition node "${node.data.label}" has no No branch connected`,
+            nodeId: action.id,
+            message: `Condition action "${action.data.label}" has no No branch connected`,
             severity: 'warning'
           });
         }
         
         // Validate conditions
-        const conditions = node.data.conditions || [];
+        const conditions = action.data.conditions || [];
         if (conditions.length === 0) {
           errors.push({
-            nodeId: node.id,
-            message: `Condition node "${node.data.label}" must have at least one condition`,
+            nodeId: action.id,
+            message: `Condition action "${action.data.label}" must have at least one condition`,
             severity: 'error'
           });
         }
         
-        conditions.forEach((condition, index) => {
+        conditions.forEach((condition: WorkflowCondition, index: number) => {
           if (!condition.dataSource) {
             errors.push({
-              nodeId: node.id,
-              message: `Condition ${index + 1} in "${node.data.label}" must specify a data source`,
+              nodeId: action.id,
+              message: `Condition ${index + 1} in "${action.data.label}" must specify a data source`,
               severity: 'error'
             });
           }
           
           if (!condition.field) {
             errors.push({
-              nodeId: node.id,
-              message: `Condition ${index + 1} in "${node.data.label}" must specify a field`,
+              nodeId: action.id,
+              message: `Condition ${index + 1} in "${action.data.label}" must specify a field`,
               severity: 'error'
             });
           }
@@ -536,8 +545,8 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
           if (!['is_empty', 'is_not_empty'].includes(condition.operator) && 
               (condition.value === undefined || condition.value === '')) {
             errors.push({
-              nodeId: node.id,
-              message: `Condition ${index + 1} in "${node.data.label}" must specify a value for operator "${condition.operator}"`,
+              nodeId: action.id,
+              message: `Condition ${index + 1} in "${action.data.label}" must specify a value for operator "${condition.operator}"`,
               severity: 'error'
             });
           }
@@ -568,7 +577,7 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
       name: `New ${triggerType === 'event-based' ? 'Event-Based' : 'Schedule-Based'} Workflow`,
       description: '',
       triggerType,
-      nodes: [],
+      actions: [],
       peers: [],
       createdAt: now,
       updatedAt: now,
@@ -581,9 +590,9 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
     set({
       workflows,
       currentWorkflow: workflow,
-      nodes: [],
+      actions: [],
       peers: [],
-      selectedNode: null,
+      selectedAction: null,
       selectedPeer: null,
       rightSidebarVisible: false,
       validationErrors: [],
@@ -641,7 +650,7 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
       name: workflow.name,
       triggerType: workflow.triggerType,
       status: workflow.status,
-      nodeCount: workflow.nodes.length,
+      actionCount: workflow.actions.length,
       lastModified: workflow.updatedAt,
       lastTriggered: workflow.lastTriggered
     };
@@ -686,14 +695,29 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
     set({ 
       workflows: sampleWorkflows,
       currentWorkflow: null,
-      nodes: [],
+      actions: [],
       peers: [],
-      selectedNode: null,
+      selectedAction: null,
       selectedPeer: null,
       validationErrors: [],
       isDirty: false
     });
-  }
+  },
+  
+  // Backward compatibility getters and methods for nodes → actions transition
+  get nodes() {
+    return get().actions;
+  },
+  
+  get selectedNode() {
+    return get().selectedAction;
+  },
+  
+  addNode: (node) => get().addAction(node),
+  updateNode: (nodeId, data) => get().updateAction(nodeId, data),
+  deleteNode: (nodeId) => get().deleteAction(nodeId),
+  selectNode: (node) => get().selectAction(node),
+  onNodesChange: (changes) => get().onActionsChange(changes)
 }));
 
 export default useWorkflowStore;

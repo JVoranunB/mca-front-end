@@ -415,8 +415,8 @@ const TopBar: React.FC<TopBarProps> = ({ onBackToList }) => {
                   {workflows.find(w => w.id === selectedWorkflowId)?.description || 'No description'}
                 </Text>
                 <Text as="p" variant="bodyMd">
-                  <strong>Nodes:</strong>{' '}
-                  {workflows.find(w => w.id === selectedWorkflowId)?.nodes.length || 0}
+                  <strong>Actions:</strong>{' '}
+                  {workflows.find(w => w.id === selectedWorkflowId)?.actions.length || 0}
                 </Text>
                 <Button
                   icon={DeleteIcon}

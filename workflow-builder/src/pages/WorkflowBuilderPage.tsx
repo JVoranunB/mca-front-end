@@ -59,11 +59,11 @@ const WorkflowBuilderPage = () => {
           loadWorkflow(workflowId);
         }
       } else {
-        // Legacy route - load sample if no nodes exist
-        if (store.nodes.length === 0 && store.peers.length === 0) {
+        // Legacy route - load sample if no actions exist
+        if (store.actions.length === 0 && store.peers.length === 0) {
           const firstSample = sampleWorkflows[0];
           if (firstSample) {
-            firstSample.nodes.forEach((node: WorkflowNode) => store.addNode(node));
+            firstSample.actions.forEach((action: WorkflowNode) => store.addAction(action));
             firstSample.peers.forEach((peer) => store.addPeer(peer));
           }
         }

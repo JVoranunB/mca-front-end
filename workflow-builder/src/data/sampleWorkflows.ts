@@ -9,7 +9,7 @@ export const sampleWorkflows: Workflow[] = [
     status: 'active',
     createdAt: '2024-01-16T11:00:00Z',
     updatedAt: '2024-01-16T11:00:00Z',
-    nodes: [
+    actions: [
       {
         id: 'start-7',
         type: 'start',
@@ -118,7 +118,7 @@ export const sampleWorkflows: Workflow[] = [
     status: 'draft',
     createdAt: '2024-01-15T10:00:00Z',
     updatedAt: '2024-01-15T10:00:00Z',
-    nodes: [
+    actions: [
       {
         id: 'start-1',
         type: 'start',
@@ -248,7 +248,7 @@ export const sampleWorkflows: Workflow[] = [
     status: 'active',
     createdAt: '2024-01-16T09:00:00Z',
     updatedAt: '2024-01-16T09:00:00Z',
-    nodes: [
+    actions: [
       {
         id: 'start-10',
         type: 'start',
@@ -411,7 +411,7 @@ export const sampleWorkflows: Workflow[] = [
     status: 'draft',
     createdAt: '2024-01-15T13:00:00Z',
     updatedAt: '2024-01-15T13:00:00Z',
-    nodes: [
+    actions: [
       {
         id: 'start-4',
         type: 'start',
@@ -547,7 +547,7 @@ export const sampleWorkflows: Workflow[] = [
     status: 'active',
     createdAt: '2024-01-16T14:00:00Z',
     updatedAt: '2024-01-16T14:00:00Z',
-    nodes: [
+    actions: [
       {
         id: 'start-11',
         type: 'start',

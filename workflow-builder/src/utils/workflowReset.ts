@@ -28,7 +28,7 @@ export const checkCurrentWorkflows = () => {
     console.log(`Found ${parsed.length} workflows:`, parsed.map((w: Workflow) => ({ 
       name: w.name, 
       type: w.triggerType, 
-      nodes: w.nodes.length,
+      actions: w.actions.length,
       id: w.id 
     })));
     return parsed;

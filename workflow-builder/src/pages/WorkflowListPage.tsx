@@ -227,7 +227,7 @@ const WorkflowListPage = () => {
     </Link>,
     getTriggerTypeBadge(workflow.triggerType),
     getStatusBadge(workflow.status),
-    workflow.nodeCount.toString(),
+    workflow.actionCount.toString(),
     formatDate(workflow.lastModified),
     workflow.lastTriggered ? formatDate(workflow.lastTriggered) : '—',
     renderActions(workflow)

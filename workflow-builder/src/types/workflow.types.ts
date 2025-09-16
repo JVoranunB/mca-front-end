@@ -81,12 +81,17 @@ export interface WorkflowPeer {
 // Keep WorkflowEdge as alias for backward compatibility
 export type WorkflowEdge = WorkflowPeer;
 
+// Backward compatibility for nodes → actions transition
+export interface WorkflowWithNodes extends Omit<Workflow, 'actions'> {
+  nodes: WorkflowNode[];
+}
+
 export interface Workflow {
   id: string;
   name: string;
   description?: string;
   triggerType: TriggerType;
-  nodes: WorkflowNode[];
+  actions: WorkflowNode[];
   peers: WorkflowPeer[];
   createdAt: string;
   updatedAt: string;
@@ -99,7 +104,7 @@ export interface WorkflowSummary {
   name: string;
   triggerType: TriggerType;
   status: 'draft' | 'active' | 'paused';
-  nodeCount: number;
+  actionCount: number;
   lastModified: string;
   lastTriggered?: string;
 }

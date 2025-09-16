@@ -14,15 +14,15 @@ export class WorkflowTransformer {
     const nodeMapping: NodeMapping = {};
     let actionCounter = 1;
 
-    // Create mapping from node IDs to action keys
-    workflow.nodes.forEach((node) => {
-      nodeMapping[node.id] = `a${actionCounter}`;
+    // Create mapping from action IDs to action keys
+    workflow.actions.forEach((action) => {
+      nodeMapping[action.id] = `a${actionCounter}`;
       actionCounter++;
     });
 
-    // Transform nodes to actions
-    const actions: BackendWorkflowAction[] = workflow.nodes.map((node) => {
-      return this.transformNodeToAction(node, nodeMapping);
+    // Transform actions to backend actions
+    const actions: BackendWorkflowAction[] = workflow.actions.map((action) => {
+      return this.transformNodeToAction(action, nodeMapping);
     });
 
     // Transform peers to backend peers
@@ -45,10 +45,10 @@ export class WorkflowTransformer {
    * Extract merchantId from workflow nodes
    */
   private static extractMerchantId(workflow: Workflow): string {
-    // Look for merchantId in any node config
-    for (const node of workflow.nodes) {
-      if (node.data.config?.merchantId) {
-        return String(node.data.config.merchantId);
+    // Look for merchantId in any action config
+    for (const action of workflow.actions) {
+      if (action.data.config?.merchantId) {
+        return String(action.data.config.merchantId);
       }
     }
     return 'SHOP001'; // Default fallback
