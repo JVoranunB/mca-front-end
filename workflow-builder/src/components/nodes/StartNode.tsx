@@ -36,11 +36,11 @@ const StartNode = memo(({ data }: NodeProps) => {
               </Text>
             )}
             <Text as="p" variant="bodySm" tone="subdued">
-              Data Source: {startConfig?.dataSource || 'CRM'}
+              Data Source: {startConfig?.data_source || 'CRM'}
             </Text>
-            {startConfig?.merchantId && (
+            {startConfig?.merchant_id && (
               <Text as="p" variant="bodySm" tone="subdued">
-                Merchant: {startConfig.merchantId}
+                Merchant: {startConfig.merchant_id}
               </Text>
             )}
           </BlockStack>

@@ -76,6 +76,22 @@ interface WorkflowState {
   onNodesChange: (changes: NodeChange[]) => void;
 }
 
+// Helper function to migrate workflow from camelCase to snake_case
+const migrateWorkflow = (workflow: any): Workflow => {
+  return {
+    id: workflow.id,
+    name: workflow.name,
+    description: workflow.description,
+    trigger_type: workflow.trigger_type || workflow.triggerType,
+    actions: workflow.actions || workflow.nodes,
+    peers: workflow.peers,
+    created_at: workflow.created_at || workflow.createdAt,
+    updated_at: workflow.updated_at || workflow.updatedAt,
+    status: workflow.status,
+    last_triggered: workflow.last_triggered || workflow.lastTriggered
+  };
+};
+
 // Helper function to initialize workflows with samples if localStorage is empty
 const initializeWorkflows = (): Workflow[] => {
   const storedWorkflows = localStorage.getItem('workflows');
@@ -84,7 +100,15 @@ const initializeWorkflows = (): Workflow[] => {
     localStorage.setItem('workflows', JSON.stringify(sampleWorkflows));
     return sampleWorkflows;
   }
-  return JSON.parse(storedWorkflows);
+
+  const parsed = JSON.parse(storedWorkflows);
+  // Migrate any old format workflows to new snake_case format
+  const migratedWorkflows = parsed.map(migrateWorkflow);
+
+  // Save migrated workflows back to localStorage
+  localStorage.setItem('workflows', JSON.stringify(migratedWorkflows));
+
+  return migratedWorkflows;
 };
 
 const useWorkflowStore = create<WorkflowState>((set, get) => ({
@@ -135,8 +159,8 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
       id: uniqueId,
       source: params.source!,
       target: params.target!,
-      sourceHandle: params.sourceHandle || undefined,
-      targetHandle: params.targetHandle || undefined,
+      source_handle: params.sourceHandle || undefined,
+      target_handle: params.targetHandle || undefined,
       animated: true,
       label: params.sourceHandle === 'no' ? 'No' : params.sourceHandle === 'yes' ? 'Yes' : undefined,
     };
@@ -224,8 +248,8 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
   },
   
   selectAction: (action) => {
-    set({ 
-      selectedAction: action, 
+    set({
+      selectedAction: action,
       selectedPeer: null,
       rightSidebarVisible: action !== null
     });
@@ -249,11 +273,11 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
         id: currentState.currentWorkflow?.id || Date.now().toString(),
         name,
         description: description || '',
-        triggerType,
+        trigger_type: triggerType,
         actions: currentState.actions,
         peers: currentState.peers,
-        createdAt: currentState.currentWorkflow?.createdAt || new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        created_at: currentState.currentWorkflow?.created_at || new Date().toISOString(),
+        updated_at: new Date().toISOString(),
         status: currentState.currentWorkflow?.status || 'draft'
       };
       
@@ -321,11 +345,11 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
           id: currentState.currentWorkflow?.id || Date.now().toString(),
           name,
           description: description || '',
-          triggerType,
+          trigger_type: triggerType,
           actions: currentState.actions,
           peers: currentState.peers,
-          createdAt: currentState.currentWorkflow?.createdAt || new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
+          created_at: currentState.currentWorkflow?.created_at || new Date().toISOString(),
+          updated_at: new Date().toISOString(),
           status: currentState.currentWorkflow?.status || 'draft'
         };
         
@@ -403,7 +427,7 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
     const updatedWorkflow = {
       ...currentState.currentWorkflow,
       name,
-      updatedAt: new Date().toISOString()
+      updated_at: new Date().toISOString()
     };
 
     const workflows = currentState.workflows.map(w => 
@@ -425,8 +449,8 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
 
     const updatedWorkflow = {
       ...currentState.currentWorkflow,
-      triggerType,
-      updatedAt: new Date().toISOString()
+      trigger_type: triggerType,
+      updated_at: new Date().toISOString()
     };
 
     const workflows = currentState.workflows.map(w => 
@@ -465,16 +489,16 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
       
       if (!config) {
         errors.push({
-          nodeId: action.id,
+          node_id: action.id,
           message: `Start action "${action.data.label}" is missing configuration`,
           severity: 'error'
         });
         return;
       }
       
-      if (!config.dataSource) {
+      if (!config.data_source) {
         errors.push({
-          nodeId: action.id,
+          node_id: action.id,
           message: `Start action "${action.data.label}" must specify a data source`,
           severity: 'error'
         });
@@ -486,7 +510,7 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
       
       if (action.data.type !== 'start' && !hasIncoming) {
         errors.push({
-          nodeId: action.id,
+          node_id: action.id,
           message: `Action "${action.data.label}" has no incoming connections`,
           severity: 'warning'
         });
@@ -494,13 +518,13 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
       
       // Condition action validation
       if (action.data.type === 'condition') {
-        const yesEdge = peers.find((p) => p.source === action.id && p.sourceHandle === 'yes');
-        const noEdge = peers.find((p) => p.source === action.id && p.sourceHandle === 'no');
+        const yesEdge = peers.find((p) => p.source === action.id && p.source_handle === 'yes');
+        const noEdge = peers.find((p) => p.source === action.id && p.source_handle === 'no');
         
         // Only require the "yes" branch - "no" branch is optional
         if (!yesEdge) {
           errors.push({
-            nodeId: action.id,
+            node_id: action.id,
             message: `Condition action "${action.data.label}" must have a Yes branch connected`,
             severity: 'error'
           });
@@ -509,7 +533,7 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
         // Optional warning when no "no" branch is connected
         if (!noEdge) {
           errors.push({
-            nodeId: action.id,
+            node_id: action.id,
             message: `Condition action "${action.data.label}" has no No branch connected`,
             severity: 'warning'
           });
@@ -519,16 +543,16 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
         const conditions = action.data.conditions || [];
         if (conditions.length === 0) {
           errors.push({
-            nodeId: action.id,
+            node_id: action.id,
             message: `Condition action "${action.data.label}" must have at least one condition`,
             severity: 'error'
           });
         }
         
         conditions.forEach((condition: WorkflowCondition, index: number) => {
-          if (!condition.dataSource) {
+          if (!condition.data_source) {
             errors.push({
-              nodeId: action.id,
+              node_id: action.id,
               message: `Condition ${index + 1} in "${action.data.label}" must specify a data source`,
               severity: 'error'
             });
@@ -536,7 +560,7 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
           
           if (!condition.field) {
             errors.push({
-              nodeId: action.id,
+              node_id: action.id,
               message: `Condition ${index + 1} in "${action.data.label}" must specify a field`,
               severity: 'error'
             });
@@ -545,7 +569,7 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
           if (!['is_empty', 'is_not_empty'].includes(condition.operator) && 
               (condition.value === undefined || condition.value === '')) {
             errors.push({
-              nodeId: action.id,
+              node_id: action.id,
               message: `Condition ${index + 1} in "${action.data.label}" must specify a value for operator "${condition.operator}"`,
               severity: 'error'
             });
@@ -576,11 +600,11 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
       id: Date.now().toString(),
       name: `New ${triggerType === 'event-based' ? 'Event-Based' : 'Schedule-Based'} Workflow`,
       description: '',
-      triggerType,
+      trigger_type: triggerType,
       actions: [],
       peers: [],
-      createdAt: now,
-      updatedAt: now,
+      created_at: now,
+      updated_at: now,
       status: 'draft'
     };
     
@@ -611,10 +635,10 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
       ...originalWorkflow,
       id: Date.now().toString(),
       name: `${originalWorkflow.name} (Copy)`,
-      createdAt: now,
-      updatedAt: now,
+      created_at: now,
+      updated_at: now,
       status: 'draft',
-      lastTriggered: undefined
+      last_triggered: undefined
     };
     
     const workflows = [...get().workflows, duplicatedWorkflow];
@@ -633,7 +657,7 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
         return {
           ...workflow,
           status: newStatus as 'draft' | 'active' | 'paused',
-          updatedAt: new Date().toISOString()
+          updated_at: new Date().toISOString()
         };
       }
       return workflow;
@@ -648,11 +672,11 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
     return {
       id: workflow.id,
       name: workflow.name,
-      triggerType: workflow.triggerType,
+      trigger_type: workflow.trigger_type,
       status: workflow.status,
-      actionCount: workflow.actions.length,
-      lastModified: workflow.updatedAt,
-      lastTriggered: workflow.lastTriggered
+      action_count: workflow.actions.length,
+      last_modified: workflow.updated_at,
+      last_triggered: workflow.last_triggered
     };
   },
   
@@ -717,7 +741,38 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
   updateNode: (nodeId, data) => get().updateAction(nodeId, data),
   deleteNode: (nodeId) => get().deleteAction(nodeId),
   selectNode: (node) => get().selectAction(node),
-  onNodesChange: (changes) => get().onActionsChange(changes)
+  onNodesChange: (changes) => get().onActionsChange(changes),
+  
+  // Utility methods for camelCase → snake_case compatibility
+  convertToSnakeCase: (workflow: any): Workflow => {
+    return {
+      id: workflow.id,
+      name: workflow.name,
+      description: workflow.description,
+      trigger_type: workflow.triggerType || workflow.trigger_type,
+      actions: workflow.actions || workflow.nodes,
+      peers: workflow.peers,
+      created_at: workflow.createdAt || workflow.created_at,
+      updated_at: workflow.updatedAt || workflow.updated_at,
+      status: workflow.status,
+      last_triggered: workflow.lastTriggered || workflow.last_triggered
+    };
+  },
+  
+  convertToCamelCase: (workflow: Workflow): any => {
+    return {
+      id: workflow.id,
+      name: workflow.name,
+      description: workflow.description,
+      triggerType: workflow.trigger_type,
+      actions: workflow.actions,
+      peers: workflow.peers,
+      createdAt: workflow.created_at,
+      updatedAt: workflow.updated_at,
+      status: workflow.status,
+      lastTriggered: workflow.last_triggered
+    };
+  }
 }));
 
 export default useWorkflowStore;

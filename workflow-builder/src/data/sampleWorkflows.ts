@@ -5,10 +5,10 @@ export const sampleWorkflows: Workflow[] = [
     id: 'sample-7',
     name: 'Simple Points Milestone Notification',
     description: 'Send LINE notification when customer points exceed 1000',
-    triggerType: 'event-based',
+    trigger_type: 'event-based',
     status: 'active',
-    createdAt: '2024-01-16T11:00:00Z',
-    updatedAt: '2024-01-16T11:00:00Z',
+    created_at: '2024-01-16T11:00:00Z',
+    updated_at: '2024-01-16T11:00:00Z',
     actions: [
       {
         id: 'start-7',
@@ -22,11 +22,11 @@ export const sampleWorkflows: Workflow[] = [
           config: {
             label: 'Points Update Trigger',
             description: 'Monitor points balance updates',
-            merchantId: 'SHOP001',
-            dataSource: 'CRM',
-            triggerCategory: 'event',
-            eventType: 'points_updated',
-            changeStreamEnabled: true,
+            merchant_id: 'SHOP001',
+            data_source: 'CRM',
+            trigger_category: 'event',
+            event_type: 'points_updated',
+            change_stream_enabled: true,
             collections: ['contacts']
           }
         }
@@ -43,10 +43,10 @@ export const sampleWorkflows: Workflow[] = [
           conditions: [
             {
               id: 'cond-7',
-              dataSource: 'CRM',
+              data_source: 'CRM',
               collection: 'contacts',
               field: 'point_balance',
-              fieldType: 'number',
+              field_type: 'number',
               operator: 'greater_than',
               value: 1000
             }
@@ -64,8 +64,8 @@ export const sampleWorkflows: Workflow[] = [
           status: 'active',
           config: {
             message: 'Congratulations! You now have ${points_balance} points. Redeem them for exclusive rewards in our store!',
-            lineUserId: 'line_user_id',
-            includeCustomerData: true
+            line_user_id: 'line_user_id',
+            include_customer_data: true
           }
         }
       },
@@ -96,7 +96,7 @@ export const sampleWorkflows: Workflow[] = [
         id: 'e46-yes',
         source: 'condition-7',
         target: 'action-26',
-        sourceHandle: 'yes',
+        source_handle: 'yes',
         animated: true,
         label: 'Yes'
       },
@@ -104,7 +104,7 @@ export const sampleWorkflows: Workflow[] = [
         id: 'e47-no',
         source: 'condition-7',
         target: 'log-7',
-        sourceHandle: 'no',
+        source_handle: 'no',
         animated: true,
         label: 'No'
       }
@@ -114,10 +114,10 @@ export const sampleWorkflows: Workflow[] = [
     id: 'sample-1',
     name: 'High Value Customer Follow-up',
     description: 'Automatically send SMS to customers who place orders over $500',
-    triggerType: 'event-based',
+    trigger_type: 'event-based',
     status: 'draft',
-    createdAt: '2024-01-15T10:00:00Z',
-    updatedAt: '2024-01-15T10:00:00Z',
+    created_at: '2024-01-15T10:00:00Z',
+    updated_at: '2024-01-15T10:00:00Z',
     actions: [
       {
         id: 'start-1',
@@ -131,8 +131,8 @@ export const sampleWorkflows: Workflow[] = [
           config: {
             label: 'Order Processing Start',
             description: 'Starting point for order processing workflow',
-            merchantId: 'SHOP001',
-            dataSource: 'CRM'
+            merchant_id: 'SHOP001',
+            data_source: 'CRM'
           }
         }
       },
@@ -148,10 +148,10 @@ export const sampleWorkflows: Workflow[] = [
           conditions: [
             {
               id: 'cond-1',
-              dataSource: 'CRM',
+              data_source: 'CRM',
               collection: 'orders',
               field: 'grand_total',
-              fieldType: 'number',
+              field_type: 'number',
               operator: 'greater_than',
               value: 500
             }
@@ -168,8 +168,8 @@ export const sampleWorkflows: Workflow[] = [
           description: 'Send personalized SMS to high-value customers',
           status: 'active',
           config: {
-            smsTemplate: 'Thank you for your ${order_total} order! As a valued customer, enjoy 10% off your next purchase.',
-            delayMinutes: 0
+            sms_template: 'Thank you for your ${order_total} order! As a valued customer, enjoy 10% off your next purchase.',
+            delay_minutes: 0
           }
         }
       },
@@ -186,7 +186,7 @@ export const sampleWorkflows: Workflow[] = [
             message: '🎉 High-value customer alert! ${customer_name} just placed a ${order_total} order. Consider reaching out for personalized service.',
             channel: '#customer-success',
             username: 'Order Bot',
-            includeCustomerData: true,
+            include_customer_data: true,
             attachments: []
           }
         }
@@ -218,7 +218,7 @@ export const sampleWorkflows: Workflow[] = [
         id: 'e2-yes',
         source: 'condition-1',
         target: 'action-1',
-        sourceHandle: 'yes',
+        source_handle: 'yes',
         animated: true,
         label: 'Yes'
       },
@@ -226,7 +226,7 @@ export const sampleWorkflows: Workflow[] = [
         id: 'e3-yes',
         source: 'condition-1',
         target: 'action-2',
-        sourceHandle: 'yes',
+        source_handle: 'yes',
         animated: true,
         label: 'Yes'
       },
@@ -234,7 +234,7 @@ export const sampleWorkflows: Workflow[] = [
         id: 'e4-no',
         source: 'condition-1',
         target: 'log-1',
-        sourceHandle: 'no',
+        source_handle: 'no',
         animated: true,
         label: 'No'
       }
@@ -244,10 +244,10 @@ export const sampleWorkflows: Workflow[] = [
     id: 'sample-10',
     name: 'User Birthday Celebration',
     description: 'Send birthday greetings and special offers to customers on their birthday',
-    triggerType: 'schedule-based',
+    trigger_type: 'schedule-based',
     status: 'active',
-    createdAt: '2024-01-16T09:00:00Z',
-    updatedAt: '2024-01-16T09:00:00Z',
+    created_at: '2024-01-16T09:00:00Z',
+    updated_at: '2024-01-16T09:00:00Z',
     actions: [
       {
         id: 'start-10',
@@ -261,14 +261,14 @@ export const sampleWorkflows: Workflow[] = [
           config: {
             label: 'Daily Birthday Check',
             description: 'Runs daily to check for customer birthdays',
-            merchantId: 'SHOP001',
-            dataSource: 'CRM',
-            triggerCategory: 'scheduled',
-            scheduleTime: '09:00',
+            merchant_id: 'SHOP001',
+            data_source: 'CRM',
+            trigger_category: 'scheduled',
+            schedule_time: '09:00',
             timezone: 'Asia/Bangkok',
-            recurrencePattern: 'daily',
-            scheduleType: 'recurring',
-            changeStreamEnabled: false,
+            recurrence_pattern: 'daily',
+            schedule_type: 'recurring',
+            change_stream_enabled: false,
             collections: ['contacts']
           }
         }
@@ -285,10 +285,10 @@ export const sampleWorkflows: Workflow[] = [
           conditions: [
             {
               id: 'cond-10',
-              dataSource: 'CRM',
+              data_source: 'CRM',
               collection: 'contacts',
               field: 'date_of_birth',
-              fieldType: 'date',
+              field_type: 'date',
               operator: 'equals',
               value: 'today'
             }
@@ -305,12 +305,12 @@ export const sampleWorkflows: Workflow[] = [
           description: 'Send birthday wishes with special discount',
           status: 'active',
           config: {
-            emailTemplate: 'birthday-wishes',
+            email_template: 'birthday-wishes',
             subject: 'Happy Birthday ${customer_name}! 🎂',
-            emailField: 'email',
+            email_field: 'email',
             body: 'Dear ${customer_name}, wishing you a wonderful birthday! Enjoy 30% off with code BDAY30 - valid for 7 days.',
-            discountCode: 'BDAY30',
-            includeCustomerData: true
+            discount_code: 'BDAY30',
+            include_customer_data: true
           }
         }
       },
@@ -325,9 +325,9 @@ export const sampleWorkflows: Workflow[] = [
           status: 'active',
           config: {
             message: '🎉 Happy Birthday ${customer_name}! 🎂 Celebrate with 30% off - use code BDAY30. Valid for 7 days!',
-            lineUserId: 'line_user_id',
-            includeCustomerData: true,
-            imageUrl: 'https://example.com/images/birthday-celebration.png'
+            line_user_id: 'line_user_id',
+            include_customer_data: true,
+            image_url: 'https://example.com/images/birthday-celebration.png'
           }
         }
       },
@@ -342,7 +342,7 @@ export const sampleWorkflows: Workflow[] = [
           status: 'active',
           config: {
             tags: ['Birthday 2024', 'Birthday Campaign'],
-            updateCustomerProfile: true
+            update_customer_profile: true
           }
         }
       },
@@ -373,7 +373,7 @@ export const sampleWorkflows: Workflow[] = [
         id: 'e54-yes',
         source: 'condition-10',
         target: 'action-31',
-        sourceHandle: 'yes',
+        source_handle: 'yes',
         animated: true,
         label: 'Yes'
       },
@@ -381,7 +381,7 @@ export const sampleWorkflows: Workflow[] = [
         id: 'e55-yes',
         source: 'condition-10',
         target: 'action-32',
-        sourceHandle: 'yes',
+        source_handle: 'yes',
         animated: true,
         label: 'Yes'
       },
@@ -389,7 +389,7 @@ export const sampleWorkflows: Workflow[] = [
         id: 'e56-yes',
         source: 'condition-10',
         target: 'action-33',
-        sourceHandle: 'yes',
+        source_handle: 'yes',
         animated: true,
         label: 'Yes'
       },
@@ -397,7 +397,7 @@ export const sampleWorkflows: Workflow[] = [
         id: 'e57-no',
         source: 'condition-10',
         target: 'log-10',
-        sourceHandle: 'no',
+        source_handle: 'no',
         animated: true,
         label: 'No'
       }
@@ -407,10 +407,10 @@ export const sampleWorkflows: Workflow[] = [
     id: 'sample-4',
     name: 'Weekly Inventory Low Stock Alert',
     description: 'Monitor inventory levels and notify staff of low stock items',
-    triggerType: 'schedule-based',
+    trigger_type: 'schedule-based',
     status: 'draft',
-    createdAt: '2024-01-15T13:00:00Z',
-    updatedAt: '2024-01-15T13:00:00Z',
+    created_at: '2024-01-15T13:00:00Z',
+    updated_at: '2024-01-15T13:00:00Z',
     actions: [
       {
         id: 'start-4',
@@ -424,15 +424,15 @@ export const sampleWorkflows: Workflow[] = [
           config: {
             label: 'Inventory Check Start',
             description: 'Starting point for inventory monitoring workflow',
-            merchantId: 'SHOP001',
-            dataSource: 'CRM',
-            triggerCategory: 'scheduled',
-            scheduleTime: '08:00',
+            merchant_id: 'SHOP001',
+            data_source: 'CRM',
+            trigger_category: 'scheduled',
+            schedule_time: '08:00',
             timezone: 'America/New_York',
-            recurrencePattern: 'weekly',
-            scheduleType: 'recurring',
-            dayOfWeek: 1,
-            changeStreamEnabled: false,
+            recurrence_pattern: 'weekly',
+            schedule_type: 'recurring',
+            day_of_week: 1,
+            change_stream_enabled: false,
             collections: ['products']
           }
         }
@@ -449,10 +449,10 @@ export const sampleWorkflows: Workflow[] = [
           conditions: [
             {
               id: 'cond-4',
-              dataSource: 'CRM',
+              data_source: 'CRM',
               collection: 'products',
               field: 'created_date',
-              fieldType: 'date',
+              field_type: 'date',
               operator: 'date_before',
               value: '2024-01-01'
             }
@@ -469,9 +469,9 @@ export const sampleWorkflows: Workflow[] = [
           description: 'Notify external inventory management system',
           status: 'active',
           config: {
-            webhookUrl: 'https://inventory.example.com/api/low-stock',
+            webhook_url: 'https://inventory.example.com/api/low-stock',
             method: 'POST',
-            includeProductDetails: true
+            include_product_details: true
           }
         }
       },
@@ -485,7 +485,7 @@ export const sampleWorkflows: Workflow[] = [
           description: 'Weekly low stock report to operations team',
           status: 'active',
           config: {
-            emailTemplate: 'low-stock-report',
+            email_template: 'low-stock-report',
             recipients: ['inventory@company.com', 'operations@company.com']
           }
         }
@@ -517,7 +517,7 @@ export const sampleWorkflows: Workflow[] = [
         id: 'e11-yes',
         source: 'condition-4',
         target: 'action-7',
-        sourceHandle: 'yes',
+        source_handle: 'yes',
         animated: true,
         label: 'Yes'
       },
@@ -525,7 +525,7 @@ export const sampleWorkflows: Workflow[] = [
         id: 'e12-yes',
         source: 'condition-4',
         target: 'action-8',
-        sourceHandle: 'yes',
+        source_handle: 'yes',
         animated: true,
         label: 'Yes'
       },
@@ -533,7 +533,7 @@ export const sampleWorkflows: Workflow[] = [
         id: 'e13-no',
         source: 'condition-4',
         target: 'log-4',
-        sourceHandle: 'no',
+        source_handle: 'no',
         animated: true,
         label: 'No'
       }
@@ -543,10 +543,10 @@ export const sampleWorkflows: Workflow[] = [
     id: 'sample-11',
     name: 'Customer Product Purchase Follow-up',
     description: 'Target customers who  bought specific product in past 30 days',
-    triggerType: 'event-based',
+    trigger_type: 'event-based',
     status: 'active',
-    createdAt: '2024-01-16T14:00:00Z',
-    updatedAt: '2024-01-16T14:00:00Z',
+    created_at: '2024-01-16T14:00:00Z',
+    updated_at: '2024-01-16T14:00:00Z',
     actions: [
       {
         id: 'start-11',
@@ -560,11 +560,11 @@ export const sampleWorkflows: Workflow[] = [
           config: {
             label: 'Order Processing Trigger',
             description: 'Monitor new order events from CRM',
-            merchantId: 'SHOP001',
-            dataSource: 'CRM',
-            triggerCategory: 'event',
-            eventType: 'order_created',
-            changeStreamEnabled: true,
+            merchant_id: 'SHOP001',
+            data_source: 'CRM',
+            trigger_category: 'event',
+            event_type: 'order_created',
+            change_stream_enabled: true,
             collections: ['orders', 'order_items', 'contacts']
           }
         }
@@ -581,23 +581,23 @@ export const sampleWorkflows: Workflow[] = [
           conditions: [
             {
               id: 'cond-11a',
-              dataSource: 'CRM',
+              data_source: 'CRM',
               collection: 'orders',
               field: 'created_date',
-              fieldType: 'date',
+              field_type: 'date',
               operator: 'date_before',
               value: '30_days',
-              dateType: 'relative',
-              periodNumber: 30,
-              periodUnit: 'days',
-              logicalOperator: 'AND'
+              date_type: 'relative',
+              period_number: 30,
+              period_unit: 'days',
+              logical_operator: 'AND'
             },
             {
               id: 'cond-11b',
-              dataSource: 'CRM',
+              data_source: 'CRM',
               collection: 'order_items',
               field: 'product_name',
-              fieldType: 'text',
+              field_type: 'text',
               operator: 'equals',
               value: 'PROD-XX123'
             }
@@ -614,11 +614,11 @@ export const sampleWorkflows: Workflow[] = [
           description: 'Send detailed VIP program information email',
           status: 'active',
           config: {
-            emailTemplate: 'vip-program',
+            email_template: 'vip-program',
             subject: 'Welcome to VIP Program - Exclusive Benefits Await!',
-            emailField: 'email',
+            email_field: 'email',
             body: 'Dear ${customer_name}, congratulations on reaching VIP status with ${total_sales_30days} in purchases! You now have access to: priority support, exclusive discounts, early product access, and a dedicated account manager.',
-            includeCustomerData: true
+            include_customer_data: true
           }
         }
       },        
@@ -649,7 +649,7 @@ export const sampleWorkflows: Workflow[] = [
         id: 'e60-yes',
         source: 'condition-11',
         target: 'action-35',
-        sourceHandle: 'yes',
+        source_handle: 'yes',
         animated: true,
         label: 'Yes'
       },  
@@ -657,7 +657,7 @@ export const sampleWorkflows: Workflow[] = [
         id: 'e63-no',
         source: 'condition-11',
         target: 'log-11',
-        sourceHandle: 'no',
+        source_handle: 'no',
         animated: true,
         label: 'No'
       }

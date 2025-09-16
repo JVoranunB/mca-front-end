@@ -4,45 +4,45 @@ export type TriggerType = 'event-based' | 'schedule-based';
 
 export interface WorkflowCondition {
   id: string;
-  dataSource: 'CRM';
+  data_source: 'CRM';
   collection?: string;
   field: string;
-  fieldType: 'text' | 'number' | 'date' | 'select';
+  field_type: 'text' | 'number' | 'date' | 'select';
   operator: 'equals' | 'not_equals' | 'greater_than' | 'less_than' | 'greater_equal' | 'less_equal' | 'contains' | 'not_contains' | 'date_before' | 'date_after' | 'date_between' | 'date_not_between' | 'is_empty' | 'is_not_empty';
   value: string | number;
-  selectOptions?: string[];
-  logicalOperator?: 'AND' | 'OR';
-  dateType?: 'today' | 'specific' | 'relative' | 'range';
-  periodNumber?: number;
-  periodUnit?: 'days' | 'weeks' | 'months' | 'years';
-  dateFrom?: string;
-  dateTo?: string;
+  select_options?: string[];
+  logical_operator?: 'AND' | 'OR';
+  date_type?: 'today' | 'specific' | 'relative' | 'range';
+  period_number?: number;
+  period_unit?: 'days' | 'weeks' | 'months' | 'years';
+  date_from?: string;
+  date_to?: string;
 }
 
 export interface StartConfig {
   label: string;
   description?: string;
-  merchantId?: string;
-  dataSource: 'CRM';
+  merchant_id?: string;
+  data_source: 'CRM';
 }
 
 export interface TriggerConfig {
-  triggerCategory: 'event-based' | 'scheduled';
-  dataSource: 'CRM';
-  merchantId?: string;
+  trigger_category: 'event-based' | 'scheduled';
+  data_source: 'CRM';
+  merchant_id?: string;
   
   // Event-based specific
-  changeStreamEnabled?: boolean;
+  change_stream_enabled?: boolean;
   collections?: string[];
   
   // Scheduled specific
-  scheduleTime?: string;
+  schedule_time?: string;
   timezone?: string;
-  recurrencePattern?: 'one-time' | 'daily' | 'weekly' | 'monthly' | 'yearly';
-  scheduleDate?: string; // for one-time schedules
-  scheduleType?: 'one-time' | 'recurring';
-  dayOfWeek?: number; // 0-6 for weekly
-  dayOfMonth?: number; // 1-31 for monthly
+  recurrence_pattern?: 'one-time' | 'daily' | 'weekly' | 'monthly' | 'yearly';
+  schedule_date?: string; // for one-time schedules
+  schedule_type?: 'one-time' | 'recurring';
+  day_of_week?: number; // 0-6 for weekly
+  day_of_month?: number; // 1-31 for monthly
 }
 
 export interface NodeData {
@@ -72,8 +72,8 @@ export interface WorkflowPeer {
   id: string;
   source: string;
   target: string;
-  sourceHandle?: string;
-  targetHandle?: string;
+  source_handle?: string;
+  target_handle?: string;
   label?: string;
   animated?: boolean;
 }
@@ -86,7 +86,8 @@ export interface WorkflowWithNodes extends Omit<Workflow, 'actions'> {
   nodes: WorkflowNode[];
 }
 
-export interface Workflow {
+// Backward compatibility for camelCase → snake_case transition
+export interface WorkflowCamelCase {
   id: string;
   name: string;
   description?: string;
@@ -99,7 +100,7 @@ export interface Workflow {
   lastTriggered?: string;
 }
 
-export interface WorkflowSummary {
+export interface WorkflowSummaryCamelCase {
   id: string;
   name: string;
   triggerType: TriggerType;
@@ -109,12 +110,35 @@ export interface WorkflowSummary {
   lastTriggered?: string;
 }
 
+export interface Workflow {
+  id: string;
+  name: string;
+  description?: string;
+  trigger_type: TriggerType;
+  actions: WorkflowNode[];
+  peers: WorkflowPeer[];
+  created_at: string;
+  updated_at: string;
+  status: 'draft' | 'active' | 'paused';
+  last_triggered?: string;
+}
+
+export interface WorkflowSummary {
+  id: string;
+  name: string;
+  trigger_type: TriggerType;
+  status: 'draft' | 'active' | 'paused';
+  action_count: number;
+  last_modified: string;
+  last_triggered?: string;
+}
+
 export interface NodeTemplate {
   type: NodeType;
   label: string;
   description: string;
   icon: string;
-  defaultConfig?: {
+  default_config?: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [key: string]: any;
   };
@@ -122,13 +146,13 @@ export interface NodeTemplate {
 }
 
 export interface ValidationError {
-  nodeId?: string;
-  edgeId?: string;
+  node_id?: string;
+  edge_id?: string;
   message: string;
   severity: 'error' | 'warning';
 }
 
 export interface WorkflowValidationResult {
-  isValid: boolean;
+  is_valid: boolean;
   errors: ValidationError[];
 }

@@ -109,19 +109,19 @@ const ConditionNode = memo(({ data }: NodeProps) => {
               <Divider />
               {nodeData.conditions.map((condition, index: number) => (
                 <BlockStack key={condition.id} gap="100">
-                  {index > 0 && condition.logicalOperator && (
+                  {index > 0 && condition.logical_operator && (
                     <InlineStack gap="100">
                       <Badge tone="info" size="small">
-                        {condition.logicalOperator}
+                        {condition.logical_operator}
                       </Badge>
                     </InlineStack>
                   )}
                   <Card padding="100">
                     <BlockStack gap="100">
-                      {condition.dataSource && (
+                      {condition.data_source && (
                         <InlineStack gap="100" align="start">
                           <Badge size="small">
-                            {condition.dataSource.toUpperCase()}
+                            {condition.data_source.toUpperCase()}
                           </Badge>
                           {condition.collection && (
                             <Badge size="small">
@@ -132,13 +132,13 @@ const ConditionNode = memo(({ data }: NodeProps) => {
                       )}
                       <InlineStack gap="100" wrap={false} align="center">
                         <InlineStack gap="050">
-                          {condition.fieldType === 'number' && (
+                          {condition.field_type === 'number' && (
                             <Icon source={Icons.Default} tone="subdued" />
                           )}
-                          {condition.fieldType === 'date' && (
+                          {condition.field_type === 'date' && (
                             <Icon source={Icons.Timer} tone="subdued" />
                           )}
-                          {condition.fieldType === 'select' && (
+                          {condition.field_type === 'select' && (
                             <Icon source={Icons.ChevronDown} tone="subdued" />
                           )}
                           <Text as="span" variant="bodySm" fontWeight="medium">
@@ -150,8 +150,8 @@ const ConditionNode = memo(({ data }: NodeProps) => {
                         </Badge>
                         {!['is_empty', 'is_not_empty'].includes(condition.operator) && condition.value !== undefined && (
                           <Text as="span" variant="bodySm" fontWeight="semibold">
-                            {condition.fieldType === 'date' 
-                              ? formatDateValue(condition.value, condition.dateType)
+                            {condition.field_type === 'date' 
+                              ? formatDateValue(condition.value, condition.date_type)
                               : String(condition.value)}
                           </Text>
                         )}

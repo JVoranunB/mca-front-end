@@ -64,13 +64,13 @@ const WorkflowListPage = () => {
 
   const filteredWorkflows = useMemo(() => {
     return workflows.filter((workflow) => {
-      const matchesTriggerType = filters.triggerType.length === 0 || 
-        filters.triggerType.includes(workflow.triggerType);
-      const matchesStatus = filters.status.length === 0 || 
+      const matchesTriggerType = filters.triggerType.length === 0 ||
+        filters.triggerType.includes(workflow.trigger_type);
+      const matchesStatus = filters.status.length === 0 ||
         filters.status.includes(workflow.status);
-      const matchesSearch = !filters.search || 
+      const matchesSearch = !filters.search ||
         workflow.name.toLowerCase().includes(filters.search.toLowerCase());
-      
+
       return matchesTriggerType && matchesStatus && matchesSearch;
     });
   }, [workflows, filters]);
@@ -225,11 +225,11 @@ const WorkflowListPage = () => {
     >
       {workflow.name}
     </Link>,
-    getTriggerTypeBadge(workflow.triggerType),
+    getTriggerTypeBadge(workflow.trigger_type),
     getStatusBadge(workflow.status),
-    workflow.actionCount.toString(),
-    formatDate(workflow.lastModified),
-    workflow.lastTriggered ? formatDate(workflow.lastTriggered) : '—',
+    workflow.action_count.toString(),
+    formatDate(workflow.last_modified),
+    workflow.last_triggered ? formatDate(workflow.last_triggered) : '—',
     renderActions(workflow)
   ]);
 

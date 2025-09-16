@@ -35,7 +35,7 @@ export class WorkflowTransformer {
       name: workflow.name,
       version: '1.0',
       status: workflow.status,
-      merchantId: this.extractMerchantId(workflow),
+      merchant_id: this.extractMerchantId(workflow),
       actions,
       peers,
     };
@@ -47,8 +47,8 @@ export class WorkflowTransformer {
   private static extractMerchantId(workflow: Workflow): string {
     // Look for merchantId in any action config
     for (const action of workflow.actions) {
-      if (action.data.config?.merchantId) {
-        return String(action.data.config.merchantId);
+      if (action.data.config?.merchant_id) {
+        return String(action.data.config.merchant_id);
       }
     }
     return 'SHOP001'; // Default fallback
@@ -158,8 +158,8 @@ export class WorkflowTransformer {
     switch (node.data.type) {
       case 'start':
         config.event = 'workflow_start';
-        config.merchantId = node.data.config?.merchantId || '';
-        config.dataSource = node.data.config?.dataSource || 'CRM';
+        config.merchant_id = node.data.config?.merchant_id || '';
+        config.data_source = node.data.config?.data_source || 'CRM';
         break;
 
       case 'condition':
@@ -170,7 +170,7 @@ export class WorkflowTransformer {
             config.conditions = 'ctx.orders.grand_total > 500';
           } else {
             // Fallback to expression format
-            const field = this.mapFieldToContextPath(condition.dataSource, condition.collection, condition.field);
+            const field = this.mapFieldToContextPath(condition.data_source, condition.collection, condition.field);
             const operator = this.mapOperatorToExpression(condition.operator);
             const value = typeof condition.value === 'string' ? `'${condition.value}'` : condition.value;
             config.conditions = `${field} ${operator} ${value}`;
@@ -182,10 +182,10 @@ export class WorkflowTransformer {
         config.actionType = this.getActionType(node.data.label);
         const nodeConfig = node.data.config || {};
         
-        // For Slack actions, exclude includeCustomerData and attachments
+        // For Slack actions, exclude include_customer_data and attachments
         if (node.data.label.includes('Slack')) {
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const { includeCustomerData, attachments, ...slackConfig } = nodeConfig as Record<string, unknown>;
+          const { include_customer_data, attachments, ...slackConfig } = nodeConfig as Record<string, unknown>;
           Object.assign(config, slackConfig);
         } else {
           Object.assign(config, nodeConfig);
