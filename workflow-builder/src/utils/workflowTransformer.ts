@@ -1,6 +1,7 @@
 import type { Workflow, WorkflowNode, WorkflowPeer } from '../types/workflow.types';
 import type { BackendWorkflow, BackendWorkflowAction, BackendWorkflowPeer } from '../services/workflowApi';
 import { DATA_SOURCE_FIELDS } from './dataSourceFields';
+import { ConditionConverter } from './conditionConverter';
 
 interface NodeMapping {
   [node_id: string]: string; // Maps frontend node IDs to backend action keys
@@ -164,17 +165,19 @@ export class WorkflowTransformer {
 
       case 'condition':
         if (node.data.conditions && node.data.conditions.length > 0) {
-          const condition = node.data.conditions[0]; // Use first condition for simplicity
-          if (condition.operator === 'greater_than' && condition.value === 500) {
-            // Generate the query format for order value check
-            config.conditions = 'ctx.orders.grand_total > 500';
-          } else {
-            // Fallback to expression format
-            const field = this.mapFieldToContextPath(condition.data_source, condition.collection, condition.field);
-            const operator = this.mapOperatorToExpression(condition.operator);
-            const value = typeof condition.value === 'string' ? `'${condition.value}'` : condition.value;
-            config.conditions = `${field} ${operator} ${value}`;
-          }
+          // Use the new ConditionConverter to generate proper MCA-query JSON
+          const queryOutput = ConditionConverter.convertConditionsToQuery(node.data.conditions);
+          config.query = {
+            mode: 'json',
+            value: JSON.stringify(queryOutput)
+          };
+
+          // Keep legacy expression format for backward compatibility
+          const condition = node.data.conditions[0];
+          const field = this.mapFieldToContextPath(condition.data_source, condition.collection, condition.field);
+          const operator = this.mapOperatorToExpression(condition.operator);
+          const value = typeof condition.value === 'string' ? `'${condition.value}'` : condition.value;
+          config.conditions = `${field} ${operator} ${value}`;
         }
         break;
 
@@ -208,11 +211,12 @@ export class WorkflowTransformer {
    */
   private static createMapper(node: WorkflowNode): BackendWorkflowAction['mapper'] {
     // Handle condition node query mapping
-    if (node.data.type === 'condition') {
+    if (node.data.type === 'condition' && node.data.conditions && node.data.conditions.length > 0) {
+      const queryOutput = ConditionConverter.convertConditionsToQuery(node.data.conditions);
       return {
         query: {
-          mode: 'expression',
-          value: '{"users":{"limit":5,"select":["user_id","first_name","last_name","points_balance","id_card"],"where":{"and":[{"status":"ACTIVE"},{"points_balance":{">":100}},{"user_id":"684bc1b694537bbbc606660a"}]}}}'
+          mode: 'json',
+          value: JSON.stringify(queryOutput)
         }
       };
     }

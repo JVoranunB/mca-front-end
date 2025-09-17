@@ -107,7 +107,7 @@ This use case combines customer demographics with time-sensitive loyalty data to
 ```json
 {
   "contacts": {
-    "select": ["id", "first_name", "last_name", "created_date"],
+    "select": ["user_id"],
     "where": {
       "gender": "MALE",
       "merchant_id": "68468c7bbffca9a0a6b2a413"
@@ -130,6 +130,14 @@ This use case combines customer demographics with time-sensitive loyalty data to
 ```
 
 # Usecase 4
+## Input
+```json
+```
+## Result
+```json
+```
+
+# Usecase 5
 ## Input
 ```json
 ```
