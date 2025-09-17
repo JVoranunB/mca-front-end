@@ -161,6 +161,8 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
       target: params.target!,
       source_handle: params.sourceHandle || undefined,
       target_handle: params.targetHandle || undefined,
+      sourceHandle: params.sourceHandle || undefined, // React Flow expects camelCase
+      targetHandle: params.targetHandle || undefined, // React Flow expects camelCase
       animated: true,
       label: params.sourceHandle === 'no' ? 'No' : params.sourceHandle === 'yes' ? 'Yes' : undefined,
     };

@@ -89,6 +89,8 @@ export interface WorkflowPeer {
   target: string;
   source_handle?: string;
   target_handle?: string;
+  sourceHandle?: string; // React Flow compatibility
+  targetHandle?: string; // React Flow compatibility
   label?: string;
   animated?: boolean;
 }
