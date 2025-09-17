@@ -179,7 +179,7 @@ const convertConditionsToQuery = (conditions: WorkflowCondition[], defaultCollec
     }
 
     // Determine if this condition should go in WHERE or HAVING
-    if (conditionCollection === 'point_histories' || fieldTableMap[field] === 'point_histories') {
+    if (conditionCollection !== mainCollection && (conditionCollection === 'point_histories' || conditionCollection === 'orders' || fieldTableMap[field] === 'point_histories' || fieldTableMap[field] === 'orders')) {
       // This is an aggregation condition - move to HAVING
       const aggKey = `SUM(${conditionCollection || fieldTableMap[field]}.${field})`;
       havingConditions.push({ [aggKey]: whereCondition[field] });
@@ -187,10 +187,17 @@ const convertConditionsToQuery = (conditions: WorkflowCondition[], defaultCollec
       // Add the join table for aggregation
       const joinTable = conditionCollection || fieldTableMap[field];
       if (!joinTables[joinTable]) {
-        joinTables[joinTable] = {
-          select: [`SUM(${joinTable}.${field}) as ${field}s`],
-          join: 'user_id:user_id'
-        };
+        if (joinTable === 'point_histories') {
+          joinTables[joinTable] = {
+            select: [`SUM(${joinTable}.${field}) as ${field}s`],
+            join: 'user_id:user_id'
+          };
+        } else if (joinTable === 'orders') {
+          joinTables[joinTable] = {
+            select: [`SUM(${joinTable}.${field}) as ${field === 'net_amount' ? 'net_amount' : field}`],
+            join: 'user_id:user_id'
+          };
+        }
       }
     } else {
       // Regular WHERE condition - special handling for user_id field
@@ -205,6 +212,11 @@ const convertConditionsToQuery = (conditions: WorkflowCondition[], defaultCollec
 
   // Keep the main collection as output collection (contacts stays contacts)
   const outputCollection = mainCollection;
+
+  // Add default user_id condition for cross-collection queries (from Usecase 3 pattern)
+  if (needsAggregation && whereConditions.length > 0 && !whereConditions.some(cond => Object.keys(cond)[0] === 'user_id')) {
+    whereConditions.unshift({ user_id: '684bc1b694537bbbc606660a' });
+  }
 
   // Build the main query object
   const queryObject: Record<string, unknown> = {
@@ -293,6 +305,32 @@ const ConditionNode = memo(({ data }: NodeProps) => {
 
     const usecase2Query = convertConditionsToQuery(usecase2Conditions);
     console.log('Usecase 2 - Cross-collection with aggregation:', JSON.stringify(usecase2Query, null, 2));
+
+    // Usecase 3: Contacts + Orders cross-collection query
+    const usecase3Conditions: WorkflowCondition[] = [
+      {
+        id: '1758015714312',
+        data_source: 'CRM',
+        collection: 'contacts',
+        field: 'point_balance',
+        field_type: 'number',
+        operator: 'greater_than',
+        value: 10000
+      },
+      {
+        id: '1758015846570',
+        data_source: 'CRM',
+        collection: 'orders',
+        field: 'net_amount',
+        field_type: 'number',
+        operator: 'less_than',
+        value: 10000,
+        logical_operator: 'AND'
+      }
+    ];
+
+    const usecase3Query = convertConditionsToQuery(usecase3Conditions);
+    console.log('Usecase 3 - Contacts + Orders aggregation:', JSON.stringify(usecase3Query, null, 2));
   }, []); // Run once on component mount
   return (
     <div style={{ minWidth: '320px' }}>

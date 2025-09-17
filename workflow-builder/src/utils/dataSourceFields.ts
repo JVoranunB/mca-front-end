@@ -1,31 +1,9 @@
 // CRM data source fields based on PostgreSQL schema
 export const DATA_SOURCE_FIELDS = {
-  CRM: {
-    merchants: [
-      { key: 'merchant_id', label: 'Merchant ID', type: 'text' as const },
-      { key: 'code', label: 'Merchant Code', type: 'text' as const },
-      { key: 'name', label: 'Merchant Name', type: 'text' as const },
-      { key: 'created_date', label: 'Registration Date', type: 'date' as const },
-      { key: 'updated_date', label: 'Last Updated', type: 'date' as const }
-    ],
-    stores: [
-      { key: 'code', label: 'Store Code', type: 'text' as const },
-      { key: 'name', label: 'Store Name', type: 'text' as const },
-      { key: 'merchant_id', label: 'Merchant ID', type: 'text' as const },
-      { key: 'created_date', label: 'Store Created Date', type: 'date' as const },
-      { key: 'updated_date', label: 'Last Updated', type: 'date' as const }
-    ],
-    products: [
-      { key: 'code', label: 'Product Code', type: 'text' as const },
-      { key: 'name', label: 'Product Name', type: 'text' as const },
-      { key: 'product_category_id', label: 'Category ID', type: 'text' as const },
-      { key: 'description', label: 'Product Description', type: 'text' as const },
-      { key: 'merchant_id', label: 'Merchant ID', type: 'text' as const },
-      { key: 'created_date', label: 'Product Created Date', type: 'date' as const },
-      { key: 'updated_date', label: 'Last Updated', type: 'date' as const }
-    ],
+  CRM: {   
     contacts: [
       { key: 'user_id', label: 'User ID', type: 'text' as const },
+      { key: 'merchant_id', label: 'Merchant ID', type: 'text' as const },
       { key: 'email', label: 'Email Address', type: 'text' as const },
       { key: 'phone_number', label: 'Phone Number', type: 'text' as const },
       { key: 'line_user_id', label: 'LINE User ID', type: 'text' as const },
