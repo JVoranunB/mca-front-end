@@ -76,15 +76,27 @@ interface WorkflowState {
   onNodesChange: (changes: NodeChange[]) => void;
 }
 
+// Helper function to migrate edges to include React Flow compatible properties
+const migrateEdge = (edge: Record<string, unknown>): WorkflowPeer => {
+  return {
+    ...edge,
+    sourceHandle: edge.sourceHandle || edge.source_handle,
+    targetHandle: edge.targetHandle || edge.target_handle,
+  } as WorkflowPeer;
+};
+
 // Helper function to migrate workflow from camelCase to snake_case
 const migrateWorkflow = (workflow: Record<string, unknown>): Workflow => {
+  const peers = workflow.peers as WorkflowPeer[] || [];
+  const migratedPeers = peers.map(migrateEdge);
+
   return {
     id: workflow.id as string,
     name: workflow.name as string,
     description: workflow.description as string | undefined,
     trigger_type: (workflow.trigger_type || workflow.triggerType) as TriggerType,
     actions: (workflow.actions || workflow.nodes) as WorkflowNode[],
-    peers: workflow.peers as WorkflowPeer[],
+    peers: migratedPeers,
     created_at: (workflow.created_at || workflow.createdAt) as string,
     updated_at: (workflow.updated_at || workflow.updatedAt) as string,
     status: workflow.status as 'active' | 'draft' | 'paused',
@@ -96,9 +108,10 @@ const migrateWorkflow = (workflow: Record<string, unknown>): Workflow => {
 const initializeWorkflows = (): Workflow[] => {
   const storedWorkflows = localStorage.getItem('workflows');
   if (!storedWorkflows || JSON.parse(storedWorkflows).length === 0) {
-    // If no workflows in localStorage, use sample workflows as default
-    localStorage.setItem('workflows', JSON.stringify(sampleWorkflows));
-    return sampleWorkflows;
+    // Migrate sample workflows to ensure React Flow compatibility
+    const migratedSamples = sampleWorkflows.map(migrateWorkflow);
+    localStorage.setItem('workflows', JSON.stringify(migratedSamples));
+    return migratedSamples;
   }
 
   const parsed = JSON.parse(storedWorkflows);
