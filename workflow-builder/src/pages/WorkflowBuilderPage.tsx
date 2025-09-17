@@ -63,8 +63,8 @@ const WorkflowBuilderPage = () => {
         if (store.actions.length === 0 && store.peers.length === 0) {
           const firstSample = sampleWorkflows[0];
           if (firstSample) {
-            firstSample.actions.forEach((action: WorkflowNode) => store.addAction(action));
-            firstSample.peers.forEach((peer) => store.addPeer(peer));
+            // Use loadWorkflow instead to properly set currentWorkflow
+            loadWorkflow(firstSample.id);
           }
         }
       }

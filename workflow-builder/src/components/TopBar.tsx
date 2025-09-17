@@ -276,9 +276,9 @@ const TopBar: React.FC<TopBarProps> = ({ onBackToList }) => {
                       e.currentTarget.style.border = '1px solid transparent';
                     }}
                   >
-                    <Badge tone="info">
+                    <Text as="span" variant="bodyMd" fontWeight="medium">
                       {currentWorkflow.name}
-                    </Badge>
+                    </Text>
                     <div style={{ opacity: 0.6 }}>
                       <Icon source={EditIcon} tone="subdued" />
                     </div>
