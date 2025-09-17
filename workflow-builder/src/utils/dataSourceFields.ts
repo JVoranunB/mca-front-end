@@ -37,7 +37,7 @@ export const DATA_SOURCE_FIELDS = {
       { key: 'net_amount', label: 'Net Amount', type: 'number' as const },
       { key: 'grand_total', label: 'Grand Total', type: 'number' as const },
       { key: 'points_earned', label: 'Points Earned', type: 'number' as const },
-      { key: 'user_id', label: 'Customer ID', type: 'text' as const },
+      { key: 'user_id', label: 'User ID', type: 'text' as const },
       { key: 'store_code', label: 'Store Code', type: 'text' as const },
       { key: 'store_name', label: 'Store Name', type: 'text' as const },
       { key: 'created_date', label: 'Order Date', type: 'date' as const },
