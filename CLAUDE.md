@@ -48,11 +48,17 @@ src/
 npm install          # Install all dependencies to root node_modules
 
 # Development
-npm run dev          # Start development server (automatically finds available port)
-npm run build:uat    # Build for UAT environment  
+npm run dev          # Start development server (uses port 5173 only)
+npm run build:uat    # Build for UAT environment
 npm run build:production # Build for production environment
 npm run deploy:uat   # Deploy to UAT (requires AWS credentials)
 npm run deploy:production # Deploy to production (requires AWS credentials)
+
+# Port Management
+# Dev server ONLY uses port 5173. If port is busy or cache needs clearing:
+# 1. Stop the current server (Ctrl+C)
+# 2. Kill any processes on port 5173: taskkill /F /IM node.exe
+# 3. Restart: npm run dev
 
 # Workspace-specific commands (run from root)
 cd workflow-builder && npm run lint    # Run ESLint
@@ -212,7 +218,7 @@ npm run deploy:production   # Build + Deploy to Production S3 + Invalidate Cloud
 1. **Missing Dependencies**: Ensure `npm install` runs from root directory
 2. **Build Path**: GitHub Actions builds from root but deploys `workflow-builder/dist/`
 3. **Cache Configuration**: GitHub Actions caches using root `package-lock.json`
-4. **Port Conflicts**: Dev server automatically finds available ports (5173, 5174, 5175, etc.)
+4. **Port Management**: Dev server uses port 5173 exclusively - if port is busy, restart to clear cache
 
 ### AWS Resources
 
@@ -225,4 +231,4 @@ npm run deploy:production   # Build + Deploy to Production S3 + Invalidate Cloud
 This project uses npm workspaces - ALWAYS run commands from the root directory.
 The GitHub Actions configuration has been fixed - dependencies install from root, builds run from workspace.
 Do NOT create duplicate node_modules folders - only the root node_modules should exist.
-Dev server will auto-select available ports (5173, 5174, 5175, etc.) to avoid conflicts.
+Dev server uses port 5173 exclusively. If port is busy or cache needs clearing, stop the server and restart on port 5173.
