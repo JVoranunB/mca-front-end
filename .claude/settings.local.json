@@ -37,7 +37,9 @@
       "Bash(npx vite:*)",
       "Bash(taskkill:*)",
       "Bash(python:*)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)"
     ],
     "deny": [],
     "ask": []

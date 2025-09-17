@@ -24,6 +24,9 @@ import {
   ProductIcon,
   ClockIcon,
   ChatIcon,
+  CalendarIcon,
+  TextTitleIcon,
+  HashtagIcon,
 } from '@shopify/polaris-icons';
 
 // Export all icons with descriptive names
@@ -61,7 +64,12 @@ export const Icons = {
   Tag: ProductIcon,
   Timer: ClockIcon,
   Chat: ChatIcon,
-  
+
+  // Field types
+  Calendar: CalendarIcon,    // For date fields
+  Text: TextTitleIcon,            // For text fields
+  Number: HashtagIcon,       // For number fields
+
   // Fallback for any missing icons
   Default: InfoIcon
 };
@@ -72,4 +80,20 @@ export type IconKey = keyof typeof Icons;
 // Helper function to get icon safely
 export const getIcon = (key: IconKey): typeof InfoIcon => {
   return Icons[key] || Icons.Default;
+};
+
+// Helper function to get field type icon
+export const getFieldTypeIcon = (fieldType: string): typeof InfoIcon => {
+  switch (fieldType) {
+    case 'date':
+      return Icons.Calendar;
+    case 'text':
+      return Icons.Text;
+    case 'number':
+      return Icons.Number;
+    case 'select':
+      return Icons.ChevronDown;
+    default:
+      return Icons.Default;
+  }
 };

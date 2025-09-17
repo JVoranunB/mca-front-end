@@ -18,6 +18,22 @@ import useWorkflowStore from '../store/workflowStore';
 import type { WorkflowCondition, StartConfig, TriggerConfig } from '../types/workflow.types';
 import { getCollectionsForDataSource, getFieldsForCollection, type DataSourceField } from '../utils/dataSourceFields';
 
+// Helper function to get field type display prefix with emoji/symbol
+const getFieldTypeDisplayPrefix = (fieldType: string): string => {
+  switch (fieldType) {
+    case 'date':
+      return '📅';
+    case 'text':
+      return '📝';
+    case 'number':
+      return '#️⃣';
+    case 'select':
+      return '🔽';
+    default:
+      return '📋';
+  }
+};
+
 const PropertiesSidebar: React.FC = () => {
   const { selectedAction, updateAction, deleteAction, rightSidebarVisible, toggleRightSidebar, currentWorkflow } = useWorkflowStore();
 
@@ -743,7 +759,10 @@ const PropertiesSidebar: React.FC = () => {
                               {fields.length > 0 && (
                                 <Select
                                   label="Field"
-                                  options={fields.map((f: DataSourceField) => ({ label: f.label, value: f.key }))}
+                                  options={fields.map((f: DataSourceField) => ({
+                                    label: `${getFieldTypeDisplayPrefix(f.type)} ${f.label}`,
+                                    value: f.key
+                                  }))}
                                   value={condition.field}
                                   onChange={(value) => {
                                     const field = fields.find((f: DataSourceField) => f.key === value);
