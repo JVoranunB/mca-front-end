@@ -3,7 +3,7 @@ import type { BackendWorkflow, BackendWorkflowAction, BackendWorkflowPeer } from
 import { DATA_SOURCE_FIELDS } from './dataSourceFields';
 
 interface NodeMapping {
-  [nodeId: string]: string; // Maps frontend node IDs to backend action keys
+  [node_id: string]: string; // Maps frontend node IDs to backend action keys
 }
 
 export class WorkflowTransformer {
@@ -42,10 +42,10 @@ export class WorkflowTransformer {
   }
 
   /**
-   * Extract merchantId from workflow nodes
+   * Extract merchant_id from workflow nodes
    */
   private static extractMerchantId(workflow: Workflow): string {
-    // Look for merchantId in any action config
+    // Look for merchant_id in any action config
     for (const action of workflow.actions) {
       if (action.data.config?.merchant_id) {
         return String(action.data.config.merchant_id);
@@ -421,8 +421,8 @@ export class WorkflowTransformer {
     };
 
     // Add meta_output for condition branches
-    if (peer.sourceHandle) {
-      backendPeer.meta_output = peer.sourceHandle;
+    if (peer.source_handle) {
+      backendPeer.meta_output = peer.source_handle;
     } else {
       backendPeer.meta_output = 'triggered';
     }

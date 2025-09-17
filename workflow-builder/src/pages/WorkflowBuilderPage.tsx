@@ -112,7 +112,7 @@ const WorkflowBuilderPage = () => {
           type: nodeTemplate.type,
           description: nodeTemplate.description,
           icon: nodeTemplate.icon,
-          config: nodeTemplate.defaultConfig || {},
+          config: nodeTemplate.default_config || {},
           conditions: nodeTemplate.type === 'condition' ? [] : undefined,
         },
       };

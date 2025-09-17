@@ -57,8 +57,8 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({ onDrop, onDragOver, set
           config: {
             label: 'Workflow Start',
             description: 'Beginning of workflow execution',
-            merchantId: '',
-            dataSource: 'CRM'
+            merchant_id: '',
+            data_source: 'CRM'
           } as StartConfig
         } as NodeData
       };
@@ -147,8 +147,11 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({ onDrop, onDragOver, set
     const validSourceHandles = ['output', 'yes', 'no'];
     const validTargetHandles = ['input'];
     
-    const isValidSource = !connection.sourceHandle || validSourceHandles.includes(connection.sourceHandle);
-    const isValidTarget = !connection.targetHandle || validTargetHandles.includes(connection.targetHandle);
+    const sourceHandle = 'sourceHandle' in connection ? connection.sourceHandle : connection.source_handle;
+    const targetHandle = 'targetHandle' in connection ? connection.targetHandle : connection.target_handle;
+
+    const isValidSource = !sourceHandle || validSourceHandles.includes(sourceHandle);
+    const isValidTarget = !targetHandle || validTargetHandles.includes(targetHandle);
     
     if (!isValidSource || !isValidTarget) {
       return false;

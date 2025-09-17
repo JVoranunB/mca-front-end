@@ -36,7 +36,8 @@
       "Bash(curl:*)",
       "Bash(npx vite:*)",
       "Bash(taskkill:*)",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(npm run:*)"
     ],
     "deny": [],
     "ask": []

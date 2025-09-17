@@ -77,18 +77,18 @@ interface WorkflowState {
 }
 
 // Helper function to migrate workflow from camelCase to snake_case
-const migrateWorkflow = (workflow: any): Workflow => {
+const migrateWorkflow = (workflow: Record<string, unknown>): Workflow => {
   return {
-    id: workflow.id,
-    name: workflow.name,
-    description: workflow.description,
-    trigger_type: workflow.trigger_type || workflow.triggerType,
-    actions: workflow.actions || workflow.nodes,
-    peers: workflow.peers,
-    created_at: workflow.created_at || workflow.createdAt,
-    updated_at: workflow.updated_at || workflow.updatedAt,
-    status: workflow.status,
-    last_triggered: workflow.last_triggered || workflow.lastTriggered
+    id: workflow.id as string,
+    name: workflow.name as string,
+    description: workflow.description as string | undefined,
+    trigger_type: (workflow.trigger_type || workflow.triggerType) as TriggerType,
+    actions: (workflow.actions || workflow.nodes) as WorkflowNode[],
+    peers: workflow.peers as WorkflowPeer[],
+    created_at: (workflow.created_at || workflow.createdAt) as string,
+    updated_at: (workflow.updated_at || workflow.updatedAt) as string,
+    status: workflow.status as 'active' | 'draft' | 'paused',
+    last_triggered: (workflow.last_triggered || workflow.lastTriggered) as string | undefined
   };
 };
 
@@ -744,22 +744,22 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
   onNodesChange: (changes) => get().onActionsChange(changes),
   
   // Utility methods for camelCase → snake_case compatibility
-  convertToSnakeCase: (workflow: any): Workflow => {
+  convertToSnakeCase: (workflow: Record<string, unknown>): Workflow => {
     return {
-      id: workflow.id,
-      name: workflow.name,
-      description: workflow.description,
-      trigger_type: workflow.triggerType || workflow.trigger_type,
-      actions: workflow.actions || workflow.nodes,
-      peers: workflow.peers,
-      created_at: workflow.createdAt || workflow.created_at,
-      updated_at: workflow.updatedAt || workflow.updated_at,
-      status: workflow.status,
-      last_triggered: workflow.lastTriggered || workflow.last_triggered
+      id: workflow.id as string,
+      name: workflow.name as string,
+      description: workflow.description as string | undefined,
+      trigger_type: (workflow.triggerType || workflow.trigger_type) as TriggerType,
+      actions: (workflow.actions || workflow.nodes) as WorkflowNode[],
+      peers: workflow.peers as WorkflowPeer[],
+      created_at: (workflow.createdAt || workflow.created_at) as string,
+      updated_at: (workflow.updatedAt || workflow.updated_at) as string,
+      status: workflow.status as 'active' | 'draft' | 'paused',
+      last_triggered: (workflow.lastTriggered || workflow.last_triggered) as string | undefined
     };
   },
   
-  convertToCamelCase: (workflow: Workflow): any => {
+  convertToCamelCase: (workflow: Workflow): Record<string, unknown> => {
     return {
       id: workflow.id,
       name: workflow.name,

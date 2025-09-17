@@ -41,8 +41,8 @@ const EventBasedConfig: React.FC<EventBasedConfigProps> = ({ config, onChange })
       <FormLayout>
         <TextField
           label="Merchant ID"
-          value={config.merchantId || ''}
-          onChange={(value) => handleChange('merchantId', value)}
+          value={config.merchant_id || ''}
+          onChange={(value) => handleChange('merchant_id', value)}
           placeholder="Enter merchant ID for isolation"
           autoComplete="off"
           helpText="Leave empty to monitor all merchants"
@@ -54,16 +54,16 @@ const EventBasedConfig: React.FC<EventBasedConfigProps> = ({ config, onChange })
             { label: 'MongoDB (Real-time)', value: 'mongodb' },
             { label: 'CRM (Customer Data)', value: 'crm' }
           ]}
-          value={config.dataSource}
-          onChange={(value) => handleChange('dataSource', value)}
+          value={config.data_source}
+          onChange={(value) => handleChange('data_source', value)}
         />
         
-        {config.dataSource === 'CRM' && (
+        {config.data_source === 'CRM' && (
           <>
             <Checkbox
               label="Enable MongoDB Change Streams"
-              checked={config.changeStreamEnabled || false}
-              onChange={(value) => handleChange('changeStreamEnabled', value)}
+              checked={config.change_stream_enabled || false}
+              onChange={(value) => handleChange('change_stream_enabled', value)}
               helpText="Monitor real-time changes in selected collections"
             />
             
