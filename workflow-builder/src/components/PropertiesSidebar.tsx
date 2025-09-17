@@ -881,15 +881,15 @@ const PropertiesSidebar: React.FC = () => {
                                           // Additional updates based on dateType
                                           const additionalUpdates: Partial<WorkflowCondition> = {};
                                           if (newDateType === 'range') {
-                                            additionalUpdates.dateFrom = condition.date_from || '';
-                                            additionalUpdates.dateTo = condition.date_to || '';
+                                            additionalUpdates.date_from = condition.date_from || '';
+                                            additionalUpdates.date_to = condition.date_to || '';
                                           } else if (newDateType === 'relative') {
-                                            additionalUpdates.periodNumber = condition.period_number || 1;
-                                            additionalUpdates.periodUnit = condition.period_unit || 'days';
+                                            additionalUpdates.period_number = condition.period_number || 1;
+                                            additionalUpdates.period_unit = condition.period_unit || 'days';
                                           }
-                                          
-                                          updateCondition(condition.id, { 
-                                            dateType: newDateType,
+
+                                          updateCondition(condition.id, {
+                                            date_type: newDateType,
                                             value: newValue,
                                             operator: newOperator as WorkflowCondition['operator'],
                                             ...additionalUpdates
@@ -915,8 +915,8 @@ const PropertiesSidebar: React.FC = () => {
                                             value={String(condition.period_number || 1)}
                                             onChange={(value) => {
                                               const num = parseInt(value) || 1;
-                                              updateCondition(condition.id, { 
-                                                periodNumber: num,
+                                              updateCondition(condition.id, {
+                                                period_number: num,
                                                 value: `${num}_${condition.period_unit || 'days'}`
                                               });
                                             }}
@@ -934,8 +934,8 @@ const PropertiesSidebar: React.FC = () => {
                                               { label: 'Years', value: 'years' }
                                             ]}
                                             value={condition.period_unit || 'days'}
-                                            onChange={(value) => updateCondition(condition.id, { 
-                                              periodUnit: value as 'days' | 'weeks' | 'months' | 'years',
+                                            onChange={(value) => updateCondition(condition.id, {
+                                              period_unit: value as 'days' | 'weeks' | 'months' | 'years',
                                               value: `${condition.period_number || 1}_${value}`
                                             })}
                                           />
@@ -948,8 +948,8 @@ const PropertiesSidebar: React.FC = () => {
                                             label="From Date"
                                             type="date"
                                             value={String(condition.date_from || '')}
-                                            onChange={(value) => updateCondition(condition.id, { 
-                                              dateFrom: value,
+                                            onChange={(value) => updateCondition(condition.id, {
+                                              date_from: value,
                                               value: 'range'
                                             })}
                                             autoComplete="off"
@@ -960,8 +960,8 @@ const PropertiesSidebar: React.FC = () => {
                                             label="To Date"
                                             type="date"
                                             value={String(condition.date_to || '')}
-                                            onChange={(value) => updateCondition(condition.id, { 
-                                              dateTo: value,
+                                            onChange={(value) => updateCondition(condition.id, {
+                                              date_to: value,
                                               value: 'range'
                                             })}
                                             autoComplete="off"

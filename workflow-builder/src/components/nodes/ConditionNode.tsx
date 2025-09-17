@@ -5,32 +5,45 @@ import { Icons } from '../../utils/icons';
 import type { NodeData, WorkflowCondition } from '../../types/workflow.types';
 import { getOperatorLabel } from '../../utils/dataSourceFields';
 
-// Helper function to format date values for display  
-const formatDateValue = (value: string | number, dateType?: 'today' | 'specific' | 'relative' | 'range'): string => {
+// Helper function to format date values for display
+const formatDateValue = (value: string | number, dateType?: 'today' | 'specific' | 'relative' | 'range', condition?: WorkflowCondition): string => {
   const valueStr = String(value);
-  
-  // Handle range dates
-  if (dateType === 'range') {
+
+  // Handle range dates (date_between, date_not_between)
+  if (dateType === 'range' || (condition && ['date_between', 'date_not_between'].includes(condition.operator))) {
+    if (condition?.date_from && condition?.date_to) {
+      const fromDate = new Date(condition.date_from).toLocaleDateString();
+      const toDate = new Date(condition.date_to).toLocaleDateString();
+      return `${fromDate} - ${toDate}`;
+    }
     return 'Date Range';
   }
-  
+
   // Handle dynamic dates (today and relative)
   if (dateType === 'today' || dateType === 'relative' || !dateType) {
     // Handle simple "today"
     if (valueStr === 'today') {
       return 'Today';
     }
-    
+
     // Handle relative period format: "3_months" or "2_weeks"
     const relativeParts = valueStr.split('_');
     if (relativeParts.length === 2) {
       const [number, unit] = relativeParts;
       const num = parseInt(number);
       const unitLabel = num === 1 ? unit.slice(0, -1) : unit; // Remove 's' for singular
-      
+
       return `${num} ${unitLabel}`;
     }
-    
+
+    // Handle relative periods with period_number and period_unit
+    if (condition?.period_number && condition?.period_unit) {
+      const num = condition.period_number;
+      const unit = condition.period_unit;
+      const unitLabel = num === 1 ? unit.slice(0, -1) : unit; // Remove 's' for singular
+      return `${num} ${unitLabel} ago`;
+    }
+
     // Legacy dynamic date labels (backward compatibility)
     const dynamicDateLabels: Record<string, string> = {
       'yesterday': 'Yesterday',
@@ -42,18 +55,20 @@ const formatDateValue = (value: string | number, dateType?: 'today' | 'specific'
       'start_of_year': 'Start of this year',
       'end_of_year': 'End of this year'
     };
-    
+
     if (dynamicDateLabels[valueStr]) {
       return dynamicDateLabels[valueStr];
     }
   }
-  
+
   // Handle specific dates or fallback
-  const date = new Date(valueStr);
-  if (!isNaN(date.getTime())) {
-    return date.toLocaleDateString();
+  if (dateType === 'specific' || valueStr.match(/^\d{4}-\d{2}-\d{2}/)) {
+    const date = new Date(valueStr);
+    if (!isNaN(date.getTime())) {
+      return date.toLocaleDateString();
+    }
   }
-  
+
   // If all else fails, return the raw value
   return valueStr;
 };
@@ -167,6 +182,26 @@ const convertConditionsToQuery = (conditions: WorkflowCondition[], defaultCollec
         break;
       case 'not_contains':
         whereCondition[field] = { "not like": `%${value}%` };
+        break;
+      case 'date_before':
+        whereCondition[field] = { "<": value };
+        break;
+      case 'date_after':
+        whereCondition[field] = { ">": value };
+        break;
+      case 'date_between':
+        if (condition.date_from && condition.date_to) {
+          whereCondition[field] = { "between": [condition.date_from, condition.date_to] };
+        } else {
+          whereCondition[field] = value;
+        }
+        break;
+      case 'date_not_between':
+        if (condition.date_from && condition.date_to) {
+          whereCondition[field] = { "not between": [condition.date_from, condition.date_to] };
+        } else {
+          whereCondition[field] = { "!=": value };
+        }
         break;
       case 'is_empty':
         whereCondition[field] = null;
@@ -331,6 +366,36 @@ const ConditionNode = memo(({ data }: NodeProps) => {
 
     const usecase3Query = convertConditionsToQuery(usecase3Conditions);
     console.log('Usecase 3 - Contacts + Orders aggregation:', JSON.stringify(usecase3Query, null, 2));
+
+    // Date condition test
+    const dateConditions: WorkflowCondition[] = [
+      {
+        id: 'date-test-1',
+        data_source: 'CRM',
+        collection: 'contacts',
+        field: 'created_date',
+        field_type: 'date',
+        operator: 'date_between',
+        value: '2024-01-01',
+        date_type: 'range',
+        date_from: '2024-01-01',
+        date_to: '2024-12-31'
+      },
+      {
+        id: 'date-test-2',
+        data_source: 'CRM',
+        collection: 'contacts',
+        field: 'last_sale_date',
+        field_type: 'date',
+        operator: 'date_after',
+        value: '2024-06-01',
+        date_type: 'specific',
+        logical_operator: 'AND'
+      }
+    ];
+
+    const dateQuery = convertConditionsToQuery(dateConditions);
+    console.log('Date conditions test:', JSON.stringify(dateQuery, null, 2));
   }, []); // Run once on component mount
   return (
     <div style={{ minWidth: '320px' }}>
@@ -422,8 +487,8 @@ const ConditionNode = memo(({ data }: NodeProps) => {
                         </Badge>
                         {!['is_empty', 'is_not_empty'].includes(condition.operator) && condition.value !== undefined && (
                           <Text as="span" variant="bodySm" fontWeight="semibold">
-                            {condition.field_type === 'date' 
-                              ? formatDateValue(condition.value, condition.date_type)
+                            {condition.field_type === 'date'
+                              ? formatDateValue(condition.value, condition.date_type, condition)
                               : String(condition.value)}
                           </Text>
                         )}

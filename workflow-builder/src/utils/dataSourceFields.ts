@@ -96,7 +96,7 @@ export const getOperatorsForFieldType = (fieldType: 'text' | 'number' | 'date' |
     case 'number':
       return ['equals', 'not_equals', 'greater_than', 'less_than', 'greater_equal', 'less_equal', 'is_empty', 'is_not_empty'];
     case 'date':
-      return ['equals', 'not_equals', 'date_before', 'date_after', 'is_empty', 'is_not_empty'];
+      return ['equals', 'not_equals', 'date_before', 'date_after', 'date_between', 'date_not_between', 'is_empty', 'is_not_empty'];
     case 'select':
       return ['equals', 'not_equals', 'is_empty', 'is_not_empty'];
     default:
@@ -127,6 +127,8 @@ export const getOperatorLabel = (operator: string): string => {
     'not_contains': 'Does Not Contain',
     'date_before': 'Before',
     'date_after': 'After',
+    'date_between': 'Between',
+    'date_not_between': 'Not Between',
     'is_empty': 'Is Empty',
     'is_not_empty': 'Is Not Empty'
   };
