@@ -9,7 +9,7 @@ export const nodeTemplates: NodeTemplate[] = [
     description: 'Check data conditions with customizable rules',
     icon: 'HelpIcon',
     category: 'conditions',
-    defaultConfig: {}
+    default_config: {}
   },
   
   // Actions - Marketing Automation
@@ -19,7 +19,7 @@ export const nodeTemplates: NodeTemplate[] = [
     description: 'Send SMS with dynamic content based on trigger data',
     icon: 'MobileIcon',
     category: 'actions',
-    defaultConfig: {
+    default_config: {
       template: '',
       phoneField: 'phone_number',
       includeCustomerData: true
@@ -31,7 +31,7 @@ export const nodeTemplates: NodeTemplate[] = [
     description: 'Send personalized email with campaign templates',
     icon: 'EmailIcon',
     category: 'actions',
-    defaultConfig: {
+    default_config: {
       campaignTemplate: '',
       emailField: 'email',
       subject: '',
@@ -44,7 +44,7 @@ export const nodeTemplates: NodeTemplate[] = [
     description: 'Send message via LINE messaging platform',
     icon: 'NotificationIcon',
     category: 'actions',
-    defaultConfig: {
+    default_config: {
       message: '',
       lineUserId: '',
       includeCustomerData: true,
@@ -57,7 +57,7 @@ export const nodeTemplates: NodeTemplate[] = [
     description: 'Send message to Slack channel or user',
     icon: 'ChatIcon',
     category: 'actions',
-    defaultConfig: {
+    default_config: {
       message: '',
       channel: '',
       username: 'Workflow Bot',
@@ -71,7 +71,7 @@ export const nodeTemplates: NodeTemplate[] = [
     description: 'Call external API with customer and trigger data',
     icon: 'ExportIcon',
     category: 'actions',
-    defaultConfig: {
+    default_config: {
       url: '',
       method: 'POST',
       includeCustomerData: true,
@@ -84,7 +84,7 @@ export const nodeTemplates: NodeTemplate[] = [
     description: 'Add tags to customer profile',
     icon: 'HashtagIcon',
     category: 'actions',
-    defaultConfig: {
+    default_config: {
       tags: [],
       dataSource: 'crm'
     }
@@ -97,7 +97,7 @@ export const nodeTemplates: NodeTemplate[] = [
     description: 'Pause workflow execution',
     icon: 'ClockIcon',
     category: 'utilities',
-    defaultConfig: {
+    default_config: {
       duration: 60,
       unit: 'seconds'
     }
@@ -108,7 +108,7 @@ export const nodeTemplates: NodeTemplate[] = [
     description: 'Add entry to workflow log',
     icon: 'NoteIcon',
     category: 'utilities',
-    defaultConfig: {
+    default_config: {
       message: '',
       level: 'info'
     }

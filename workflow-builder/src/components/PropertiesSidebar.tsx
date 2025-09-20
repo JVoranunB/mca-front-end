@@ -18,8 +18,29 @@ import useWorkflowStore from '../store/workflowStore';
 import type { WorkflowCondition, StartConfig, TriggerConfig } from '../types/workflow.types';
 import { getCollectionsForDataSource, getFieldsForCollection, type DataSourceField } from '../utils/dataSourceFields';
 
+// Helper function to get field type display prefix with emoji/symbol
+const getFieldTypeDisplayPrefix = (fieldType: string): string => {
+  switch (fieldType) {
+    case 'date':
+      return '📅';
+    case 'text':
+      return '📝';
+    case 'number':
+      return '#️⃣';
+    case 'select':
+      return '🔽';
+    default:
+      return '📋';
+  }
+};
+
 const PropertiesSidebar: React.FC = () => {
-  const { selectedNode, updateNode, deleteNode, rightSidebarVisible, toggleRightSidebar, currentWorkflow } = useWorkflowStore();
+  const { selectedAction, updateAction, deleteAction, rightSidebarVisible, toggleRightSidebar, currentWorkflow } = useWorkflowStore();
+
+  // Backward compatibility alias
+  const selectedNode = selectedAction;
+  const updateNode = updateAction;
+  const deleteNode = deleteAction;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [localConfig, setLocalConfig] = useState<Record<string, any>>({});
   const [conditions, setConditions] = useState<WorkflowCondition[]>([]);
@@ -67,13 +88,13 @@ const PropertiesSidebar: React.FC = () => {
   const addCondition = () => {
     const newCondition: WorkflowCondition = {
       id: Date.now().toString(),
-      dataSource: 'CRM',
+      data_source: 'CRM',
       collection: undefined,
       field: '',
-      fieldType: 'text',
+      field_type: 'text',
       operator: 'equals',
       value: '',
-      logicalOperator: conditions.length > 0 ? 'AND' : undefined
+      logical_operator: conditions.length > 0 ? 'AND' : undefined
     };
     const newConditions = [...conditions, newCondition];
     setConditions(newConditions);
@@ -160,8 +181,8 @@ const PropertiesSidebar: React.FC = () => {
         <>
           <TextField
             label="Merchant ID"
-            value={String(config.merchantId || '')}
-            onChange={(value) => handleConfigChange('merchantId', value)}
+            value={String(config.merchant_id || '')}
+            onChange={(value) => handleConfigChange('merchant_id', value)}
             autoComplete="off"
             helpText="Unique identifier for the merchant account"
             readOnly
@@ -171,15 +192,15 @@ const PropertiesSidebar: React.FC = () => {
             options={[
               { label: 'CRM', value: 'CRM' }
             ]}
-            value={config.dataSource || 'CRM'}
-            onChange={(value) => handleConfigChange('dataSource', value)}
+            value={config.data_source || 'CRM'}
+            onChange={(value) => handleConfigChange('data_source', value)}
             disabled
             helpText="Primary data source for workflow execution"
           />
           
           
           {/* Schedule Configuration - show only for schedule-based workflows */}
-          {currentWorkflow?.triggerType === 'schedule-based' && 
+          {currentWorkflow?.trigger_type === 'schedule-based' && 
             renderScheduleConfiguration(config)
           }
         </>
@@ -209,8 +230,8 @@ const PropertiesSidebar: React.FC = () => {
             />
             <TextField
               label="Phone Number Field"
-              value={String(localConfig.phoneField || 'phone_number')}
-              onChange={(value) => handleConfigChange('phoneField', value)}
+              value={String(localConfig.phone_field || 'phone_number')}
+              onChange={(value) => handleConfigChange('phone_field', value)}
               autoComplete="off"
               helpText="Field name containing the recipient's phone number"
             />
@@ -239,8 +260,8 @@ const PropertiesSidebar: React.FC = () => {
             />
             <TextField
               label="Email Field"
-              value={String(localConfig.emailField || 'email')}
-              onChange={(value) => handleConfigChange('emailField', value)}
+              value={String(localConfig.email_field || 'email')}
+              onChange={(value) => handleConfigChange('email_field', value)}
               autoComplete="off"
               helpText="Field name containing the recipient's email address"
             />
@@ -478,20 +499,20 @@ const PropertiesSidebar: React.FC = () => {
               { label: 'One-time', value: 'one-time' },
               { label: 'Recurring', value: 'recurring' }
             ]}
-            value={config.scheduleType || 'recurring'}
-            onChange={(value) => handleConfigChange('scheduleType', value)}
+            value={config.schedule_type || 'recurring'}
+            onChange={(value) => handleConfigChange('schedule_type', value)}
           />
           
           <TextField
             label="Schedule Time"
-            value={String(config.scheduleTime || '')}
-            onChange={(value) => handleConfigChange('scheduleTime', value)}
+            value={String(config.schedule_time || '')}
+            onChange={(value) => handleConfigChange('schedule_time', value)}
             autoComplete="off"
             placeholder="14:00"
             helpText="Time in 24-hour format (e.g., 14:00 for 2 PM)"
           />
           
-          {config.scheduleType === 'recurring' && (
+          {config.schedule_type === 'recurring' && (
             <Select
                 label="Recurrence Pattern"
                 options={[
@@ -500,23 +521,23 @@ const PropertiesSidebar: React.FC = () => {
                   { label: 'Monthly', value: 'monthly' },
                   { label: 'Yearly', value: 'yearly' }
                 ]}
-                value={config.recurrencePattern || 'daily'}
-                onChange={(value) => handleConfigChange('recurrencePattern', value)}
+                value={config.recurrence_pattern || 'daily'}
+                onChange={(value) => handleConfigChange('recurrence_pattern', value)}
               />
           )}
           
-          {config.scheduleType === 'one-time' && (
+          {config.schedule_type === 'one-time' && (
             <TextField
               label="Schedule Date"
               type="date"
-              value={String(config.scheduleDate || '')}
-              onChange={(value) => handleConfigChange('scheduleDate', value)}
+              value={String(config.schedule_date || '')}
+              onChange={(value) => handleConfigChange('schedule_date', value)}
               autoComplete="off"
               helpText="Date for one-time execution"
             />
           )}
           
-          {config.recurrencePattern === 'weekly' && (
+          {config.recurrence_pattern === 'weekly' && (
             <Select
               label="Day of Week"
               options={[
@@ -528,25 +549,25 @@ const PropertiesSidebar: React.FC = () => {
                 { label: 'Friday', value: '5' },
                 { label: 'Saturday', value: '6' }
               ]}
-              value={String(config.dayOfWeek || '1')}
-              onChange={(value) => handleConfigChange('dayOfWeek', parseInt(value))}
+              value={String(config.day_of_week || '1')}
+              onChange={(value) => handleConfigChange('day_of_week', parseInt(value))}
             />
           )}
           
-          {config.recurrencePattern === 'monthly' && (
+          {config.recurrence_pattern === 'monthly' && (
             <TextField
               label="Day of Month"
               type="number"
               min="1"
               max="31"
-              value={String(config.dayOfMonth || '1')}
-              onChange={(value) => handleConfigChange('dayOfMonth', parseInt(value) || 1)}
+              value={String(config.day_of_month || '1')}
+              onChange={(value) => handleConfigChange('day_of_month', parseInt(value) || 1)}
               autoComplete="off"
               helpText="Day of the month (1-31)"
             />
           )}
           
-          {config.recurrencePattern === 'yearly' && (
+          {config.recurrence_pattern === 'yearly' && (
             <>
               <Select
                 label="Month"
@@ -572,8 +593,8 @@ const PropertiesSidebar: React.FC = () => {
                 type="number"
                 min="1"
                 max="31"
-                value={String(config.dayOfMonth || '1')}
-                onChange={(value) => handleConfigChange('dayOfMonth', parseInt(value) || 1)}
+                value={String(config.day_of_month || '1')}
+                onChange={(value) => handleConfigChange('day_of_month', parseInt(value) || 1)}
                 autoComplete="off"
                 helpText="Day of the month (1-31)"
               />
@@ -695,8 +716,8 @@ const PropertiesSidebar: React.FC = () => {
                       </InlineStack>
                       
                       {conditions.map((condition, index) => {
-                        // Ensure dataSource is always CRM
-                        const dataSource = condition.dataSource || 'CRM';
+                        // Ensure data_source is always CRM
+                        const dataSource = condition.data_source || 'CRM';
                         const collections = getCollectionsForDataSource(dataSource);
                         const fields = condition.collection 
                           ? getFieldsForCollection(dataSource, condition.collection)
@@ -713,9 +734,9 @@ const PropertiesSidebar: React.FC = () => {
                                     { label: 'AND', value: 'AND' },
                                     { label: 'OR', value: 'OR' }
                                   ]}
-                                  value={condition.logicalOperator || 'AND'}
+                                  value={condition.logical_operator || 'AND'}
                                   onChange={(value) => updateCondition(condition.id, { 
-                                    logicalOperator: value as 'AND' | 'OR' 
+                                    logical_operator: value as 'AND' | 'OR' 
                                   })}
                                 />
                               )}
@@ -738,34 +759,43 @@ const PropertiesSidebar: React.FC = () => {
                               {fields.length > 0 && (
                                 <Select
                                   label="Field"
-                                  options={fields.map((f: DataSourceField) => ({ label: f.label, value: f.key }))}
+                                  options={fields.map((f: DataSourceField) => ({
+                                    label: `${getFieldTypeDisplayPrefix(f.type)} ${f.label}`,
+                                    value: f.key
+                                  }))}
                                   value={condition.field}
                                   onChange={(value) => {
                                     const field = fields.find((f: DataSourceField) => f.key === value);
                                     const updates: Partial<WorkflowCondition> = {
                                       field: value,
-                                      fieldType: field?.type || 'text',
-                                      selectOptions: field?.options,
+                                      field_type: field?.type || 'text',
+                                      select_options: field?.options,
                                       value: ''
                                     };
                                     
                                     // Set smart defaults for date fields
                                     if (field?.type === 'date') {
                                       if (condition.operator === 'equals' || condition.operator === 'not_equals') {
-                                        updates.dateType = 'today';
-                                        updates.value = 'today';
+                                        // For birth date fields, default to anniversary
+                                        if (field.key.includes('birth') || field.key.includes('birthday')) {
+                                          updates.date_type = 'anniversary';
+                                          updates.value = 'anniversary';
+                                        } else {
+                                          updates.date_type = 'today';
+                                          updates.value = 'today';
+                                        }
                                       } else if (['date_before', 'date_after'].includes(condition.operator)) {
-                                        updates.dateType = 'relative';
-                                        updates.periodNumber = 1;
-                                        updates.periodUnit = 'days';
+                                        updates.date_type = 'relative';
+                                        updates.period_number = 1;
+                                        updates.period_unit = 'days';
                                         updates.value = '1_days';
                                       } else if (['date_between', 'date_not_between'].includes(condition.operator)) {
-                                        updates.dateType = 'range';
+                                        updates.date_type = 'range';
                                         updates.value = 'range';
-                                        updates.dateFrom = '';
-                                        updates.dateTo = '';
+                                        updates.date_from = '';
+                                        updates.date_to = '';
                                       } else {
-                                        updates.dateType = 'today';
+                                        updates.date_type = 'today';
                                         updates.value = 'today';
                                       }
                                     }
@@ -789,20 +819,20 @@ const PropertiesSidebar: React.FC = () => {
                                     if (selectedField?.type === 'date') {
                                       if (['date_between', 'date_not_between'].includes(newOperator)) {
                                         // Range operators
-                                        updates.dateType = 'range';
+                                        updates.date_type = 'range';
                                         updates.value = 'range';
-                                        updates.dateFrom = '';
-                                        updates.dateTo = '';
+                                        updates.date_from = '';
+                                        updates.date_to = '';
                                       } else if (['date_before', 'date_after'].includes(newOperator)) {
                                         // Check current dateType - if it's range, switch to relative
-                                        if (condition.dateType === 'range') {
-                                          updates.dateType = 'relative';
-                                          updates.value = `${condition.periodNumber || 1}_${condition.periodUnit || 'days'}`;
+                                        if (condition.date_type === 'range') {
+                                          updates.date_type = 'relative';
+                                          updates.value = `${condition.period_number || 1}_${condition.period_unit || 'days'}`;
                                         }
                                       } else if (['equals', 'not_equals'].includes(newOperator)) {
                                         // Check current dateType - if it's range or relative, switch to specific
-                                        if (['range', 'relative'].includes(condition.dateType || '')) {
-                                          updates.dateType = 'specific';
+                                        if (['range', 'relative'].includes(condition.date_type || '')) {
+                                          updates.date_type = 'specific';
                                           updates.value = '';
                                         }
                                       }
@@ -831,7 +861,8 @@ const PropertiesSidebar: React.FC = () => {
                                           if (['equals', 'not_equals'].includes(condition.operator)) {
                                             return [
                                               { label: 'Today', value: 'today' },
-                                              { label: 'Specific Date', value: 'specific' }
+                                              { label: 'Specific Date', value: 'specific' },
+                                              { label: 'Anniversary Date', value: 'anniversary' }
                                             ];
                                           } else if (['date_before', 'date_after'].includes(condition.operator)) {
                                             return [
@@ -849,15 +880,16 @@ const PropertiesSidebar: React.FC = () => {
                                               { label: 'Today', value: 'today' },
                                               { label: 'Specific Date', value: 'specific' },
                                               { label: 'Relative Period', value: 'relative' },
-                                              { label: 'Date Range', value: 'range' }
+                                              { label: 'Date Range', value: 'range' },
+                                              { label: 'Anniversary Date', value: 'anniversary' }
                                             ];
                                           }
                                         })()}
-                                        value={condition.dateType || 'specific'}
+                                        value={condition.date_type || 'specific'}
                                         onChange={(value) => {
-                                          const newDateType = value as 'today' | 'specific' | 'relative' | 'range';
-                                          const newValue = value === 'today' ? 'today' : value === 'relative' ? `${condition.periodNumber || 1}_${condition.periodUnit || 'days'}` : value === 'range' ? 'range' : '';
-                                          
+                                          const newDateType = value as 'today' | 'specific' | 'relative' | 'range' | 'anniversary';
+                                          const newValue = value === 'today' ? 'today' : value === 'relative' ? `${condition.period_number || 1}_${condition.period_unit || 'days'}` : value === 'range' ? 'range' : value === 'anniversary' ? 'anniversary' : '';
+
                                           // Reset operator to valid default for new date type
                                           let newOperator = condition.operator;
                                           const validOperators = getOperatorOptions(selectedField?.type).map(op => op.value);
@@ -866,25 +898,25 @@ const PropertiesSidebar: React.FC = () => {
                                               newOperator = 'date_between';
                                             } else if (newDateType === 'relative') {
                                               newOperator = 'date_before';
-                                            } else if (newDateType === 'today') {
+                                            } else if (newDateType === 'today' || newDateType === 'anniversary') {
                                               newOperator = 'equals';
                                             } else {
                                               newOperator = 'equals';
                                             }
                                           }
-                                          
+
                                           // Additional updates based on dateType
                                           const additionalUpdates: Partial<WorkflowCondition> = {};
                                           if (newDateType === 'range') {
-                                            additionalUpdates.dateFrom = condition.dateFrom || '';
-                                            additionalUpdates.dateTo = condition.dateTo || '';
+                                            additionalUpdates.date_from = condition.date_from || '';
+                                            additionalUpdates.date_to = condition.date_to || '';
                                           } else if (newDateType === 'relative') {
-                                            additionalUpdates.periodNumber = condition.periodNumber || 1;
-                                            additionalUpdates.periodUnit = condition.periodUnit || 'days';
+                                            additionalUpdates.period_number = condition.period_number || 1;
+                                            additionalUpdates.period_unit = condition.period_unit || 'days';
                                           }
-                                          
-                                          updateCondition(condition.id, { 
-                                            dateType: newDateType,
+
+                                          updateCondition(condition.id, {
+                                            date_type: newDateType,
                                             value: newValue,
                                             operator: newOperator as WorkflowCondition['operator'],
                                             ...additionalUpdates
@@ -892,7 +924,7 @@ const PropertiesSidebar: React.FC = () => {
                                         }}
                                       />
                                       
-                                      {condition.dateType === 'specific' && (
+                                      {condition.date_type === 'specific' && (
                                         <TextField
                                           label="Specific Date"
                                           type="date"
@@ -902,17 +934,17 @@ const PropertiesSidebar: React.FC = () => {
                                         />
                                       )}
                                       
-                                      {condition.dateType === 'relative' && (
+                                      {condition.date_type === 'relative' && (
                                         <>
                                           <TextField
                                             label="Number of Periods"
                                             type="number"
-                                            value={String(condition.periodNumber || 1)}
+                                            value={String(condition.period_number || 1)}
                                             onChange={(value) => {
                                               const num = parseInt(value) || 1;
-                                              updateCondition(condition.id, { 
-                                                periodNumber: num,
-                                                value: `${num}_${condition.periodUnit || 'days'}`
+                                              updateCondition(condition.id, {
+                                                period_number: num,
+                                                value: `${num}_${condition.period_unit || 'days'}`
                                               });
                                             }}
                                             autoComplete="off"
@@ -928,23 +960,23 @@ const PropertiesSidebar: React.FC = () => {
                                               { label: 'Months', value: 'months' },
                                               { label: 'Years', value: 'years' }
                                             ]}
-                                            value={condition.periodUnit || 'days'}
-                                            onChange={(value) => updateCondition(condition.id, { 
-                                              periodUnit: value as 'days' | 'weeks' | 'months' | 'years',
-                                              value: `${condition.periodNumber || 1}_${value}`
+                                            value={condition.period_unit || 'days'}
+                                            onChange={(value) => updateCondition(condition.id, {
+                                              period_unit: value as 'days' | 'weeks' | 'months' | 'years',
+                                              value: `${condition.period_number || 1}_${value}`
                                             })}
                                           />
                                         </>
                                       )}
                                       
-                                      {condition.dateType === 'range' && (
+                                      {condition.date_type === 'range' && (
                                         <>
                                           <TextField
                                             label="From Date"
                                             type="date"
-                                            value={String(condition.dateFrom || '')}
-                                            onChange={(value) => updateCondition(condition.id, { 
-                                              dateFrom: value,
+                                            value={String(condition.date_from || '')}
+                                            onChange={(value) => updateCondition(condition.id, {
+                                              date_from: value,
                                               value: 'range'
                                             })}
                                             autoComplete="off"
@@ -954,15 +986,21 @@ const PropertiesSidebar: React.FC = () => {
                                           <TextField
                                             label="To Date"
                                             type="date"
-                                            value={String(condition.dateTo || '')}
-                                            onChange={(value) => updateCondition(condition.id, { 
-                                              dateTo: value,
+                                            value={String(condition.date_to || '')}
+                                            onChange={(value) => updateCondition(condition.id, {
+                                              date_to: value,
                                               value: 'range'
                                             })}
                                             autoComplete="off"
                                             helpText="End date of the range"
                                           />
                                         </>
+                                      )}
+
+                                      {condition.date_type === 'anniversary' && (
+                                        <Text as="p" variant="bodySm" tone="subdued">
+                                          Anniversary will automatically use today's month and day to match against the selected date field (e.g., birthday anniversaries).
+                                        </Text>
                                       )}
                                     </>
                                   ) : selectedField?.type === 'number' ? (

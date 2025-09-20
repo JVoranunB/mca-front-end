@@ -52,8 +52,8 @@ const ScheduledConfig: React.FC<ScheduledConfigProps> = ({ config, onChange }) =
       <FormLayout>
         <TextField
           label="Merchant ID"
-          value={config.merchantId || ''}
-          onChange={(value) => handleChange('merchantId', value)}
+          value={config.merchant_id || ''}
+          onChange={(value) => handleChange('merchant_id', value)}
           placeholder="Enter merchant ID for isolation"
           autoComplete="off"
           helpText="Leave empty to process all merchants"
@@ -65,8 +65,8 @@ const ScheduledConfig: React.FC<ScheduledConfigProps> = ({ config, onChange }) =
             { label: 'CRM (Customer Data)', value: 'crm' },
             { label: 'MongoDB (Batch Processing)', value: 'mongodb' }
           ]}
-          value={config.dataSource}
-          onChange={(value) => handleChange('dataSource', value)}
+          value={config.data_source}
+          onChange={(value) => handleChange('data_source', value)}
         />
         
         <BlockStack gap="200">
@@ -76,33 +76,33 @@ const ScheduledConfig: React.FC<ScheduledConfigProps> = ({ config, onChange }) =
           <Stack gap="200">
             <RadioButton
               label="One-time Schedule"
-              checked={config.scheduleType === 'one-time'}
+              checked={config.schedule_type === 'one-time'}
               id="one-time"
               name="scheduleType"
-              onChange={() => handleChange('scheduleType', 'one-time')}
+              onChange={() => handleChange('schedule_type', 'one-time')}
             />
             <RadioButton
               label="Recurring Schedule"
-              checked={config.scheduleType === 'recurring'}
+              checked={config.schedule_type === 'recurring'}
               id="recurring"
               name="scheduleType"
-              onChange={() => handleChange('scheduleType', 'recurring')}
+              onChange={() => handleChange('schedule_type', 'recurring')}
             />
           </Stack>
         </BlockStack>
         
-        {config.scheduleType === 'one-time' && (
+        {config.schedule_type === 'one-time' && (
           <TextField
             label="Schedule Date"
             type="date"
-            value={config.scheduleDate || ''}
-            onChange={(value) => handleChange('scheduleDate', value)}
+            value={config.schedule_date || ''}
+            onChange={(value) => handleChange('schedule_date', value)}
             autoComplete="off"
             helpText="Select the date when this trigger should fire"
           />
         )}
         
-        {config.scheduleType === 'recurring' && (
+        {config.schedule_type === 'recurring' && (
           <Select
             label="Recurrence Pattern"
             options={[
@@ -111,26 +111,26 @@ const ScheduledConfig: React.FC<ScheduledConfigProps> = ({ config, onChange }) =
               { label: 'Monthly', value: 'monthly' },
               { label: 'Yearly', value: 'yearly' }
             ]}
-            value={config.recurrencePattern || 'daily'}
-            onChange={(value) => handleChange('recurrencePattern', value)}
+            value={config.recurrence_pattern || 'daily'}
+            onChange={(value) => handleChange('recurrence_pattern', value)}
           />
         )}
         
-        {config.recurrencePattern === 'weekly' && (
+        {config.recurrence_pattern === 'weekly' && (
           <Select
             label="Day of Week"
             options={daysOfWeek}
-            value={String(config.dayOfWeek || '1')}
-            onChange={(value) => handleChange('dayOfWeek', parseInt(value))}
+            value={String(config.day_of_week || '1')}
+            onChange={(value) => handleChange('day_of_week', parseInt(value))}
           />
         )}
         
-        {config.recurrencePattern === 'monthly' && (
+        {config.recurrence_pattern === 'monthly' && (
           <TextField
             label="Day of Month"
             type="number"
-            value={String(config.dayOfMonth || '1')}
-            onChange={(value) => handleChange('dayOfMonth', parseInt(value) || 1)}
+            value={String(config.day_of_month || '1')}
+            onChange={(value) => handleChange('day_of_month', parseInt(value) || 1)}
             min="1"
             max="31"
             autoComplete="off"
@@ -141,8 +141,8 @@ const ScheduledConfig: React.FC<ScheduledConfigProps> = ({ config, onChange }) =
         <TextField
           label="Schedule Time"
           type="time"
-          value={config.scheduleTime || '09:00'}
-          onChange={(value) => handleChange('scheduleTime', value)}
+          value={config.schedule_time || '09:00'}
+          onChange={(value) => handleChange('schedule_time', value)}
           autoComplete="off"
           helpText="Time when the trigger should fire"
         />
@@ -160,16 +160,16 @@ const ScheduledConfig: React.FC<ScheduledConfigProps> = ({ config, onChange }) =
           <Text as="p" variant="bodySm" fontWeight="semibold">
             Schedule Summary:
           </Text>
-          {config.scheduleType === 'one-time' ? (
+          {config.schedule_type === 'one-time' ? (
             <Badge tone="attention">
-              {`Once on ${config.scheduleDate || 'TBD'} at ${config.scheduleTime || '09:00'} ${config.timezone || 'UTC'}`}
+              {`Once on ${config.schedule_date || 'TBD'} at ${config.schedule_time || '09:00'} ${config.timezone || 'UTC'}`}
             </Badge>
           ) : (
             <Badge tone="success">
-              {config.recurrencePattern === 'daily' ? `Daily at ${config.scheduleTime || '09:00'} ${config.timezone || 'UTC'}` :
-               config.recurrencePattern === 'weekly' ? `Weekly on ${daysOfWeek.find(d => d.value === String(config.dayOfWeek))?.label || 'Monday'} at ${config.scheduleTime || '09:00'} ${config.timezone || 'UTC'}` :
-               config.recurrencePattern === 'monthly' ? `Monthly on day ${config.dayOfMonth || '1'} at ${config.scheduleTime || '09:00'} ${config.timezone || 'UTC'}` :
-               config.recurrencePattern === 'yearly' ? `Yearly at ${config.scheduleTime || '09:00'} ${config.timezone || 'UTC'}` :
+              {config.recurrence_pattern === 'daily' ? `Daily at ${config.schedule_time || '09:00'} ${config.timezone || 'UTC'}` :
+               config.recurrence_pattern === 'weekly' ? `Weekly on ${daysOfWeek.find(d => d.value === String(config.day_of_week))?.label || 'Monday'} at ${config.schedule_time || '09:00'} ${config.timezone || 'UTC'}` :
+               config.recurrence_pattern === 'monthly' ? `Monthly on day ${config.day_of_month || '1'} at ${config.schedule_time || '09:00'} ${config.timezone || 'UTC'}` :
+               config.recurrence_pattern === 'yearly' ? `Yearly at ${config.schedule_time || '09:00'} ${config.timezone || 'UTC'}` :
                'Configure schedule'}
             </Badge>
           )}

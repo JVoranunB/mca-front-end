@@ -1,9 +1,10 @@
-import type { Workflow, WorkflowNode, WorkflowEdge } from '../types/workflow.types';
+import type { Workflow, WorkflowNode, WorkflowPeer } from '../types/workflow.types';
 import type { BackendWorkflow, BackendWorkflowAction, BackendWorkflowPeer } from '../services/workflowApi';
 import { DATA_SOURCE_FIELDS } from './dataSourceFields';
+import { ConditionConverter } from './conditionConverter';
 
 interface NodeMapping {
-  [nodeId: string]: string; // Maps frontend node IDs to backend action keys
+  [node_id: string]: string; // Maps frontend node IDs to backend action keys
 }
 
 export class WorkflowTransformer {
@@ -14,20 +15,20 @@ export class WorkflowTransformer {
     const nodeMapping: NodeMapping = {};
     let actionCounter = 1;
 
-    // Create mapping from node IDs to action keys
-    workflow.nodes.forEach((node) => {
-      nodeMapping[node.id] = `a${actionCounter}`;
+    // Create mapping from action IDs to action keys
+    workflow.actions.forEach((action) => {
+      nodeMapping[action.id] = `a${actionCounter}`;
       actionCounter++;
     });
 
-    // Transform nodes to actions
-    const actions: BackendWorkflowAction[] = workflow.nodes.map((node) => {
-      return this.transformNodeToAction(node, nodeMapping);
+    // Transform actions to backend actions
+    const actions: BackendWorkflowAction[] = workflow.actions.map((action) => {
+      return this.transformNodeToAction(action, nodeMapping);
     });
 
-    // Transform edges to peers
-    const peers: BackendWorkflowPeer[] = workflow.edges.map((edge) => {
-      return this.transformEdgeToPeer(edge, nodeMapping);
+    // Transform peers to backend peers
+    const peers: BackendWorkflowPeer[] = workflow.peers.map((peer) => {
+      return this.transformPeerToPeer(peer, nodeMapping);
     });
 
     return {
@@ -35,20 +36,20 @@ export class WorkflowTransformer {
       name: workflow.name,
       version: '1.0',
       status: workflow.status,
-      merchantId: this.extractMerchantId(workflow),
+      merchant_id: this.extractMerchantId(workflow),
       actions,
       peers,
     };
   }
 
   /**
-   * Extract merchantId from workflow nodes
+   * Extract merchant_id from workflow nodes
    */
   private static extractMerchantId(workflow: Workflow): string {
-    // Look for merchantId in any node config
-    for (const node of workflow.nodes) {
-      if (node.data.config?.merchantId) {
-        return String(node.data.config.merchantId);
+    // Look for merchant_id in any action config
+    for (const action of workflow.actions) {
+      if (action.data.config?.merchant_id) {
+        return String(action.data.config.merchant_id);
       }
     }
     return 'SHOP001'; // Default fallback
@@ -158,43 +159,48 @@ export class WorkflowTransformer {
     switch (node.data.type) {
       case 'start':
         config.event = 'workflow_start';
-        config.merchantId = node.data.config?.merchantId || '';
-        config.dataSource = node.data.config?.dataSource || 'CRM';
+        config.merchant_id = node.data.config?.merchant_id || '';
+        config.data_source = node.data.config?.data_source || 'CRM';
         break;
 
       case 'condition':
         if (node.data.conditions && node.data.conditions.length > 0) {
-          const condition = node.data.conditions[0]; // Use first condition for simplicity
-          if (condition.operator === 'greater_than' && condition.value === 500) {
-            // Generate the query format for order value check
-            config.conditions = 'ctx.orders.grand_total > 500';
-          } else {
-            // Fallback to expression format
-            const field = this.mapFieldToContextPath(condition.dataSource, condition.collection, condition.field);
-            const operator = this.mapOperatorToExpression(condition.operator);
-            const value = typeof condition.value === 'string' ? `'${condition.value}'` : condition.value;
-            config.conditions = `${field} ${operator} ${value}`;
-          }
+          // Use the new ConditionConverter to generate proper MCA-query JSON
+          const queryOutput = ConditionConverter.convertConditionsToQuery(node.data.conditions);
+          config.query = {
+            mode: 'json',
+            value: JSON.stringify(queryOutput)
+          };
+
+          // Keep legacy expression format for backward compatibility
+          const condition = node.data.conditions[0];
+          const field = this.mapFieldToContextPath(condition.data_source, condition.collection, condition.field);
+          const operator = this.mapOperatorToExpression(condition.operator);
+          const value = typeof condition.value === 'string' ? `'${condition.value}'` : condition.value;
+          config.conditions = `${field} ${operator} ${value}`;
         }
         break;
 
-      case 'action':
+      case 'action': {
         config.actionType = this.getActionType(node.data.label);
         const nodeConfig = node.data.config || {};
         
-        // For Slack actions, exclude includeCustomerData and attachments
+        // For Slack actions, exclude include_customer_data and attachments
         if (node.data.label.includes('Slack')) {
-          const { includeCustomerData, attachments, ...slackConfig } = nodeConfig as any;
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { include_customer_data, attachments, ...slackConfig } = nodeConfig as Record<string, unknown>;
           Object.assign(config, slackConfig);
         } else {
           Object.assign(config, nodeConfig);
         }
         break;
+      }
 
-      case 'step':
+      case 'step': {
         config.stepType = this.getStepType(node.data.label);
         Object.assign(config, node.data.config || {});
         break;
+      }
     }
 
     return config;
@@ -205,11 +211,12 @@ export class WorkflowTransformer {
    */
   private static createMapper(node: WorkflowNode): BackendWorkflowAction['mapper'] {
     // Handle condition node query mapping
-    if (node.data.type === 'condition') {
+    if (node.data.type === 'condition' && node.data.conditions && node.data.conditions.length > 0) {
+      const queryOutput = ConditionConverter.convertConditionsToQuery(node.data.conditions);
       return {
         query: {
-          mode: 'expression',
-          value: '{"users":{"limit":5,"select":["user_id","first_name","last_name","points_balance","id_card"],"where":{"and":[{"status":"ACTIVE"},{"points_balance":{">":100}},{"user_id":"684bc1b694537bbbc606660a"}]}}}'
+          mode: 'json',
+          value: JSON.stringify(queryOutput)
         }
       };
     }
@@ -411,20 +418,20 @@ export class WorkflowTransformer {
   /**
    * Transform edge to peer relationship
    */
-  private static transformEdgeToPeer(edge: WorkflowEdge, nodeMapping: NodeMapping): BackendWorkflowPeer {
-    const peer: BackendWorkflowPeer = {
-      parent_key: nodeMapping[edge.source],
-      child_key: nodeMapping[edge.target],
+  private static transformPeerToPeer(peer: WorkflowPeer, nodeMapping: NodeMapping): BackendWorkflowPeer {
+    const backendPeer: BackendWorkflowPeer = {
+      parent_key: nodeMapping[peer.source],
+      child_key: nodeMapping[peer.target],
     };
 
     // Add meta_output for condition branches
-    if (edge.sourceHandle) {
-      peer.meta_output = edge.sourceHandle;
+    if (peer.source_handle) {
+      backendPeer.meta_output = peer.source_handle;
     } else {
-      peer.meta_output = 'triggered';
+      backendPeer.meta_output = 'triggered';
     }
 
-    return peer;
+    return backendPeer;
   }
 
   /**

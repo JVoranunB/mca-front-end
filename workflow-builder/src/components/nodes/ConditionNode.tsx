@@ -1,36 +1,55 @@
-import { memo } from 'react';
+import React, { memo } from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import { Card, Text, Badge, InlineStack, BlockStack, Icon, Divider } from '@shopify/polaris';
 import { Icons } from '../../utils/icons';
-import type { NodeData } from '../../types/workflow.types';
+import type { NodeData, WorkflowCondition } from '../../types/workflow.types';
 import { getOperatorLabel } from '../../utils/dataSourceFields';
+import { ConditionConverter } from '../../utils/conditionConverter';
 
-// Helper function to format date values for display  
-const formatDateValue = (value: string | number, dateType?: 'today' | 'specific' | 'relative' | 'range'): string => {
+// Helper function to format date values for display
+const formatDateValue = (value: string | number, dateType?: 'today' | 'specific' | 'relative' | 'range' | 'anniversary', condition?: WorkflowCondition): string => {
   const valueStr = String(value);
-  
-  // Handle range dates
-  if (dateType === 'range') {
+
+  // Handle range dates (date_between, date_not_between)
+  if (dateType === 'range' || (condition && ['date_between', 'date_not_between'].includes(condition.operator))) {
+    if (condition?.date_from && condition?.date_to) {
+      const fromDate = new Date(condition.date_from).toLocaleDateString();
+      const toDate = new Date(condition.date_to).toLocaleDateString();
+      return `${fromDate} - ${toDate}`;
+    }
     return 'Date Range';
   }
-  
+
+  // Handle anniversary dates (dynamic)
+  if (dateType === 'anniversary' && valueStr === 'anniversary') {
+    return 'Anniversary (today\'s date)';
+  }
+
   // Handle dynamic dates (today and relative)
   if (dateType === 'today' || dateType === 'relative' || !dateType) {
     // Handle simple "today"
     if (valueStr === 'today') {
       return 'Today';
     }
-    
+
     // Handle relative period format: "3_months" or "2_weeks"
     const relativeParts = valueStr.split('_');
     if (relativeParts.length === 2) {
       const [number, unit] = relativeParts;
       const num = parseInt(number);
       const unitLabel = num === 1 ? unit.slice(0, -1) : unit; // Remove 's' for singular
-      
+
       return `${num} ${unitLabel}`;
     }
-    
+
+    // Handle relative periods with period_number and period_unit
+    if (condition?.period_number && condition?.period_unit) {
+      const num = condition.period_number;
+      const unit = condition.period_unit;
+      const unitLabel = num === 1 ? unit.slice(0, -1) : unit; // Remove 's' for singular
+      return `${num} ${unitLabel} ago`;
+    }
+
     // Legacy dynamic date labels (backward compatibility)
     const dynamicDateLabels: Record<string, string> = {
       'yesterday': 'Yesterday',
@@ -42,24 +61,39 @@ const formatDateValue = (value: string | number, dateType?: 'today' | 'specific'
       'start_of_year': 'Start of this year',
       'end_of_year': 'End of this year'
     };
-    
+
     if (dynamicDateLabels[valueStr]) {
       return dynamicDateLabels[valueStr];
     }
   }
-  
+
   // Handle specific dates or fallback
-  const date = new Date(valueStr);
-  if (!isNaN(date.getTime())) {
-    return date.toLocaleDateString();
+  if (dateType === 'specific' || valueStr.match(/^\d{4}-\d{2}-\d{2}/)) {
+    const date = new Date(valueStr);
+    if (!isNaN(date.getTime())) {
+      return date.toLocaleDateString();
+    }
   }
-  
+
   // If all else fails, return the raw value
   return valueStr;
 };
 
+
 const ConditionNode = memo(({ data }: NodeProps) => {
   const nodeData = data as NodeData;
+
+  // Convert conditions to new format and log to console
+  if (nodeData.conditions && nodeData.conditions.length > 0) {
+    console.log('Original conditions:', JSON.stringify(nodeData.conditions, null, 2));
+    const convertedQuery = ConditionConverter.convertConditionsToQuery(nodeData.conditions);
+    console.log('Converted condition query (New Rule Engine):', JSON.stringify(convertedQuery, null, 2));
+  }
+
+  // Demo: Run use case demonstrations once on component mount
+  React.useEffect(() => {
+    ConditionConverter.demonstrateUseCases();
+  }, []); // Run once on component mount
   return (
     <div style={{ minWidth: '320px' }}>
       <Handle
@@ -109,19 +143,19 @@ const ConditionNode = memo(({ data }: NodeProps) => {
               <Divider />
               {nodeData.conditions.map((condition, index: number) => (
                 <BlockStack key={condition.id} gap="100">
-                  {index > 0 && condition.logicalOperator && (
+                  {index > 0 && condition.logical_operator && (
                     <InlineStack gap="100">
                       <Badge tone="info" size="small">
-                        {condition.logicalOperator}
+                        {condition.logical_operator}
                       </Badge>
                     </InlineStack>
                   )}
                   <Card padding="100">
                     <BlockStack gap="100">
-                      {condition.dataSource && (
+                      {condition.data_source && (
                         <InlineStack gap="100" align="start">
                           <Badge size="small">
-                            {condition.dataSource.toUpperCase()}
+                            {condition.data_source.toUpperCase()}
                           </Badge>
                           {condition.collection && (
                             <Badge size="small">
@@ -132,13 +166,13 @@ const ConditionNode = memo(({ data }: NodeProps) => {
                       )}
                       <InlineStack gap="100" wrap={false} align="center">
                         <InlineStack gap="050">
-                          {condition.fieldType === 'number' && (
+                          {condition.field_type === 'number' && (
                             <Icon source={Icons.Default} tone="subdued" />
                           )}
-                          {condition.fieldType === 'date' && (
+                          {condition.field_type === 'date' && (
                             <Icon source={Icons.Timer} tone="subdued" />
                           )}
-                          {condition.fieldType === 'select' && (
+                          {condition.field_type === 'select' && (
                             <Icon source={Icons.ChevronDown} tone="subdued" />
                           )}
                           <Text as="span" variant="bodySm" fontWeight="medium">
@@ -150,8 +184,8 @@ const ConditionNode = memo(({ data }: NodeProps) => {
                         </Badge>
                         {!['is_empty', 'is_not_empty'].includes(condition.operator) && condition.value !== undefined && (
                           <Text as="span" variant="bodySm" fontWeight="semibold">
-                            {condition.fieldType === 'date' 
-                              ? formatDateValue(condition.value, condition.dateType)
+                            {condition.field_type === 'date'
+                              ? formatDateValue(condition.value, condition.date_type, condition)
                               : String(condition.value)}
                           </Text>
                         )}

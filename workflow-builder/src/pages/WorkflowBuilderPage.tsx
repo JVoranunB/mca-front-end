@@ -59,12 +59,12 @@ const WorkflowBuilderPage = () => {
           loadWorkflow(workflowId);
         }
       } else {
-        // Legacy route - load sample if no nodes exist
-        if (store.nodes.length === 0 && store.edges.length === 0) {
+        // Legacy route - load sample if no actions exist
+        if (store.actions.length === 0 && store.peers.length === 0) {
           const firstSample = sampleWorkflows[0];
           if (firstSample) {
-            firstSample.nodes.forEach((node: WorkflowNode) => store.addNode(node));
-            firstSample.edges.forEach((edge) => store.addEdge(edge));
+            // Use loadWorkflow instead to properly set currentWorkflow
+            loadWorkflow(firstSample.id);
           }
         }
       }
@@ -112,7 +112,7 @@ const WorkflowBuilderPage = () => {
           type: nodeTemplate.type,
           description: nodeTemplate.description,
           icon: nodeTemplate.icon,
-          config: nodeTemplate.defaultConfig || {},
+          config: nodeTemplate.default_config || {},
           conditions: nodeTemplate.type === 'condition' ? [] : undefined,
         },
       };

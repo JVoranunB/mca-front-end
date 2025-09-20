@@ -75,7 +75,7 @@ const TopBar: React.FC<TopBarProps> = ({ onBackToList }) => {
       // Generate detailed error message
       const errorMessages = freshValidationErrors.map(error => {
         const prefix = error.severity === 'error' ? '🚫' : '⚠️';
-        const nodeInfo = error.nodeId ? ` (Node: ${error.nodeId})` : '';
+        const nodeInfo = error.node_id ? ` (Node: ${error.node_id})` : '';
         return `${prefix} ${error.message}${nodeInfo}`;
       });
       
@@ -155,7 +155,7 @@ const TopBar: React.FC<TopBarProps> = ({ onBackToList }) => {
       // Generate detailed error message (same as save function)
       const errorMessages = freshValidationErrors.map(error => {
         const prefix = error.severity === 'error' ? '🚫' : '⚠️';
-        const nodeInfo = error.nodeId ? ` (Node: ${error.nodeId})` : '';
+        const nodeInfo = error.node_id ? ` (Node: ${error.node_id})` : '';
         return `${prefix} ${error.message}${nodeInfo}`;
       });
       
@@ -214,7 +214,7 @@ const TopBar: React.FC<TopBarProps> = ({ onBackToList }) => {
 
   
   const workflowOptions = workflows.map(w => ({
-    label: `${w.name} (${new Date(w.createdAt).toLocaleDateString()})`,
+    label: `${w.name} (${new Date(w.created_at).toLocaleDateString()})`,
     value: w.id
   }));
   
@@ -276,9 +276,9 @@ const TopBar: React.FC<TopBarProps> = ({ onBackToList }) => {
                       e.currentTarget.style.border = '1px solid transparent';
                     }}
                   >
-                    <Badge tone="info">
+                    <Text as="span" variant="bodyMd" fontWeight="medium">
                       {currentWorkflow.name}
-                    </Badge>
+                    </Text>
                     <div style={{ opacity: 0.6 }}>
                       <Icon source={EditIcon} tone="subdued" />
                     </div>
@@ -288,10 +288,10 @@ const TopBar: React.FC<TopBarProps> = ({ onBackToList }) => {
             )}
             {currentWorkflow && (
               <Badge 
-                tone={currentWorkflow.triggerType === 'event-based' ? 'attention' : 'info'}
-                icon={currentWorkflow.triggerType === 'event-based' ? SettingsFilledIcon : CalendarIcon}
+                tone={currentWorkflow.trigger_type === 'event-based' ? 'attention' : 'info'}
+                icon={currentWorkflow.trigger_type === 'event-based' ? SettingsFilledIcon : CalendarIcon}
               >
-                {currentWorkflow.triggerType === 'event-based' ? 'Event-based' : 'Schedule-based'}
+                {currentWorkflow.trigger_type === 'event-based' ? 'Event-based' : 'Schedule-based'}
               </Badge>
             )}
             {nodes.length > 0 && (
@@ -415,8 +415,8 @@ const TopBar: React.FC<TopBarProps> = ({ onBackToList }) => {
                   {workflows.find(w => w.id === selectedWorkflowId)?.description || 'No description'}
                 </Text>
                 <Text as="p" variant="bodyMd">
-                  <strong>Nodes:</strong>{' '}
-                  {workflows.find(w => w.id === selectedWorkflowId)?.nodes.length || 0}
+                  <strong>Actions:</strong>{' '}
+                  {workflows.find(w => w.id === selectedWorkflowId)?.actions.length || 0}
                 </Text>
                 <Button
                   icon={DeleteIcon}

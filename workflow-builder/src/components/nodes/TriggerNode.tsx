@@ -7,8 +7,8 @@ import type { NodeData, TriggerConfig } from '../../types/workflow.types';
 const TriggerNode = memo(({ data }: NodeProps) => {
   const nodeData = data as NodeData;
   const triggerConfig = nodeData.config as TriggerConfig;
-  const isEventBased = triggerConfig?.triggerCategory === 'event-based';
-  const isScheduled = triggerConfig?.triggerCategory === 'scheduled';
+  const isEventBased = triggerConfig?.trigger_category === 'event-based';
+  const isScheduled = triggerConfig?.trigger_category === 'scheduled';
   
   return (
     <div style={{ minWidth: '280px' }}>
@@ -60,13 +60,13 @@ const TriggerNode = memo(({ data }: NodeProps) => {
           
           {triggerConfig && (
             <BlockStack gap="100">
-              {triggerConfig.dataSource && (
+              {triggerConfig.data_source && (
                 <InlineStack gap="100">
                   <Text as="span" variant="bodySm" tone="subdued">
                     Data Source:
                   </Text>
                   <Badge size="small">
-                    {triggerConfig.dataSource.toUpperCase()}
+                    {triggerConfig.data_source.toUpperCase()}
                   </Badge>
                 </InlineStack>
               )}
@@ -84,17 +84,17 @@ const TriggerNode = memo(({ data }: NodeProps) => {
                 </InlineStack>
               )}
               
-              {isScheduled && triggerConfig.recurrencePattern && (
+              {isScheduled && triggerConfig.recurrence_pattern && (
                 <InlineStack gap="100">
                   <Text as="span" variant="bodySm" tone="subdued">
                     Schedule:
                   </Text>
                   <Text as="span" variant="bodySm" fontWeight="medium">
-                    {triggerConfig.recurrencePattern === 'daily' ? 'Daily' :
-                     triggerConfig.recurrencePattern === 'weekly' ? 'Weekly' :
-                     triggerConfig.recurrencePattern === 'monthly' ? 'Monthly' :
-                     triggerConfig.recurrencePattern === 'yearly' ? 'Yearly' :
-                     'One-time'} at {triggerConfig.scheduleTime || '09:00'}
+                    {triggerConfig.recurrence_pattern === 'daily' ? 'Daily' :
+                     triggerConfig.recurrence_pattern === 'weekly' ? 'Weekly' :
+                     triggerConfig.recurrence_pattern === 'monthly' ? 'Monthly' :
+                     triggerConfig.recurrence_pattern === 'yearly' ? 'Yearly' :
+                     'One-time'} at {triggerConfig.schedule_time || '09:00'}
                   </Text>
                 </InlineStack>
               )}
@@ -110,13 +110,13 @@ const TriggerNode = memo(({ data }: NodeProps) => {
                 </InlineStack>
               )}
               
-              {triggerConfig.merchantId && (
+              {triggerConfig.merchant_id && (
                 <InlineStack gap="100">
                   <Text as="span" variant="bodySm" tone="subdued">
                     Merchant:
                   </Text>
                   <Badge size="small" tone="warning">
-                    {triggerConfig.merchantId}
+                    {triggerConfig.merchant_id}
                   </Badge>
                 </InlineStack>
               )}

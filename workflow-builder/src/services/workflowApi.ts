@@ -29,7 +29,7 @@ export interface BackendWorkflow {
   name: string;
   version: string;
   status: 'active' | 'paused' | 'draft';
-  merchantId: string;
+  merchant_id: string;
   actions: BackendWorkflowAction[];
   peers: BackendWorkflowPeer[];
 }
