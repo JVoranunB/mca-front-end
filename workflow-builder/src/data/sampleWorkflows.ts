@@ -586,7 +586,7 @@ export const sampleWorkflows: Workflow[] = [
               field: 'created_date',
               field_type: 'date',
               operator: 'date_before',
-              value: '30_days',
+              value: '',
               date_type: 'relative',
               period_number: 30,
               period_unit: 'days',
@@ -599,8 +599,19 @@ export const sampleWorkflows: Workflow[] = [
               field: 'product_name',
               field_type: 'text',
               operator: 'equals',
-              value: 'PROD-XX123'
-            }
+              value: 'PROD-XX123',
+              logical_operator: 'AND'
+            },
+            {
+    id: '1758352920245',
+    data_source: 'CRM',
+    collection: 'orders',
+    field: 'total_price',
+    field_type: 'number',
+    operator: 'greater_than',
+    value: 10000,
+    logical_operator: 'AND'
+  }
           ]
         }
       },

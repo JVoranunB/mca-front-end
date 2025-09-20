@@ -170,3 +170,80 @@ This use case targets customers celebrating their birthday today by matching bot
 ## Result
 ```json
 ```
+
+# Usecase 5
+This use case targets contacts who have spent more than 10,000 on a specific product (MCAProductA) within the last 30 days. This demonstrates the most complex query pattern with multi-level joins and advanced filtering:
+## Input
+```json
+[
+  {
+    "id": "cond-11a",
+    "data_source": "CRM",
+    "collection": "orders",
+    "field": "created_date",
+    "field_type": "date",
+    "operator": "date_before",
+    "value": "",
+    "date_type": "relative",
+    "period_number": 30,
+    "period_unit": "days",
+    "logical_operator": "AND"
+  },
+  {
+    "id": "cond-11b",
+    "data_source": "CRM",
+    "collection": "order_items",
+    "field": "product_name",
+    "field_type": "text",
+    "operator": "equals",
+    "value": "PROD-XX123"
+  },
+  {
+    "id": "1758352920245",
+    "data_source": "CRM",
+    "collection": "orders",
+    "field": "total_price",
+    "field_type": "number",
+    "operator": "greater_than",
+    "value": 10000,
+    "logical_operator": "AND"
+  }
+]
+```
+## Result
+```json
+{
+  "contacts": {
+    "select": [
+      "user_id"
+    ],
+    "where": {
+      "and": [
+        {"merchant_id":"68468c7bbffca9a0a6b2a413"}
+      ]
+    },
+    "group_by": ["user_id"],
+    "having": {
+      "SUM(order_items.total_price)": {">": 10000}
+    },
+    "orders": {
+      "select": [],
+      "where": {
+        "created_date": {"last_days": 30}
+      },
+      "join": "user_id:user_id",
+      "order_items": {
+        "select": [
+          "product_name",
+          "SUM(order_items.total_price) as total_price"
+        ],
+        "where": {
+          "product_name": "MCAProductA"
+        },
+        "group_by": ["product_name"],
+        "join": "order_id:id"
+      }
+    }
+  }
+}
+```
