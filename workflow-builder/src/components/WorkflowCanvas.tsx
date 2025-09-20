@@ -21,6 +21,7 @@ interface WorkflowCanvasProps {
 
 const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({ onDrop, onDragOver, setReactFlowInstance }) => {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
+  const startActionAttempted = useRef(false);
   
   const {
     actions,
@@ -42,10 +43,10 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({ onDrop, onDragOver, set
   // Auto-create start action when canvas is empty
   useEffect(() => {
     const hasStartAction = actions.some(action => action.type === 'start');
-    
-    // Only add start action if there are no start-type actions
-    // Store now handles duplicate prevention, so we can safely call addAction
-    if (!hasStartAction) {
+
+    // Only add start action if there are no start-type actions and we haven't attempted it yet
+    if (!hasStartAction && !startActionAttempted.current) {
+      startActionAttempted.current = true;
       const startAction: WorkflowNode = {
         id: 'start-action',
         type: 'start',
@@ -62,8 +63,8 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({ onDrop, onDragOver, set
           } as StartConfig
         } as NodeData
       };
-      
-      addAction(startAction); // Store will handle duplicate prevention
+
+      addAction(startAction);
     }
   }, [actions, addAction]);
   

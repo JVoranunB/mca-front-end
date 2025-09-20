@@ -372,8 +372,8 @@ export class ConditionConverter {
         field: "gender",
         field_type: "select",
         operator: "greater_than",
-        value: "male",
-        select_options: ["male", "female", "other"]
+        value: "MALE",
+        select_options: ["MALE", "FEMALE", "OTHER"]
       },
       {
         id: "1758088885456",

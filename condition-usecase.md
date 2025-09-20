@@ -83,11 +83,11 @@ This use case combines customer demographics with time-sensitive loyalty data to
     "field": "gender",
     "field_type": "select",
     "operator": "greater_than",
-    "value": "male",
+    "value": "MALE",
     "select_options": [
-      "male",
-      "female",
-      "other"
+      "MALE",
+      "FEMALE",
+      "OTHER"
     ]
   },
   {
