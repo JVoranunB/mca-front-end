@@ -776,8 +776,14 @@ const PropertiesSidebar: React.FC = () => {
                                     // Set smart defaults for date fields
                                     if (field?.type === 'date') {
                                       if (condition.operator === 'equals' || condition.operator === 'not_equals') {
-                                        updates.date_type = 'today';
-                                        updates.value = 'today';
+                                        // For birth date fields, default to anniversary
+                                        if (field.key.includes('birth') || field.key.includes('birthday')) {
+                                          updates.date_type = 'anniversary';
+                                          updates.value = 'anniversary';
+                                        } else {
+                                          updates.date_type = 'today';
+                                          updates.value = 'today';
+                                        }
                                       } else if (['date_before', 'date_after'].includes(condition.operator)) {
                                         updates.date_type = 'relative';
                                         updates.period_number = 1;
@@ -855,7 +861,8 @@ const PropertiesSidebar: React.FC = () => {
                                           if (['equals', 'not_equals'].includes(condition.operator)) {
                                             return [
                                               { label: 'Today', value: 'today' },
-                                              { label: 'Specific Date', value: 'specific' }
+                                              { label: 'Specific Date', value: 'specific' },
+                                              { label: 'Anniversary Date', value: 'anniversary' }
                                             ];
                                           } else if (['date_before', 'date_after'].includes(condition.operator)) {
                                             return [
@@ -873,15 +880,16 @@ const PropertiesSidebar: React.FC = () => {
                                               { label: 'Today', value: 'today' },
                                               { label: 'Specific Date', value: 'specific' },
                                               { label: 'Relative Period', value: 'relative' },
-                                              { label: 'Date Range', value: 'range' }
+                                              { label: 'Date Range', value: 'range' },
+                                              { label: 'Anniversary Date', value: 'anniversary' }
                                             ];
                                           }
                                         })()}
                                         value={condition.date_type || 'specific'}
                                         onChange={(value) => {
-                                          const newDateType = value as 'today' | 'specific' | 'relative' | 'range';
-                                          const newValue = value === 'today' ? 'today' : value === 'relative' ? `${condition.period_number || 1}_${condition.period_unit || 'days'}` : value === 'range' ? 'range' : '';
-                                          
+                                          const newDateType = value as 'today' | 'specific' | 'relative' | 'range' | 'anniversary';
+                                          const newValue = value === 'today' ? 'today' : value === 'relative' ? `${condition.period_number || 1}_${condition.period_unit || 'days'}` : value === 'range' ? 'range' : value === 'anniversary' ? 'anniversary' : '';
+
                                           // Reset operator to valid default for new date type
                                           let newOperator = condition.operator;
                                           const validOperators = getOperatorOptions(selectedField?.type).map(op => op.value);
@@ -890,13 +898,13 @@ const PropertiesSidebar: React.FC = () => {
                                               newOperator = 'date_between';
                                             } else if (newDateType === 'relative') {
                                               newOperator = 'date_before';
-                                            } else if (newDateType === 'today') {
+                                            } else if (newDateType === 'today' || newDateType === 'anniversary') {
                                               newOperator = 'equals';
                                             } else {
                                               newOperator = 'equals';
                                             }
                                           }
-                                          
+
                                           // Additional updates based on dateType
                                           const additionalUpdates: Partial<WorkflowCondition> = {};
                                           if (newDateType === 'range') {
@@ -987,6 +995,12 @@ const PropertiesSidebar: React.FC = () => {
                                             helpText="End date of the range"
                                           />
                                         </>
+                                      )}
+
+                                      {condition.date_type === 'anniversary' && (
+                                        <Text as="p" variant="bodySm" tone="subdued">
+                                          Anniversary will automatically use today's month and day to match against the selected date field (e.g., birthday anniversaries).
+                                        </Text>
                                       )}
                                     </>
                                   ) : selectedField?.type === 'number' ? (

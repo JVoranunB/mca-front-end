@@ -12,7 +12,7 @@ export interface WorkflowCondition {
   value: string | number;
   select_options?: string[];
   logical_operator?: 'AND' | 'OR';
-  date_type?: 'today' | 'specific' | 'relative' | 'range';
+  date_type?: 'today' | 'specific' | 'relative' | 'range' | 'anniversary';
   period_number?: number;
   period_unit?: 'days' | 'weeks' | 'months' | 'years';
   date_from?: string;

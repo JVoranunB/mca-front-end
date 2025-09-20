@@ -147,7 +147,12 @@ export class ConditionConverter {
 
     switch (operator) {
       case 'equals':
-        whereCondition[field] = value;
+        // Handle anniversary date type (dynamic - uses current date's month/day)
+        if (typeof value === 'string' && value === 'anniversary') {
+          whereCondition[field] = { "anniversary": "today" };
+        } else {
+          whereCondition[field] = value;
+        }
         break;
       case 'not_equals':
         whereCondition[field] = { "!=": value };

@@ -109,4 +109,39 @@ const expected3 = {
 
 console.log('Use Case 3 Expected:', JSON.stringify(expected3, null, 2));
 
+// Test Anniversary Date Type
+console.log('\n=== TESTING ANNIVERSARY DATE TYPE ===');
+const anniversaryTestCase: WorkflowCondition[] = [
+  {
+    id: "anniversary-test-1",
+    data_source: "CRM",
+    collection: "contacts",
+    field: "date_of_birth",
+    field_type: "date",
+    operator: "equals",
+    value: "anniversary",
+    date_type: "anniversary"
+  }
+];
+
+const anniversaryResult = ConditionConverter.convertConditionsToQuery(anniversaryTestCase);
+console.log('Anniversary Test Input:', JSON.stringify(anniversaryTestCase, null, 2));
+console.log('Anniversary Test Result:', JSON.stringify(anniversaryResult, null, 2));
+
+// Expected result for dynamic anniversary (uses today's month/day)
+const expectedAnniversary = {
+  "contacts": {
+    "select": ["user_id"],
+    "where": {
+      "and": [
+        {"date_of_birth": {"anniversary": "today"}},
+        {"merchant_id": "68468c7bbffca9a0a6b2a413"}
+      ]
+    }
+  }
+};
+
+console.log('Anniversary Expected:', JSON.stringify(expectedAnniversary, null, 2));
+console.log('Anniversary Test Matches Expected:', JSON.stringify(anniversaryResult) === JSON.stringify(expectedAnniversary));
+
 console.log('\n=== ALL TESTS COMPLETED ===');

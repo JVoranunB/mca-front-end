@@ -7,7 +7,7 @@ import { getOperatorLabel } from '../../utils/dataSourceFields';
 import { ConditionConverter } from '../../utils/conditionConverter';
 
 // Helper function to format date values for display
-const formatDateValue = (value: string | number, dateType?: 'today' | 'specific' | 'relative' | 'range', condition?: WorkflowCondition): string => {
+const formatDateValue = (value: string | number, dateType?: 'today' | 'specific' | 'relative' | 'range' | 'anniversary', condition?: WorkflowCondition): string => {
   const valueStr = String(value);
 
   // Handle range dates (date_between, date_not_between)
@@ -18,6 +18,11 @@ const formatDateValue = (value: string | number, dateType?: 'today' | 'specific'
       return `${fromDate} - ${toDate}`;
     }
     return 'Date Range';
+  }
+
+  // Handle anniversary dates (dynamic)
+  if (dateType === 'anniversary' && valueStr === 'anniversary') {
+    return 'Anniversary (today\'s date)';
   }
 
   // Handle dynamic dates (today and relative)
