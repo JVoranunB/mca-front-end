@@ -35,8 +35,15 @@ export class ConditionConverter {
 
       // Rule 2: Same collection conditions (contacts)
       if (collection === 'contacts' || this.isContactField(field)) {
-        const whereCondition = this.buildWhereCondition(field, operator, value, condition);
-        contactsConditions.push(whereCondition);
+        // Special handling for anniversary dates (Use Case 4)
+        if (condition.date_type === 'anniversary' && operator === 'equals' && value === 'anniversary') {
+          // Add separate conditions for current day and month
+          contactsConditions.push({ [field]: { "current_day": true } });
+          contactsConditions.push({ [field]: { "current_month": true } });
+        } else {
+          const whereCondition = this.buildWhereCondition(field, operator, value, condition);
+          contactsConditions.push(whereCondition);
+        }
       }
       // Rule 3 & 4: Different collection conditions
       else if (collection === 'orders' || this.isOrderField(field)) {
@@ -147,12 +154,7 @@ export class ConditionConverter {
 
     switch (operator) {
       case 'equals':
-        // Handle anniversary date type (dynamic - uses current date's month/day)
-        if (typeof value === 'string' && value === 'anniversary') {
-          whereCondition[field] = { "anniversary": "today" };
-        } else {
-          whereCondition[field] = value;
-        }
+        whereCondition[field] = value;
         break;
       case 'not_equals':
         whereCondition[field] = { "!=": value };

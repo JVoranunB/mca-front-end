@@ -128,13 +128,14 @@ const anniversaryResult = ConditionConverter.convertConditionsToQuery(anniversar
 console.log('Anniversary Test Input:', JSON.stringify(anniversaryTestCase, null, 2));
 console.log('Anniversary Test Result:', JSON.stringify(anniversaryResult, null, 2));
 
-// Expected result for dynamic anniversary (uses today's month/day)
+// Expected result for Use Case 4 (birthday anniversary)
 const expectedAnniversary = {
   "contacts": {
     "select": ["user_id"],
     "where": {
       "and": [
-        {"date_of_birth": {"anniversary": "today"}},
+        {"date_of_birth": {"current_day": true}},
+        {"date_of_birth": {"current_month": true}},
         {"merchant_id": "68468c7bbffca9a0a6b2a413"}
       ]
     }
@@ -143,5 +144,41 @@ const expectedAnniversary = {
 
 console.log('Anniversary Expected:', JSON.stringify(expectedAnniversary, null, 2));
 console.log('Anniversary Test Matches Expected:', JSON.stringify(anniversaryResult) === JSON.stringify(expectedAnniversary));
+
+// Test Use Case 4 from documentation
+console.log('\n=== TESTING USE CASE 4 (FROM DOCUMENTATION) ===');
+const usecase4: WorkflowCondition[] = [
+  {
+    id: "cond-10",
+    data_source: "CRM",
+    collection: "contacts",
+    field: "date_of_birth",
+    field_type: "date",
+    operator: "equals",
+    value: "anniversary",
+    date_type: "anniversary"
+  }
+];
+
+const result4 = ConditionConverter.convertConditionsToQuery(usecase4);
+console.log('Use Case 4 Input:', JSON.stringify(usecase4, null, 2));
+console.log('Use Case 4 Result:', JSON.stringify(result4, null, 2));
+
+// Expected result from documentation
+const expected4 = {
+  "contacts": {
+    "select": ["user_id"],
+    "where": {
+      "and": [
+        {"date_of_birth": {"current_day": true}},
+        {"date_of_birth": {"current_month": true}},
+        {"merchant_id": "68468c7bbffca9a0a6b2a413"}
+      ]
+    }
+  }
+};
+
+console.log('Use Case 4 Expected:', JSON.stringify(expected4, null, 2));
+console.log('Use Case 4 Matches Expected:', JSON.stringify(result4) === JSON.stringify(expected4));
 
 console.log('\n=== ALL TESTS COMPLETED ===');

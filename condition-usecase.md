@@ -130,11 +130,37 @@ This use case combines customer demographics with time-sensitive loyalty data to
 ```
 
 # Usecase 4
+This use case targets customers celebrating their birthday today by matching both the current day and month with their date of birth. This is a time-sensitive campaign
 ## Input
 ```json
+[
+  {
+    "id": "cond-10",
+    "data_source": "CRM",
+    "collection": "contacts",
+    "field": "date_of_birth",
+    "field_type": "date",
+    "operator": "equals",
+    "value": "anniversary",
+    "date_type": "anniversary"
+  }
+]
 ```
 ## Result
 ```json
+{
+  "contacts": {
+    "select": ["user_id"],
+    "where": {
+      "and": [
+        {"date_of_birth": {"current_day": true}},
+        {"date_of_birth": {"current_month": true}},
+        {"merchant_id": "68468c7bbffca9a0a6b2a413"}
+      ]
+    }
+  }
+}
+
 ```
 
 # Usecase 5
