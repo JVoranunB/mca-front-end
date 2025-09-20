@@ -188,7 +188,7 @@ export class ConditionConverter {
       case 'date_after':
         // Handle "today" value (Use Case 3)
         if (value === 'today') {
-          whereCondition[field] = { ">": "CURRENT_DATE()" };
+          whereCondition[field] = { ">": "today" };
         } else {
           whereCondition[field] = { ">": value };
         }

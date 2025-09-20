@@ -95,7 +95,7 @@ const expected3 = {
       "select": ["SUM(point_histories.point) as expiring_points"],
       "where": {
         "and": [
-          {"expire_date": {">": "CURRENT_DATE()"}}
+          {"expire_date": {">": "today"}}
         ]
       },
       "group_by": ["user_id"],
